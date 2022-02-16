@@ -16,6 +16,14 @@ namespace Grumpy.SmartPower.Infrastructure
             _fileCache = new FileCache(FileCacheManagers.Hashed);
         }
 
+        public int GetUsagePerHour(DateTime hour)
+        {
+            var from = new DateTime(hour.Year, hour.Month, hour.Day, hour.Hour, 0, 0, hour.Kind);
+            var to = from.AddHours(1);
+
+            return (int)Math.Round(GetReading(to) - GetReading(from) * 1000, 0);
+        }
+
         public double GetReading(DateTime dateTime)
         {
             return _fileCache.TryGetIfNotSet($"{GetType().FullName}:Reading:{dateTime}", TimeSpan.FromDays(365),

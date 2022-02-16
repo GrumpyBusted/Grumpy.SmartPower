@@ -31,8 +31,14 @@ namespace Grumpy.SmartPower.Infrastructure
 
         public IEnumerable<WeatherItem> GetHistory(DateTime from, DateTime to)
         {
-            return _fileCache.TryGetIfNotSet($"{GetType().FullName}:History:{from}:{to}", TimeSpan.FromDays(365), 
-                () => _visualCrossingWeatherClient.Get(from.ToDateOnly(), to.ToDateOnly()).Where(i => i.Hour >= from && i.Hour <= to).OrderBy(x => x.Hour).ToList());
+            // TODO: Get from client on day basis to optimize cache
+            var ff = 1;
+
+            var from1 = from.ToDateOnly();
+            var to1 = to.ToDateOnly();
+
+            return _fileCache.TryGetIfNotSet($"{GetType().FullName}:History:{from1}:{to1}", TimeSpan.FromDays(365), 
+                () => _visualCrossingWeatherClient.Get(from1, to1).Where(i => i.Hour >= from && i.Hour <= to).OrderBy(x => x.Hour).ToList());
         }
 
         public SunInformation GetSunInformation()

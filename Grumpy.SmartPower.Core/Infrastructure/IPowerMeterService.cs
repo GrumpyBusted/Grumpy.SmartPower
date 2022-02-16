@@ -2,6 +2,7 @@
 {
     public interface IPowerMeterService
     {
+        int GetUsagePerHour(DateTime hour);
         double GetReading(DateTime dateTime);
     }
 }
