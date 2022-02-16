@@ -8,6 +8,7 @@ using Grumpy.Rest;
 using Grumpy.Rest.Interface;
 using Grumpy.SmartPower;
 using Grumpy.SmartPower.Core;
+using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Interface;
 using Grumpy.SmartPower.Core.Production;
@@ -36,6 +37,7 @@ IHost host = Host.CreateDefaultBuilder(args)
             .AddSingleton<IOpenWeatherMapClient, OpenWeatherMapClient>()
             .AddSingleton<IRestClientFactory, RestClientFactory>()
             .AddSingleton<IProductionService, ProductionService>()
+            .AddSingleton<IConsumptionService, ConsumptionService>()
             .AddSingleton<IVisualCrossingWeatherClient, VisualCrossingWeatherClient>()
             .Configure<WorkerOptions>(context.Configuration.GetSection("Application"))
             .Configure<SmartPowerServiceOptions>(context.Configuration.GetSection("SmartPower"))

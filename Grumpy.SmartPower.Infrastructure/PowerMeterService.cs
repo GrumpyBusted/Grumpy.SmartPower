@@ -21,7 +21,7 @@ namespace Grumpy.SmartPower.Infrastructure
             var from = new DateTime(hour.Year, hour.Month, hour.Day, hour.Hour, 0, 0, hour.Kind);
             var to = from.AddHours(1);
 
-            return (int)Math.Round(GetReading(to) - GetReading(from) * 1000, 0);
+            return (int)Math.Round((GetReading(to) - GetReading(from)) * 1000, 0);
         }
 
         public double GetReading(DateTime dateTime)

@@ -12,8 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Grumpy.SmartPower.Core\Grumpy.SmartPower.Core.csproj" />
     <ProjectReference Include="..\Grumpy.SmartPower.Infrastructure\Grumpy.SmartPower.Infrastructure.csproj" />
-    <ProjectReference Include="..\Grumpy.Weather.Client.VisualCrossing\Grumpy.Weather.Client.VisualCrossing.csproj" />
   </ItemGroup>
 </Project>

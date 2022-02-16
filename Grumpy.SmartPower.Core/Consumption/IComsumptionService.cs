@@ -1,6 +1,6 @@
 ﻿namespace Grumpy.SmartPower.Core.Consumption
 {
-    public interface IComsumptionService
+    public interface IConsumptionService
     {
         IEnumerable<ConsumptionItem> Predict(DateTime from, DateTime to);
     }

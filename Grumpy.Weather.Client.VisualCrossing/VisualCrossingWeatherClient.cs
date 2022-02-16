@@ -23,11 +23,11 @@ namespace Grumpy.Weather.Client.VisualCrossing
             _restClientFactory = restClientFactory;
         }
 
-        public IEnumerable<WeatherItem> Get(DateOnly from, DateOnly to)
+        public IEnumerable<WeatherItem> Get(DateOnly date)
         {
             var client = _restClientFactory.Instance("https://weather.visualcrossing.com/VisualCrossingWebServices/rest");
 
-            var request = new RestRequest($"services/timeline/{_options.Latitude.ToString("F", CultureInfo.InvariantCulture)},{_options.Longitude.ToString("F", CultureInfo.InvariantCulture)}/{from:yyyy-MM-dd}/{to:yyyy-MM-dd}", Method.Get)
+            var request = new RestRequest($"services/timeline/{_options.Latitude.ToString("F", CultureInfo.InvariantCulture)},{_options.Longitude.ToString("F", CultureInfo.InvariantCulture)}/{date:yyyy-MM-dd}/{date:yyyy-MM-dd}", Method.Get)
                 .AddQueryParameter("unitGroup", "metric")
                 .AddQueryParameter("include", "hours")
                 .AddQueryParameter("key", _options.ApiKey)

@@ -1,4 +1,5 @@
 using Grumpy.SmartPower.Core.Interface;
+using Grumpy.SmartPower.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Grumpy.SmartPower

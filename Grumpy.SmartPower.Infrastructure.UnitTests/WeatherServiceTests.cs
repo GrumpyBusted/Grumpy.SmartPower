@@ -66,29 +66,29 @@ namespace Grumpy.SmartPower.Infrastructure.UnitTests
             {
                 new WeatherItem()
                 {
-                    Hour = DateTime.Parse("2022-01-02T00:00:00")
-                },
-                new WeatherItem()
-                {
                     Hour = DateTime.Parse("2022-01-03T00:00:00")
                 },
                 new WeatherItem()
                 {
-                    Hour = DateTime.Parse("2022-01-04T00:00:00")
+                    Hour = DateTime.Parse("2022-01-03T12:00:00")
+                },
+                new WeatherItem()
+                {
+                    Hour = DateTime.Parse("2022-01-03T23:00:00")
                 }
             };
 
             var openWeatherMapClient = Substitute.For<IOpenWeatherMapClient>();
 
             var visualCrossingWeatherClient = Substitute.For<IVisualCrossingWeatherClient>();
-            visualCrossingWeatherClient.Get(DateOnly.Parse("2022-01-02"), DateOnly.Parse("2022-01-03")).Returns(list);
+            visualCrossingWeatherClient.Get(Arg.Any<DateOnly>()).Returns(list);
 
             var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient);
 
-            var res = cut.GetHistory(DateTime.Parse("2022-01-02T12:00:00"), DateTime.Parse("2022-01-03T11:59:59"));
+            var res = cut.GetHistory(DateTime.Parse("2022-01-03T11:00:00"), DateTime.Parse("2022-01-03T13:00:00"));
 
             res.Should().HaveCount(1);
-            res.First().Hour.Should().Be(DateTime.Parse("2022-01-03T00:00:00"));
+            res.First().Hour.Should().Be(DateTime.Parse("2022-01-03T12:00:00"));
         }
     }
 }

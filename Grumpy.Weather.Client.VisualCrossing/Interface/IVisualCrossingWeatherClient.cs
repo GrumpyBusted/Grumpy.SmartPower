@@ -4,6 +4,6 @@ namespace Grumpy.Weather.Client.VisualCrossing.Interface
 {
     public interface IVisualCrossingWeatherClient
     {
-        public IEnumerable<WeatherItem> Get(DateOnly from, DateOnly to);
+        public IEnumerable<WeatherItem> Get(DateOnly date);
     }
 }

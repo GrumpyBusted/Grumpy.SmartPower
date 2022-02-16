@@ -44,7 +44,7 @@ namespace Grumpy.Weather.Client.VisualCrossing.UnitTests
             _restClient.Execute<Root>(Arg.Any<RestRequest>()).Returns(exp);
             var cut = CreateTestObject();
 
-            var res = cut.Get(DateOnly.Parse("2022-02-13"), DateOnly.Parse("2022-02-13"));
+            var res = cut.Get(DateOnly.Parse("2022-02-13"));
 
             res.Should().HaveCount(1);
             res.First().Temperature.Should().Be(2);

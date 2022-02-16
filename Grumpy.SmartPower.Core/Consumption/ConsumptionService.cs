@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace Grumpy.SmartPower.Core.Consumption
 {
-    public class ComsumptionService : IComsumptionService
+    public class ConsumptionService : IConsumptionService
     {
         private readonly IPowerMeterService _powerMeterService;
         private readonly IWeatherService _weatherService;
 
-        public ComsumptionService(IPowerMeterService powerMeterService, IWeatherService weatherService)
+        public ConsumptionService(IPowerMeterService powerMeterService, IWeatherService weatherService)
         {
             _powerMeterService = powerMeterService;
             _weatherService = weatherService;

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Dtos;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Production;
@@ -18,9 +19,8 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
         private readonly IPowerPriceService _powerPriceService = Substitute.For<IPowerPriceService>();
         private readonly IHouseBatteryService _houseBatteryService = Substitute.For<IHouseBatteryService>();
-        private readonly ISolarService _solarService = Substitute.For<ISolarService>();
-        private readonly IPowerMeterService _powerMeterService = Substitute.For<IPowerMeterService>();
         private readonly IProductionService _productionService = Substitute.For<IProductionService>();
+        private readonly IConsumptionService _consumptionService = Substitute.For<IConsumptionService>();
 
         [Fact]
         public void CanCreateObject()
@@ -42,7 +42,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
         private SmartPowerService CreateTestObject()
         {
-            return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _solarService, _powerMeterService, _productionService);
+            return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService);
         }
     }
 }

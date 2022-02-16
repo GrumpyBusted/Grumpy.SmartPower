@@ -25,7 +25,7 @@ namespace Grumpy.Weather.Client.VisualCrossing.IntegrationTests
         {
             var cut = CreateTestObject();
 
-            var res = cut.Get(DateTime.Now.ToDateOnly(), DateTime.Now.ToDateOnly());
+            var res = cut.Get(DateTime.Now.ToDateOnly());
 
             res.Should().HaveCount(24);
         }
