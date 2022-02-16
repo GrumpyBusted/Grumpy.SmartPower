@@ -1,7 +1,9 @@
-﻿using Grumpy.HouseBattery.Client.Sonnen.Dtos;
+﻿using Grumpy.Caching.Extensions;
+using Grumpy.HouseBattery.Client.Sonnen.Dtos;
 using Grumpy.HouseBattery.Client.Sonnen.Interface;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Model;
+using System.Runtime.Caching;
 
 namespace Grumpy.SmartPower.Infrastructure
 {
@@ -9,21 +11,29 @@ namespace Grumpy.SmartPower.Infrastructure
     {
         private readonly ISonnenBatteryClient _sonnenBatteryClient;
         private readonly Lazy<int> _chargeFromGridWatt;
+        private readonly MemoryCache _memoryCache;
 
         public HouseBatteryService(ISonnenBatteryClient sonnenBatteryClient)
         {
             _sonnenBatteryClient = sonnenBatteryClient;
             _chargeFromGridWatt = new Lazy<int>(() => GetBatterySize());
+            _memoryCache = new MemoryCache(GetType().FullName);
         }
 
         public bool IsBatteryFull()
         {
-            return _sonnenBatteryClient.GetBatteryLevel() > 99;
+            return GetBatteryLevel() > 99;
         }
 
         public int GetBatterySize()
         {
-            var level = _sonnenBatteryClient.GetBatteryLevel();
+            return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatterySize", TimeSpan.FromHours(1),
+                () => GetBatterySizeInt());
+        }
+
+        private int GetBatterySizeInt()
+        {
+            var level = GetBatteryLevel();
 
             if (level == 0)
                 return _sonnenBatteryClient.GetBatterySize();
@@ -33,7 +43,8 @@ namespace Grumpy.SmartPower.Infrastructure
 
         public int GetBatteryCurrent()
         {
-            return _sonnenBatteryClient.GetBatteryCapacity();
+            return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatteryCapacity", TimeSpan.FromMinutes(1),
+                () => _sonnenBatteryClient.GetBatteryCapacity());
         }
 
         public void SetMode(BatteryMode batteryMode, DateTime hour)
@@ -64,6 +75,12 @@ namespace Grumpy.SmartPower.Infrastructure
                 _sonnenBatteryClient.SetSchedule(new List<TimeOfUseEvent>() { timeOfUseEvent });
                 _sonnenBatteryClient.SetOperatingMode(OperatingMode.TimeOfUse);
             }
+        }
+
+        private int GetBatteryLevel()
+        {
+            return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatteryLevel", TimeSpan.FromMinutes(1),
+                () => _sonnenBatteryClient.GetBatteryLevel());
         }
     }
 }

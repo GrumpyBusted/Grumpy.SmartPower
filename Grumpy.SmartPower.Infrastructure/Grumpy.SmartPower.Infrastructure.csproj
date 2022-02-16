@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Grumpy.Caching\Grumpy.Caching.csproj" />
     <ProjectReference Include="..\Grumpy.HouseBattery.Client.Sonnen\Grumpy.HouseBattery.Client.Sonnen.csproj" />
     <ProjectReference Include="..\Grumpy.PowerMeter.Client.SmartMe\Grumpy.PowerMeter.Client.SmartMe.csproj" />
     <ProjectReference Include="..\Grumpy.PowerPrice.Client.EnergyDataService\Grumpy.PowerPrice.Client.EnergyDataService.csproj" />

@@ -1,4 +1,6 @@
 using Grumpy.Rest.Interface;
+using Grumpy.Weather.Client.OpenWeatherMap.Api.OneCall;
+using Grumpy.Weather.Client.OpenWeatherMap.Api.Weather;
 using Grumpy.Weather.Client.OpenWeatherMap.Interface;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -21,7 +23,7 @@ namespace Grumpy.Weather.Client.OpenWeatherMap.UnitTests
         public void CanGetSunInformation()
         {
             var cut = CreateTestObject();
-            _restClient.Execute<Api.Weather.Root>(Arg.Any<RestRequest>()).Returns(new Api.Weather.Root());
+            _restClient.Execute<WeatherRoot>(Arg.Any<RestRequest>()).Returns(new WeatherRoot());
 
             cut.GetSunInformation();
         }
@@ -30,7 +32,7 @@ namespace Grumpy.Weather.Client.OpenWeatherMap.UnitTests
         public void CanGetForecast()
         {
             var cut = CreateTestObject();
-            _restClient.Execute<Api.OneCall.Root>(Arg.Any<RestRequest>()).Returns(new Api.OneCall.Root());
+            _restClient.Execute<OneCallRoot>(Arg.Any<RestRequest>()).Returns(new OneCallRoot());
 
             cut.GetForecast();
         }

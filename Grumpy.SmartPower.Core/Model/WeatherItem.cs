@@ -1,5 +1,6 @@
 ﻿namespace Grumpy.SmartPower.Core.Model
 {
+    [Serializable]
     public class WeatherItem
     {
         public DateTime Hour { get; set; }

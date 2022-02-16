@@ -2,7 +2,7 @@
 
 namespace Grumpy.HouseBattery.Client.Sonnen.Api.Configurations.TimeOfUseSchedule
 {
-    public class Schedule
+    internal class Schedule
     {
         [JsonPropertyName("start")]
         public string Start { get; set; } = "";

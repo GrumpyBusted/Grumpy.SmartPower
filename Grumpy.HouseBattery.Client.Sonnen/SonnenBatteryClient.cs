@@ -1,11 +1,18 @@
-﻿using Grumpy.HouseBattery.Client.Sonnen.Dtos;
+﻿using Grumpy.HouseBattery.Client.Sonnen.Api.Configurations.OperatingMode;
+using Grumpy.HouseBattery.Client.Sonnen.Api.Configurations.TimeOfUseSchedule;
+using Grumpy.HouseBattery.Client.Sonnen.Api.LatestData;
+using Grumpy.HouseBattery.Client.Sonnen.Api.Status;
+using Grumpy.HouseBattery.Client.Sonnen.Dtos;
 using Grumpy.HouseBattery.Client.Sonnen.Helpers;
 using Grumpy.HouseBattery.Client.Sonnen.Interface;
 using Grumpy.Json;
 using Grumpy.Rest.Interface;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+
+[assembly: InternalsVisibleTo("Grumpy.HouseBattery.Client.Sonnen.UnitTests")]
 
 namespace Grumpy.HouseBattery.Client.Sonnen
 {
@@ -51,7 +58,7 @@ namespace Grumpy.HouseBattery.Client.Sonnen
 
             var request = CreateRequest("configurations/EM_OperatingMode", Method.Get);
 
-            var response = client.Execute<Api.Configurations.OperatingMode.Root>(request);
+            var response = client.Execute<OperatingModeRoot>(request);
 
             return OperatingModeHelper.Parse(response.OperatingMode);
         }
@@ -62,14 +69,14 @@ namespace Grumpy.HouseBattery.Client.Sonnen
 
             var request = CreateRequest("configurations/EM_ToU_Schedule", Method.Get);
 
-            var response = client.Execute<Api.Configurations.TimeOfUseSchedule.Root>(request);
+            var response = client.Execute<TimeOfUseScheduleRoot>(request);
 
             return MapFromSonnenTimeOfUseSchedule(response.TimeOfUseSchedule);
         }
 
         public void SetOperatingMode(OperatingMode operationMode)
         {
-            var body = new Api.Configurations.OperatingMode.Root()
+            var body = new OperatingModeRoot()
             {
                 OperatingMode = operationMode.ToApiString()
             };
@@ -96,22 +103,22 @@ namespace Grumpy.HouseBattery.Client.Sonnen
             client.Execute(request);
         }
 
-        private Api.Status.Root GetStatus()
+        private StatusRoot GetStatus()
         {
             using var client = CreateClient();
 
             var request = CreateRequest("status", Method.Get);
 
-            return client.Execute<Api.Status.Root>(request);
+            return client.Execute<StatusRoot>(request);
         }
 
-        private Api.LatestData.Root GetLatestData()
+        private LatestDataRoot GetLatestData()
         {
             using var client = CreateClient();
 
             var request = CreateRequest("latestdata", Method.Get);
 
-            return client.Execute<Api.LatestData.Root>(request);
+            return client.Execute<LatestDataRoot>(request);
         }
 
         private IRestClient CreateClient()
@@ -141,13 +148,13 @@ namespace Grumpy.HouseBattery.Client.Sonnen
             }
         }
 
-        private static Api.Configurations.TimeOfUseSchedule.Root MapToSonnenTimeOfUseSchedule(IEnumerable<TimeOfUseEvent> schedule)
+        private static TimeOfUseScheduleRoot MapToSonnenTimeOfUseSchedule(IEnumerable<TimeOfUseEvent> schedule)
         {
-            var list = new List<Api.Configurations.TimeOfUseSchedule.Schedule>();
+            var list = new List<Schedule>();
 
             foreach (var item in schedule)
             {
-                list.Add(new Api.Configurations.TimeOfUseSchedule.Schedule()
+                list.Add(new Schedule()
                 {
                     Start = item.Start,
                     Stop = item.End,
@@ -155,7 +162,7 @@ namespace Grumpy.HouseBattery.Client.Sonnen
                 });
             }
 
-            var res = new Api.Configurations.TimeOfUseSchedule.Root()
+            var res = new TimeOfUseScheduleRoot()
             {
                 TimeOfUseSchedule = list.SerializeToJson()
             };
@@ -165,7 +172,7 @@ namespace Grumpy.HouseBattery.Client.Sonnen
 
         private static IEnumerable<TimeOfUseEvent> MapFromSonnenTimeOfUseSchedule(string timeOfUseSchedule)
         {
-            var list = timeOfUseSchedule.DeserializeFromJson<List<Api.Configurations.TimeOfUseSchedule.Schedule>>();
+            var list = timeOfUseSchedule.DeserializeFromJson<List<Schedule>>();
 
             foreach (var item in list)
             {

@@ -26,5 +26,15 @@ namespace Grumpy.Common.UnitTests
 
             res.Should().Be(44563.12783564815);
         }
+
+        [Fact]
+        public void ToUnixTimestampShouldReturnValue()
+        {
+            var value = DateTime.Parse("2022-01-02T03:04:05");
+
+            var res = value.ToUnixTimestamp();
+
+            res.Should().Be(1641092645);
+        }
     }
 }

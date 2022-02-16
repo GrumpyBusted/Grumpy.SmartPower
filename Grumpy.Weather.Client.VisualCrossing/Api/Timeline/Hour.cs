@@ -2,7 +2,7 @@
 
 namespace Grumpy.Weather.Client.VisualCrossing.Api.Timeline
 {
-    public class Hour
+    internal class Hour
     {
         [JsonPropertyName("datetimeEpoch")]
         public int DateTime { get; set; } = 0;

@@ -2,7 +2,7 @@
 
 namespace Grumpy.Weather.Client.OpenWeatherMap.Api.OneCall
 {
-    public class Root
+    internal class OneCallRoot
     {
         [JsonPropertyName("hourly")]
         public List<ForecastPoint> Forecast { get; set; } = new List<ForecastPoint>();

@@ -2,7 +2,7 @@
 
 namespace Grumpy.Weather.Client.OpenWeatherMap.Api.Weather
 {
-    public class Root
+    internal class WeatherRoot
     {
         [JsonPropertyName("sys")]
         public SystemInformation SystemInformation { get; set; } = new SystemInformation();

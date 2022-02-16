@@ -2,7 +2,7 @@
 
 namespace Grumpy.HouseBattery.Client.Sonnen.Api.Configurations.OperatingMode
 {
-    public class Root
+    internal class OperatingModeRoot
     {
         [JsonPropertyName("EM_OperatingMode")]
         public string OperatingMode { get; set; } = "";

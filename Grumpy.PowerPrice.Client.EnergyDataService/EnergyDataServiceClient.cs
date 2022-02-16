@@ -1,8 +1,13 @@
-﻿using Grumpy.PowerPrice.Client.EnergyDataService.Exceptions;
+﻿using Grumpy.PowerPrice.Client.EnergyDataService.Api.DatastoreSearchSql.ExchangeRate;
+using Grumpy.PowerPrice.Client.EnergyDataService.Api.DatastoreSearchSql.Prices;
+using Grumpy.PowerPrice.Client.EnergyDataService.Exceptions;
 using Grumpy.PowerPrice.Client.EnergyDataService.Interface;
 using Grumpy.Rest.Interface;
 using Grumpy.SmartPower.Core.Dtos;
 using RestSharp;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Grumpy.PowerPrice.Client.EnergyDataService.UnitTests")]
 
 namespace Grumpy.PowerPrice.Client.EnergyDataService
 {
@@ -21,7 +26,7 @@ namespace Grumpy.PowerPrice.Client.EnergyDataService
 
             var request = CreateRequest($"SELECT \"HourDK\", \"SpotPriceDKK\", \"SpotPriceEUR\" FROM ELSpotPrices WHERE \"HourDK\" BETWEEN TIMESTAMP '{from:yyyy-MM-dd HH:mm:ss}' AND TIMESTAMP '{to:yyyy-MM-dd HH:mm:ss}' AND \"PriceArea\" = '{priceArea}'");
 
-            var response = client.Execute<Api.DatastoreSearchSql.Prices.Root>(request);
+            var response = client.Execute<PricesRoot>(request);
 
             if (!response.Success || response.Result.Records == null)
                 throw new EnergyDataServiceException(response);
@@ -60,7 +65,7 @@ namespace Grumpy.PowerPrice.Client.EnergyDataService
 
             var request = CreateRequest($"SELECT \"SpotPriceDKK\", \"SpotPriceEUR\" FROM ELSpotPrices WHERE \"SpotPriceDKK\" IS NOT NULL AND \"SpotPriceEUR\" IS NOT NULL AND \"HourDK\" <= TIMESTAMP '{dateTime:yyyy-MM-dd HH:mm:ss}' AND \"PriceArea\" = '{priceArea}' ORDER BY \"HourDK\" DESC FETCH FIRST 1 ROWS ONLY");
 
-            var response = client.Execute<Api.DatastoreSearchSql.ExchangeRate.Root>(request);
+            var response = client.Execute<ExchangeRateRoot>(request);
 
             var record = response.Result.Records.FirstOrDefault();
 

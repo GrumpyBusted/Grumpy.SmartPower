@@ -2,7 +2,7 @@
 
 namespace Grumpy.HouseBattery.Client.Sonnen.Api.Status
 {
-    public class Root
+    internal class StatusRoot
     {
         [JsonPropertyName("Production_W")]
         public int Production { get; set; } = 0;

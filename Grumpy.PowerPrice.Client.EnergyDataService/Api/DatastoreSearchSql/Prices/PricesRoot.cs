@@ -2,7 +2,7 @@
 
 namespace Grumpy.PowerPrice.Client.EnergyDataService.Api.DatastoreSearchSql.Prices
 {
-    public class Root
+    internal class PricesRoot
     {
         [JsonPropertyName("success")]
         public bool Success { get; set; } = false;

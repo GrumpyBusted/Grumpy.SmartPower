@@ -80,7 +80,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grumpy.PowerMeter.Client.Sm
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grumpy.SmartPower.Core.IntegrationTests", "Grumpy.SmartPower.Core.IntegrationTests\Grumpy.SmartPower.Core.IntegrationTests.csproj", "{47599890-56D1-4DBE-9D4E-25301D155A4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grumpy.Weather.Client.VisualCrossing", "Grumpy.Weather.Client.VisualCrossing\Grumpy.Weather.Client.VisualCrossing.csproj", "{29D3EEED-79DE-4EDE-9F3C-C94717446262}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grumpy.Weather.Client.VisualCrossing", "Grumpy.Weather.Client.VisualCrossing\Grumpy.Weather.Client.VisualCrossing.csproj", "{29D3EEED-79DE-4EDE-9F3C-C94717446262}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grumpy.Weather.Client.VisualCrossing.UnitTests", "Grumpy.Weather.Client.VisualCrossing.UnitTests\Grumpy.Weather.Client.VisualCrossing.UnitTests.csproj", "{7D1DF176-AF8B-41F8-9AA4-56029481EB7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grumpy.Weather.Client.VisualCrossing.IntegrationTests", "Grumpy.Weather.Client.VisualCrossing.IntegrationTests\Grumpy.Weather.Client.VisualCrossing.IntegrationTests.csproj", "{F2D6CB4C-67A4-4002-85DA-4585E4A3F309}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grumpy.Caching", "Grumpy.Caching\Grumpy.Caching.csproj", "{CD511033-5157-4049-98E0-A7E1E8BB4171}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grumpy.Caching.UnitTests", "Grumpy.Caching.UnitTests\Grumpy.Caching.UnitTests.csproj", "{D25E46BB-3F99-48AF-862F-31025C8CD1FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -216,6 +224,22 @@ Global
 		{29D3EEED-79DE-4EDE-9F3C-C94717446262}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29D3EEED-79DE-4EDE-9F3C-C94717446262}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29D3EEED-79DE-4EDE-9F3C-C94717446262}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D1DF176-AF8B-41F8-9AA4-56029481EB7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D1DF176-AF8B-41F8-9AA4-56029481EB7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D1DF176-AF8B-41F8-9AA4-56029481EB7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D1DF176-AF8B-41F8-9AA4-56029481EB7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2D6CB4C-67A4-4002-85DA-4585E4A3F309}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2D6CB4C-67A4-4002-85DA-4585E4A3F309}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2D6CB4C-67A4-4002-85DA-4585E4A3F309}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2D6CB4C-67A4-4002-85DA-4585E4A3F309}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD511033-5157-4049-98E0-A7E1E8BB4171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD511033-5157-4049-98E0-A7E1E8BB4171}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD511033-5157-4049-98E0-A7E1E8BB4171}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD511033-5157-4049-98E0-A7E1E8BB4171}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D25E46BB-3F99-48AF-862F-31025C8CD1FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D25E46BB-3F99-48AF-862F-31025C8CD1FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D25E46BB-3F99-48AF-862F-31025C8CD1FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D25E46BB-3F99-48AF-862F-31025C8CD1FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -250,6 +274,10 @@ Global
 		{66F0F7AA-45B3-48E5-B972-1101C937A470} = {CD281DB5-8B7A-4514-99BE-068BFF739F91}
 		{47599890-56D1-4DBE-9D4E-25301D155A4F} = {CD281DB5-8B7A-4514-99BE-068BFF739F91}
 		{29D3EEED-79DE-4EDE-9F3C-C94717446262} = {96DAE292-890C-42BC-A976-83D4685EADCC}
+		{7D1DF176-AF8B-41F8-9AA4-56029481EB7F} = {CD281DB5-8B7A-4514-99BE-068BFF739F91}
+		{F2D6CB4C-67A4-4002-85DA-4585E4A3F309} = {CD281DB5-8B7A-4514-99BE-068BFF739F91}
+		{CD511033-5157-4049-98E0-A7E1E8BB4171} = {F3EC20A4-8A22-4E3C-AC05-BF81678207AF}
+		{D25E46BB-3F99-48AF-862F-31025C8CD1FF} = {CD281DB5-8B7A-4514-99BE-068BFF739F91}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {584FCD7A-AE9E-46FB-8632-680B38670C26}

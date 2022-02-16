@@ -1,11 +1,17 @@
-﻿using Grumpy.PowerMeter.Client.SmartMe.Exceptions;
+﻿using Grumpy.PowerMeter.Client.SmartMe.Api.DeviceBySerial;
+using Grumpy.PowerMeter.Client.SmartMe.Api.MeterValues;
+using Grumpy.PowerMeter.Client.SmartMe.Exceptions;
 using Grumpy.PowerMeter.Client.SmartMe.Interface;
 using Grumpy.Rest.Interface;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Grumpy.PowerMeter.Client.SmartMe.UnitTests")]
 
 namespace Grumpy.PowerMeter.Client.SmartMe
 {
+
     public class SmartMePowerMeterClient : ISmartMePowerMeterClient
     {
         private readonly SmartMePowerMeterClientOptions _options;
@@ -26,7 +32,7 @@ namespace Grumpy.PowerMeter.Client.SmartMe
             var request = CreateRequest($"MeterValues/{_id.Value}", Method.Get)
                 .AddQueryParameter("date", dateTime.ToString("yyyy-MM-ddTHH:mm:ss"));
 
-            var response = client.Execute<Api.MeterValues.Root>(request);
+            var response = client.Execute<MeterValuesRoot>(request);
 
             if (response.CounterReadingUnit != "kWh")
                 throw new InvalidMeterValueException(response.CounterReadingUnit, response.CounterReading);
@@ -44,7 +50,7 @@ namespace Grumpy.PowerMeter.Client.SmartMe
             var request = CreateRequest("DeviceBySerial", Method.Get)
                 .AddQueryParameter("serial", serialNo);
 
-            var response = client.Execute<Api.DeviceBySerial.Root>(request);
+            var response = client.Execute<DeviceBySerialRoot>(request);
 
             return response.Id;
         }

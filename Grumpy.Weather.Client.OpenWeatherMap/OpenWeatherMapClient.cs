@@ -1,9 +1,14 @@
 ﻿using Grumpy.Common.Extensions;
 using Grumpy.Rest.Interface;
 using Grumpy.SmartPower.Core.Model;
+using Grumpy.Weather.Client.OpenWeatherMap.Api.OneCall;
+using Grumpy.Weather.Client.OpenWeatherMap.Api.Weather;
 using Grumpy.Weather.Client.OpenWeatherMap.Interface;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Grumpy.Weather.Client.OpenWeatherMap.UnitTests")]
 
 namespace Grumpy.Weather.Client.OpenWeatherMap
 {
@@ -24,7 +29,7 @@ namespace Grumpy.Weather.Client.OpenWeatherMap
 
             var request = CreateRequest("weather", Method.Get);
 
-            var response = client.Execute<Api.Weather.Root>(request);
+            var response = client.Execute<WeatherRoot>(request);
 
             var res = new SunInformation()
             {
@@ -42,7 +47,7 @@ namespace Grumpy.Weather.Client.OpenWeatherMap
             var request = CreateRequest("onecall", Method.Get)
                 .AddQueryParameter("exclude", "current,minutely,daily,alerts");
 
-            var response = client.Execute<Api.OneCall.Root>(request);
+            var response = client.Execute<OneCallRoot>(request);
 
             var list = new List<WeatherItem>();
 

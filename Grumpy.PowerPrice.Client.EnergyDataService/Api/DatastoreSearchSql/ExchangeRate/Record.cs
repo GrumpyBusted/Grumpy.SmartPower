@@ -2,7 +2,7 @@
 
 namespace Grumpy.PowerPrice.Client.EnergyDataService.Api.DatastoreSearchSql.ExchangeRate
 {
-    public class Record
+    internal class Record
     {
         [JsonPropertyName("SpotPriceDKK")]
         public double SpotPriceDKK { get; set; } = 0;

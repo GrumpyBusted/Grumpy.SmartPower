@@ -2,7 +2,7 @@
 
 namespace Grumpy.PowerPrice.Client.EnergyDataService.Api.DatastoreSearchSql.Prices
 {
-    public class Record
+    internal class Record
     {
         [JsonPropertyName("HourDK")]
         public DateTime Hour { get; set; }

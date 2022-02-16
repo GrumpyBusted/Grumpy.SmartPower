@@ -2,7 +2,7 @@
 
 namespace Grumpy.Weather.Client.OpenWeatherMap.Api.OneCall
 {
-    public class ForecastPoint
+    internal class ForecastPoint
     {
         [JsonPropertyName("dt")]
         public int DateTime { get; set; } = 0;

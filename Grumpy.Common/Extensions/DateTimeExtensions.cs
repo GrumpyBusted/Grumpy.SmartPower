@@ -11,6 +11,11 @@
         {
             return value.Date <= new DateTime(1900, 1, 1) ? 1 + (value.ToOADate() - Math.Floor(value.ToOADate())) : value.ToOADate();
         }
+
+        public static int ToUnixTimestamp(this DateTime value)
+        {
+            return (int)value.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        }
     }
 }
 

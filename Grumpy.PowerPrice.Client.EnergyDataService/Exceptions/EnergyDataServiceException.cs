@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using Grumpy.PowerPrice.Client.EnergyDataService.Api.DatastoreSearchSql.Prices;
+using System.Runtime.Serialization;
 
 namespace Grumpy.PowerPrice.Client.EnergyDataService.Exceptions
 {
@@ -6,9 +7,9 @@ namespace Grumpy.PowerPrice.Client.EnergyDataService.Exceptions
     internal class EnergyDataServiceException : Exception
     {
         private const string Text = "Energy Data Service Exception";
-        private readonly Api.DatastoreSearchSql.Prices.Root? _response;
+        private readonly PricesRoot? _response;
 
-        public EnergyDataServiceException(Api.DatastoreSearchSql.Prices.Root response) : base(Text)
+        public EnergyDataServiceException(PricesRoot response) : base(Text)
         {
             _response = response;
         }

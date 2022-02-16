@@ -2,7 +2,7 @@
 
 namespace Grumpy.Weather.Client.OpenWeatherMap.Api.Weather
 {
-    public class SystemInformation
+    internal class SystemInformation
     {
         [JsonPropertyName("sunrise")]
         public int Sunrise { get; set; } = 0;

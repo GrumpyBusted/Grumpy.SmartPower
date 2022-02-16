@@ -6,6 +6,9 @@ using Grumpy.Weather.Client.VisualCrossing.Interface;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Grumpy.Weather.Client.VisualCrossing.UnitTests")]
 
 namespace Grumpy.Weather.Client.VisualCrossing
 {
