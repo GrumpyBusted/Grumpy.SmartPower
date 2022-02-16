@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Grumpy.SmartPower-C6A56E18-F263-43E3-A0C8-AAF378EB2E92</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Grumpy.SmartPower.Core\Grumpy.SmartPower.Core.csproj" />
+    <ProjectReference Include="..\Grumpy.SmartPower.Infrastructure\Grumpy.SmartPower.Infrastructure.csproj" />
+    <ProjectReference Include="..\Grumpy.Weather.Client.VisualCrossing\Grumpy.Weather.Client.VisualCrossing.csproj" />
+  </ItemGroup>
+</Project>

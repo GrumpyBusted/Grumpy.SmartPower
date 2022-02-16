@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Grumpy.HouseBattery.Client.Sonnen\Grumpy.HouseBattery.Client.Sonnen.csproj" />
+    <ProjectReference Include="..\Grumpy.PowerMeter.Client.SmartMe\Grumpy.PowerMeter.Client.SmartMe.csproj" />
+    <ProjectReference Include="..\Grumpy.PowerPrice.Client.EnergyDataService\Grumpy.PowerPrice.Client.EnergyDataService.csproj" />
+    <ProjectReference Include="..\Grumpy.SmartPower.Core\Grumpy.SmartPower.Core.csproj" />
+    <ProjectReference Include="..\Grumpy.SolarInformation\Grumpy.SolarInformation.csproj" />
+    <ProjectReference Include="..\Grumpy.Weather.Client.OpenWeatherMap\Grumpy.Weather.Client.OpenWeatherMap.csproj" />
+    <ProjectReference Include="..\Grumpy.Weather.Client.VisualCrossing\Grumpy.Weather.Client.VisualCrossing.csproj" />
+  </ItemGroup>
+
+</Project>
