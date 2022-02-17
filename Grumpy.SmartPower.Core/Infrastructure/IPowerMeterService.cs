@@ -2,7 +2,7 @@
 {
     public interface IPowerMeterService
     {
-        int GetUsagePerHour(DateTime hour);
+        int GetWattPerHour(DateTime hour);
         double GetReading(DateTime dateTime);
     }
 }

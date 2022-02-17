@@ -1,3 +1,5 @@
+using Grumpy.Common;
+using Grumpy.Common.Interface;
 using Grumpy.HouseBattery.Client.Sonnen;
 using Grumpy.HouseBattery.Client.Sonnen.Interface;
 using Grumpy.PowerMeter.Client.SmartMe;
@@ -38,7 +40,9 @@ IHost host = Host.CreateDefaultBuilder(args)
             .AddSingleton<IRestClientFactory, RestClientFactory>()
             .AddSingleton<IProductionService, ProductionService>()
             .AddSingleton<IConsumptionService, ConsumptionService>()
+            .AddSingleton<IPredictConsumptionService, PredictConsumptionService>()
             .AddSingleton<IVisualCrossingWeatherClient, VisualCrossingWeatherClient>()
+            .AddSingleton<IDateTimeProvider, DateTimeProvider>()
             .Configure<WorkerOptions>(context.Configuration.GetSection("Application"))
             .Configure<SmartPowerServiceOptions>(context.Configuration.GetSection("SmartPower"))
             .Configure<SolarServiceOptions>(context.Configuration.GetSection("SmartPower:Location"))
@@ -48,7 +52,8 @@ IHost host = Host.CreateDefaultBuilder(args)
             .Configure<OpenWeatherMapClientOptions>(context.Configuration.GetSection("OpenWeatherMap"))
             .Configure<ProductionServiceOptions>(context.Configuration.GetSection("SmartPower:SolarPanel"))
             .Configure<VisualCrossingWeatherClientOptions>(context.Configuration.GetSection("SmartPower:Location"))
-            .Configure<VisualCrossingWeatherClientOptions>(context.Configuration.GetSection("VisualCrossingWeather"));
+            .Configure<VisualCrossingWeatherClientOptions>(context.Configuration.GetSection("VisualCrossingWeather"))
+            .Configure<PredictConsumptionServiceOptions>(context.Configuration.GetSection("SmartPower:MachineLearning"));
     })
     .Build();
 

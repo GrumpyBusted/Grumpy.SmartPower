@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Grumpy.Common;
 using Grumpy.Rest;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.Weather.Client.OpenWeatherMap;
@@ -62,7 +63,7 @@ namespace Grumpy.SmartPower.Infrastructure.IntegrationTests
             var openWeatherMapClient = new OpenWeatherMapClient(Options.Create(_openWeatherMapClientOptions), new RestClientFactory(Substitute.For<ILoggerFactory>()));
             var visualCrossingWeatherClient = new VisualCrossingWeatherClient(Options.Create(_visualCrossingWeatherClientOptions), new RestClientFactory(Substitute.For<ILoggerFactory>()));
 
-            return new WeatherService(openWeatherMapClient, visualCrossingWeatherClient);
+            return new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider());
         }
     }
 }

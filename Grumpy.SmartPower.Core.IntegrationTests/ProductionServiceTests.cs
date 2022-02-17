@@ -49,8 +49,8 @@ namespace Grumpy.SmartPower.Core.IntegrationTests
             var res = cut.Forecast(DateTime.Parse("2022-02-13T00:00:00"), DateTime.Parse("2022-02-13T23:59:59"));
 
             res.Should().HaveCount(24);
-            res.First().WattHour.Should().Be(0);
-            res.First(i => i.Hour.Hour == 11).WattHour.Should().BeCloseTo(3500, 500);
+            res.First().WattPerHour.Should().Be(0);
+            res.First(i => i.Hour.Hour == 11).WattPerHour.Should().BeCloseTo(3500, 500);
 
             var j = res.SerializeToJson();
         }

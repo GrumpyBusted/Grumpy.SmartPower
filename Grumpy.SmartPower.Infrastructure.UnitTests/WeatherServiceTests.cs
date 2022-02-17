@@ -1,4 +1,6 @@
 using FluentAssertions;
+using Grumpy.Common;
+using Grumpy.Common.Interface;
 using Grumpy.SmartPower.Core.Model;
 using Grumpy.TestTools.Extensions;
 using Grumpy.Weather.Client.OpenWeatherMap.Interface;
@@ -24,7 +26,7 @@ namespace Grumpy.SmartPower.Infrastructure.UnitTests
             });
             var visualCrossingWeatherClient = Substitute.For<IVisualCrossingWeatherClient>();
 
-            var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient);
+            var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider());
 
             var res = cut.GetSunInformation();
 
@@ -51,8 +53,10 @@ namespace Grumpy.SmartPower.Infrastructure.UnitTests
             openWeatherMapClient.GetForecast().Returns(list);
 
             var visualCrossingWeatherClient = Substitute.For<IVisualCrossingWeatherClient>();
+            var dateTimeProvider = Substitute.For<IDateTimeProvider>();
+            dateTimeProvider.Now.Returns(DateTime.Parse("2022-01-01T00:00:00"));
 
-            var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient);
+            var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, dateTimeProvider);
 
             var res = cut.GetForecast(DateTime.Parse("2022-01-02T00:00:00"), DateTime.Parse("2022-01-02T23:59:59"));
 
@@ -83,7 +87,7 @@ namespace Grumpy.SmartPower.Infrastructure.UnitTests
             var visualCrossingWeatherClient = Substitute.For<IVisualCrossingWeatherClient>();
             visualCrossingWeatherClient.Get(Arg.Any<DateOnly>()).Returns(list);
 
-            var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient);
+            var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider());
 
             var res = cut.GetHistory(DateTime.Parse("2022-01-03T11:00:00"), DateTime.Parse("2022-01-03T13:00:00"));
 

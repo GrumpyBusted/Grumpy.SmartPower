@@ -32,14 +32,14 @@ namespace Grumpy.SmartPower.Core.Production
                 var item = new ProductionItem
                 {
                     Hour = hour.Hour,
-                    WattHour = CalcWattHour(sun, altitude, direction, hour.CloudCover)
+                    WattPerHour = CalcWattPerHour(sun, altitude, direction, hour.CloudCover)
                 };
 
                 yield return item;
             }
         }
 
-        private int CalcWattHour(TimeSpan sunHour, double altitude, double direction, int cloudCover)
+        private int CalcWattPerHour(TimeSpan sunHour, double altitude, double direction, int cloudCover)
         {
             var production = sunHour.TotalHours * _options.Capacity;
             var verticalAngle = altitude < 0 ? 0 : Math.Abs(altitude + _options.Angle);

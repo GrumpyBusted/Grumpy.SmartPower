@@ -7,6 +7,8 @@ namespace Grumpy.SmartPower.Core.Infrastructure
         public bool IsBatteryFull();
         public int GetBatterySize();
         public int GetBatteryCurrent();
+        public int GetProduction();
+        public int GetConsumption();
         public void SetMode(BatteryMode batteryMode, DateTime hour);
     }
 }

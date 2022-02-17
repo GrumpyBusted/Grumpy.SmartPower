@@ -22,7 +22,7 @@ namespace Grumpy.SmartPower.Infrastructure.UnitTests
         }
 
         [Fact]
-        public void GetUsageShouldReturnFromClient()
+        public void GetWattPerHourShouldReturnFromClient()
         {
             var client = Substitute.For<ISmartMePowerMeterClient>();
             client.GetValue(DateTime.Parse("2022-02-12T13:00:00")).Returns(300);
@@ -30,7 +30,7 @@ namespace Grumpy.SmartPower.Infrastructure.UnitTests
 
             var cut = new PowerMeterService(client);
 
-            var res = cut.GetUsagePerHour(DateTime.Parse("2022-02-12T13:34:00"));
+            var res = cut.GetWattPerHour(DateTime.Parse("2022-02-12T13:34:00"));
 
             res.Should().Be(100000);
         }

@@ -16,7 +16,7 @@ namespace Grumpy.SmartPower.Infrastructure
             _fileCache = new FileCache(FileCacheManagers.Hashed);
         }
 
-        public int GetUsagePerHour(DateTime hour)
+        public int GetWattPerHour(DateTime hour)
         {
             var from = new DateTime(hour.Year, hour.Month, hour.Day, hour.Hour, 0, 0, hour.Kind);
             var to = from.AddHours(1);

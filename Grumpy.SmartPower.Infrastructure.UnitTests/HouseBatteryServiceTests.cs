@@ -67,6 +67,32 @@ namespace Grumpy.SmartPower.Infrastructure.UnitTests
         }
 
         [Fact]
+        public void GetConsumptionShouldReturnFromClient()
+        {
+            var client = Substitute.For<ISonnenBatteryClient>();
+            client.GetConsumption().Returns(123);
+
+            var cut = new HouseBatteryService(client);
+
+            var res = cut.GetConsumption();
+
+            res.Should().Be(123);
+        }
+
+        [Fact]
+        public void GetProductionShouldReturnFromClient()
+        {
+            var client = Substitute.For<ISonnenBatteryClient>();
+            client.GetProduction().Returns(123);
+
+            var cut = new HouseBatteryService(client);
+
+            var res = cut.GetProduction();
+
+            res.Should().Be(123);
+        }
+
+        [Fact]
         public void SetModeToDefaultShouldSetToSelfConsumption()
         {
             var client = Substitute.For<ISonnenBatteryClient>();

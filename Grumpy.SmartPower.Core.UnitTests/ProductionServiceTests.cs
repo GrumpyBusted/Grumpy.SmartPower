@@ -20,7 +20,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(9000);
+            res.First().WattPerHour.Should().Be(9000);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(7200);
+            res.First().WattPerHour.Should().Be(7200);
         }
 
         [Fact]
@@ -40,7 +40,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(0);
+            res.First().WattPerHour.Should().Be(0);
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(4500);
+            res.First().WattPerHour.Should().Be(4500);
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(0);
+            res.First().WattPerHour.Should().Be(0);
         }
 
         [Fact]
@@ -70,7 +70,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(9000, 400);
+            res.First().WattPerHour.Should().BeCloseTo(9000, 400);
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(0, 400);
+            res.First().WattPerHour.Should().BeCloseTo(0, 400);
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(0);
+            res.First().WattPerHour.Should().Be(0);
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(0);
+            res.First().WattPerHour.Should().Be(0);
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(0);
+            res.First().WattPerHour.Should().Be(0);
         }
 
         [Fact]
@@ -120,7 +120,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(9000, 400);
+            res.First().WattPerHour.Should().BeCloseTo(9000, 400);
         }
 
         [Fact]
@@ -130,7 +130,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(0, 400);
+            res.First().WattPerHour.Should().BeCloseTo(0, 400);
         }
 
         [Fact]
@@ -140,7 +140,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(0);
+            res.First().WattPerHour.Should().Be(0);
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(0);
+            res.First().WattPerHour.Should().Be(0);
         }
 
         [Fact]
@@ -160,7 +160,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(0);
+            res.First().WattPerHour.Should().Be(0);
         }
 
         [Fact]
@@ -170,7 +170,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().Be(0);
+            res.First().WattPerHour.Should().Be(0);
         }
 
         [Fact]
@@ -180,7 +180,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(0, 400);
+            res.First().WattPerHour.Should().BeCloseTo(0, 400);
         }
 
         [Fact]
@@ -190,7 +190,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(2000, 400);
+            res.First().WattPerHour.Should().BeCloseTo(2000, 400);
         }
 
         [Fact]
@@ -200,7 +200,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(9000, 400);
+            res.First().WattPerHour.Should().BeCloseTo(9000, 400);
         }
 
         [Fact]
@@ -211,7 +211,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-01-17T11:00:00"), DateTime.Parse("2022-01-17T12:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(2900, 400);
+            res.First().WattPerHour.Should().BeCloseTo(2900, 400);
         }
 
         [Fact]
@@ -222,7 +222,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-01-30T11:00:00"), DateTime.Parse("2022-01-30T12:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(3900, 400);
+            res.First().WattPerHour.Should().BeCloseTo(3900, 400);
         }
 
         [Fact]
@@ -233,7 +233,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-02-13T11:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(4900, 400);
+            res.First().WattPerHour.Should().BeCloseTo(4900, 400);
         }
 
         [Fact]
@@ -244,7 +244,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Forecast(DateTime.Parse("2022-06-22T12:00:00"), DateTime.Parse("2022-06-22T13:00:00"));
 
-            res.First().WattHour.Should().BeCloseTo(7000, 200);
+            res.First().WattPerHour.Should().BeCloseTo(7000, 200);
         }
 
         private static ProductionService CreateTestObject(int panelAngle, int panelDirection, int panelCapacity, double sunAltitude, double sunDirection, double sunlightHours, int cloudCover) 

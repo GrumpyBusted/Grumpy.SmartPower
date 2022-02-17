@@ -19,13 +19,28 @@ namespace Grumpy.SmartPower
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var lastCalibrate = DateTime.Now.AddDays(-1);
+            var lastModelUpdate = DateTime.Now;
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-                _smartPowerService.Execute(DateTime.Now);
+                if (lastCalibrate - DateTime.Now > TimeSpan.FromMilliseconds(_options.Interval))
+                {
+                    lastCalibrate = DateTime.Now;
+                    _smartPowerService.Execute(DateTime.Now);
+                }
 
-                await Task.Delay(_options.Interval, stoppingToken);
+                if (DateTime.Now.Hour != lastModelUpdate.Hour)
+                {
+                    lastModelUpdate = DateTime.Now;
+                    //_smartPowerService.UpdateModel();
+                }
+
+                _smartPowerService.SaveData();
+
+                await Task.Delay(60000, stoppingToken);
             }
         }
     }

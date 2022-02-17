@@ -31,9 +31,15 @@ namespace Grumpy.SmartPower.Core
 
             var production = _productionService.Forecast(from, to).SerializeToJson();
             var consumption = _consumptionService.Predict(from, to).SerializeToJson();
-            var prices = _powerPriceService.GetPrices(_options.PriceArea, from, to);
+            var prices = _powerPriceService.GetPrices(_options.PriceArea, from, to).SerializeToJson();
             
             _houseBatteryService.GetBatterySize();
+        }
+
+        public void SaveData()
+        {
+            var production = _houseBatteryService.GetProduction();
+            var consumption = _houseBatteryService.GetConsumption();
         }
     }
 }

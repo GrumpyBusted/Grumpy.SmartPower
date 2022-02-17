@@ -82,5 +82,15 @@ namespace Grumpy.SmartPower.Infrastructure
             return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatteryLevel", TimeSpan.FromMinutes(1),
                 () => _sonnenBatteryClient.GetBatteryLevel());
         }
+
+        public int GetProduction()
+        {
+            return _sonnenBatteryClient.GetProduction();
+        }
+
+        public int GetConsumption()
+        {
+            return _sonnenBatteryClient.GetConsumption();
+        }
     }
 }

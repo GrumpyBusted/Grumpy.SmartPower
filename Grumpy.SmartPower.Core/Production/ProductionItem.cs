@@ -3,6 +3,6 @@
     public class ProductionItem
     {
         public DateTime Hour { get; set; }
-        public int WattHour { get; set; }
+        public int WattPerHour { get; set; }
     }
 }
