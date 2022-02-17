@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.ML.FastTree" Version="1.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Grumpy.Caching\Grumpy.Caching.csproj" />
     <ProjectReference Include="..\Grumpy.HouseBattery.Client.Sonnen\Grumpy.HouseBattery.Client.Sonnen.csproj" />
     <ProjectReference Include="..\Grumpy.PowerMeter.Client.SmartMe\Grumpy.PowerMeter.Client.SmartMe.csproj" />
