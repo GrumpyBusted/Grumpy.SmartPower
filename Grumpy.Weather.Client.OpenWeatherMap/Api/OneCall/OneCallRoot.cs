@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Grumpy.Weather.Client.OpenWeatherMap.Api.OneCall
+namespace Grumpy.Weather.Client.OpenWeatherMap.Api.OneCall;
+
+internal class OneCallRoot
 {
-    internal class OneCallRoot
-    {
-        [JsonPropertyName("hourly")]
-        public List<ForecastPoint> Forecast { get; set; } = new List<ForecastPoint>();
-    }
+    [JsonPropertyName("hourly")]
+    public List<ForecastPoint> Forecast { get; set; } = new();
 }

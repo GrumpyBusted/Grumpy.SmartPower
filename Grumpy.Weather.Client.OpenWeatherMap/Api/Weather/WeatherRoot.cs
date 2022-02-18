@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Grumpy.Weather.Client.OpenWeatherMap.Api.Weather
+namespace Grumpy.Weather.Client.OpenWeatherMap.Api.Weather;
+
+internal class WeatherRoot
 {
-    internal class WeatherRoot
-    {
-        [JsonPropertyName("sys")]
-        public SystemInformation SystemInformation { get; set; } = new SystemInformation();
-    }
+    [JsonPropertyName("sys")]
+    public SystemInformation SystemInformation { get; set; } = new();
 }

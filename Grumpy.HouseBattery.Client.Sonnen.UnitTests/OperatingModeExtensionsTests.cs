@@ -1,18 +1,17 @@
 ﻿using FluentAssertions;
-using Grumpy.HouseBattery.Client.Sonnen.Dtos;
+using Grumpy.HouseBattery.Client.Sonnen.Dto;
 using Grumpy.HouseBattery.Client.Sonnen.Helpers;
 using Xunit;
 
-namespace Grumpy.HouseBattery.Client.Sonnen.UnitTests
+namespace Grumpy.HouseBattery.Client.Sonnen.UnitTests;
+
+public class OperatingModeExtensionsTests
 {
-    public class OperatingModeExtensionsTests
+    [Fact]
+    public void OperatingModeToStringShouldMapCorrectly()
     {
-        [Fact]
-        public void OperatingModeToStringShouldMapCorrectly()
-        {
-            OperatingModeExtensions.ToApiString(OperatingMode.Manual).Should().Be("1");
-            OperatingModeExtensions.ToApiString(OperatingMode.SelfConsumption).Should().Be("2");
-            OperatingModeExtensions.ToApiString(OperatingMode.TimeOfUse).Should().Be("10");
-        }
+        OperatingMode.Manual.ToApiString().Should().Be("1");
+        OperatingMode.SelfConsumption.ToApiString().Should().Be("2");
+        OperatingMode.TimeOfUse.ToApiString().Should().Be("10");
     }
 }

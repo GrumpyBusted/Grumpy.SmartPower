@@ -8,31 +8,30 @@ using NSubstitute;
 using System;
 using Xunit;
 
-namespace Grumpy.SmartPower.Infrastructure.IntegrationTests
+namespace Grumpy.SmartPower.Infrastructure.IntegrationTests;
+
+public class PowerMeterServiceTests
 {
-    public class PowerMeterServiceTests
+    private readonly SmartMePowerMeterClientOptions _options = new()
     {
-        private readonly SmartMePowerMeterClientOptions _options = new()
-        {
-            ApiToken = "YW5kZXJzQGJ1c3RlZC1qYW51bS5kazpKb0VtQ2EwMQ==",
-            SerialNo = 9203930
-        };
+        ApiToken = "YW5kZXJzQGJ1c3RlZC1qYW51bS5kazpKb0VtQ2EwMQ==",
+        SerialNo = 9203930
+    };
 
-        [Fact]
-        public void GetReadingShouldReturnValue()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void GetReadingShouldReturnValue()
+    {
+        var cut = CreateTestObject();
 
-            var res = cut.GetReading(DateTime.Now);
+        var res = cut.GetReading(DateTime.Now);
 
-            res.Should().BeGreaterThan(1);
-        }
+        res.Should().BeGreaterThan(1);
+    }
 
-        private IPowerMeterService CreateTestObject()
-        {
-            var client = new SmartMePowerMeterClient(Options.Create(_options), new RestClientFactory(Substitute.For<ILoggerFactory>()));
+    private IPowerMeterService CreateTestObject()
+    {
+        var client = new SmartMePowerMeterClient(Options.Create(_options), new RestClientFactory(Substitute.For<ILoggerFactory>()));
 
-            return new PowerMeterService(client);
-        }
+        return new PowerMeterService(client);
     }
 }

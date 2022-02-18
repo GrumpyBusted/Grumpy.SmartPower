@@ -5,20 +5,19 @@ using RestSharp;
 using System;
 using Xunit;
 
-namespace Grumpy.Rest.UnitTests
+namespace Grumpy.Rest.UnitTests;
+
+public class RestClientTests
 {
-    public class RestClientTests
+    [Fact]
+    public void ExecuteShouldThrow()
     {
-        [Fact]
-        public void ExecuteShouldThrow()
-        {
-            var logger = Substitute.For<ILoggerFactory>();
-            var factory = new RestClientFactory(logger);
-            var cut = factory.Instance("http://0.0.0.0");
+        var logger = Substitute.For<ILoggerFactory>();
+        var factory = new RestClientFactory(logger);
+        var cut = factory.Instance("http://0.0.0.0");
 
-            var act = () => cut.Execute<string>(new RestRequest());
+        var act = () => cut.Execute<string>(new RestRequest());
 
-            act.Should().Throw<AggregateException>();
-        }
+        act.Should().Throw<AggregateException>();
     }
 }

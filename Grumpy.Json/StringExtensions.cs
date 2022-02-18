@@ -1,13 +1,12 @@
 ﻿using Grumpy.Json.Exceptions;
 using System.Text.Json;
 
-namespace Grumpy.Json
+namespace Grumpy.Json;
+
+public static class StringExtensions
 {
-    public static class StringExtensions
+    public static T DeserializeFromJson<T>(this string value)
     {
-        public static T DeserializeFromJson<T>(this string value)
-        {
-            return JsonSerializer.Deserialize<T>(value) ?? throw new JsonDeserielizeException(typeof(T), value);
-        }
+        return JsonSerializer.Deserialize<T>(value) ?? throw new JsonDeserializeException(typeof(T), value);
     }
 }

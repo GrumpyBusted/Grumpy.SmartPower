@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Grumpy.PowerPrice.Client.EnergyDataService.Api.DatastoreSearchSql.ExchangeRate
+namespace Grumpy.PowerPrice.Client.EnergyDataService.Api.DataStoreSearchSql.ExchangeRate;
+
+internal class Result
 {
-    internal class Result
-    {
-        [JsonPropertyName("records")]
-        public List<Record> Records { get; set; } = new List<Record>();
-    }
+    [JsonPropertyName("records")]
+    public List<Record> Records { get; set; } = new();
 }

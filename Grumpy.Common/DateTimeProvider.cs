@@ -1,11 +1,10 @@
 ﻿using Grumpy.Common.Interface;
 
-namespace Grumpy.Common
-{
-    public class DateTimeProvider : IDateTimeProvider
-    {
-        public DateTime Now => DateTime.Now;
+namespace Grumpy.Common;
 
-        public DateTime Today => DateTime.Today;
-    }
+public class DateTimeProvider : IDateTimeProvider
+{
+    public DateTime Now => DateTime.Now;
+
+    public DateTime Today => DateTime.Today;
 }

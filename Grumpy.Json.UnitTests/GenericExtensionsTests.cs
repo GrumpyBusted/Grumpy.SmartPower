@@ -3,23 +3,22 @@ using Grumpy.Json.UnitTests.Helper;
 using System;
 using Xunit;
 
-namespace Grumpy.Json.UnitTests
+namespace Grumpy.Json.UnitTests;
+
+public class GenericExtensionsTests
 {
-    public class GenericExtensionsTests
+    [Fact]
+    public void CanSerializeObjectShouldReturnString()
     {
-        [Fact]
-        public void CanSerielizeObjectShouldReturnString()
+        var obj = new TestClass
         {
-            var obj = new TestClass()
-            {
-                Name = "Anders",
-                Birthday = new DateTime(1973, 10, 25, 10, 0, 0),
-                Year = 1973
-            };
+            Name = "Anders",
+            Birthday = new DateTime(1973, 10, 25, 10, 0, 0),
+            Year = 1973
+        };
 
-            var res = obj.SerializeToJson();
+        var res = obj.SerializeToJson();
 
-            res.Should().Be("{\"Name\":\"Anders\",\"Birthday\":\"1973-10-25T10:00:00\",\"Year\":1973}");
-        }
+        res.Should().Be("{\"Name\":\"Anders\",\"Birthday\":\"1973-10-25T10:00:00\",\"Year\":1973}");
     }
 }

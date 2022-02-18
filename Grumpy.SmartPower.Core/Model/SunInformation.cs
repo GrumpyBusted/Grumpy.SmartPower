@@ -1,8 +1,7 @@
-﻿namespace Grumpy.SmartPower.Core.Model
+﻿namespace Grumpy.SmartPower.Core.Model;
+
+public class SunInformation
 {
-    public class SunInformation
-    {
-        public DateTime Sunrise { get; set; }
-        public DateTime Sunset { get; set; }
-    }
+    public DateTime Sunrise { get; set; }
+    public DateTime Sunset { get; set; }
 }

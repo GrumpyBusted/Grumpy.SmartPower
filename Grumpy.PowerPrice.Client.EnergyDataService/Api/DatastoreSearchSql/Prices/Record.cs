@@ -1,14 +1,13 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Grumpy.PowerPrice.Client.EnergyDataService.Api.DatastoreSearchSql.Prices
+namespace Grumpy.PowerPrice.Client.EnergyDataService.Api.DataStoreSearchSql.Prices;
+
+internal class Record
 {
-    internal class Record
-    {
-        [JsonPropertyName("HourDK")]
-        public DateTime Hour { get; set; }
-        [JsonPropertyName("SpotPriceDKK")]
-        public double SpotPriceDKK { get; set; } = 0;
-        [JsonPropertyName("SpotPriceEUR")]
-        public double SpotPriceEUR { get; set; } = 0;
-    }
+    [JsonPropertyName("HourDK")]
+    public DateTime Hour { get; set; }
+    [JsonPropertyName("SpotPriceDKK")]
+    public double SpotPriceDKK { get; set; } = 0;
+    [JsonPropertyName("SpotPriceEUR")]
+    public double SpotPriceEUR { get; set; } = 0;
 }

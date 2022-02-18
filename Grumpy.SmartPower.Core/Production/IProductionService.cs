@@ -1,7 +1,6 @@
-﻿namespace Grumpy.SmartPower.Core.Production
+﻿namespace Grumpy.SmartPower.Core.Production;
+
+public interface IProductionService
 {
-    public interface IProductionService
-    {
-        IEnumerable<ProductionItem> Forecast(DateTime from, DateTime to);
-    }
+    IEnumerable<ProductionItem> Forecast(DateTime from, DateTime to);
 }

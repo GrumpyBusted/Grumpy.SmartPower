@@ -1,9 +1,8 @@
-﻿using Grumpy.SmartPower.Core.Dtos;
+﻿using Grumpy.SmartPower.Core.Dto;
 
-namespace Grumpy.PowerPrice.Client.EnergyDataService.Interface
+namespace Grumpy.PowerPrice.Client.EnergyDataService.Interface;
+
+public interface IEnergyDataServiceClient
 {
-    public interface IEnergyDataServiceClient
-    {
-        IEnumerable<Dtos.PowerPrice> GetPrices(PriceArea priceArea, DateTime from, DateTime to);
-    }
+    IEnumerable<Dto.PowerPrice> GetPrices(PriceArea priceArea, DateTime from, DateTime to);
 }

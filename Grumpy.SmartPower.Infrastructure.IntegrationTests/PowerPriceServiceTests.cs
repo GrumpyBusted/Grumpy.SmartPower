@@ -1,32 +1,31 @@
 using FluentAssertions;
 using Grumpy.PowerPrice.Client.EnergyDataService;
 using Grumpy.Rest;
-using Grumpy.SmartPower.Core.Dtos;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System;
+using Grumpy.SmartPower.Core.Dto;
 using Xunit;
 
-namespace Grumpy.SmartPower.Infrastructure.IntegrationTests
+namespace Grumpy.SmartPower.Infrastructure.IntegrationTests;
+
+public class PowerPriceServiceTests
 {
-    public class PowerPriceServiceTests
+    [Fact]
+    public void GetPricesShouldReturnList()
     {
-        [Fact]
-        public void GetPricesShouldReturnList()
-        {
-            var cut = CreateTestObject();
+        var cut = CreateTestObject();
 
-            var res = cut.GetPrices(PriceArea.DK2, DateTime.Now, DateTime.Now.AddDays(1));
+        var res = cut.GetPrices(PriceArea.DK2, DateTime.Now, DateTime.Now.AddDays(1));
 
-            res.Should().HaveCount(24);
-        }
+        res.Should().HaveCount(24);
+    }
 
-        private static IPowerPriceService CreateTestObject()
-        {
-            var client = new EnergyDataServiceClient(new RestClientFactory(Substitute.For<ILoggerFactory>()));
+    private static IPowerPriceService CreateTestObject()
+    {
+        var client = new EnergyDataServiceClient(new RestClientFactory(Substitute.For<ILoggerFactory>()));
 
-            return new PowerPriceService(client);
-        }
+        return new PowerPriceService(client);
     }
 }

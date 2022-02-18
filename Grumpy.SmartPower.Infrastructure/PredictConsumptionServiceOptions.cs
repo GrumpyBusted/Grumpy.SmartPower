@@ -1,8 +1,7 @@
-﻿namespace Grumpy.SmartPower.Infrastructure
+﻿namespace Grumpy.SmartPower.Infrastructure;
+
+public class PredictConsumptionServiceOptions
 {
-    public class PredictConsumptionServiceOptions
-    {
-        public string ModelPath { get; set; } = "";
-        public string DataPath { get; set; } = "";
-    }
+    public string ModelPath { get; set; } = "";
+    public string DataPath { get; set; } = "";
 }

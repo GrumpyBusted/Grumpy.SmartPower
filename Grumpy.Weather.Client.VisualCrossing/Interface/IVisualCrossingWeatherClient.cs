@@ -1,9 +1,8 @@
 ﻿using Grumpy.SmartPower.Core.Model;
 
-namespace Grumpy.Weather.Client.VisualCrossing.Interface
+namespace Grumpy.Weather.Client.VisualCrossing.Interface;
+
+public interface IVisualCrossingWeatherClient
 {
-    public interface IVisualCrossingWeatherClient
-    {
-        public IEnumerable<WeatherItem> Get(DateOnly date);
-    }
+    public IEnumerable<WeatherItem> Get(DateOnly date);
 }

@@ -22,7 +22,7 @@ using Grumpy.Weather.Client.OpenWeatherMap.Interface;
 using Grumpy.Weather.Client.VisualCrossing;
 using Grumpy.Weather.Client.VisualCrossing.Interface;
 
-IHost host = Host.CreateDefaultBuilder(args)
+var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         services.AddHostedService<Worker>()
