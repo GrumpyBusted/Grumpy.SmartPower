@@ -1,7 +1,8 @@
-﻿namespace Grumpy.Common.Interface;
-
-public interface IDateTimeProvider
+﻿namespace Grumpy.Common.Interface
 {
-    DateTime Now { get; }
-    DateTime Today { get; }
+    public interface IDateTimeProvider
+    {
+        DateTime Now { get; }
+        DateTime Today { get; }
+    }
 }

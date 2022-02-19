@@ -1,8 +1,9 @@
 ﻿using Grumpy.SmartPower.Core.Dto;
 
-namespace Grumpy.SmartPower.Core;
-
-public class SmartPowerServiceOptions
+namespace Grumpy.SmartPower.Core
 {
-    public PriceArea PriceArea { get; set; } = PriceArea.DK1;
+    public class SmartPowerServiceOptions
+    {
+        public PriceArea PriceArea { get; set; } = PriceArea.DK1;
+    }
 }

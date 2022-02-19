@@ -1,6 +1,7 @@
-﻿namespace Grumpy.SmartPower;
-
-public class WorkerOptions
+﻿namespace Grumpy.SmartPower
 {
-    public int Interval { get; set; }
+    public class WorkerOptions
+    {
+        public int Interval { get; set; }
+    }
 }

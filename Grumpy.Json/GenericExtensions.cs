@@ -1,11 +1,12 @@
 ﻿using System.Text.Json;
 
-namespace Grumpy.Json;
-
-public static class GenericExtensions
+namespace Grumpy.Json
 {
-    public static string SerializeToJson<T>(this T value)
+    public static class GenericExtensions
     {
-        return JsonSerializer.Serialize(value);
+        public static string SerializeToJson<T>(this T value)
+        {
+            return JsonSerializer.Serialize(value);
+        }
     }
 }

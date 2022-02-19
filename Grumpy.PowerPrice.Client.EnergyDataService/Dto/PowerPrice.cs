@@ -1,7 +1,8 @@
-﻿namespace Grumpy.PowerPrice.Client.EnergyDataService.Dto;
-
-public class PowerPrice
+﻿namespace Grumpy.PowerPrice.Client.EnergyDataService.Dto
 {
-    public DateTime Hour { get; set; } = DateTime.MinValue;
-    public double Price { get; set; } = 0;
+    public class PowerPrice
+    {
+        public DateTime Hour { get; set; } = DateTime.MinValue;
+        public double Price { get; set; } = 0;
+    }
 }

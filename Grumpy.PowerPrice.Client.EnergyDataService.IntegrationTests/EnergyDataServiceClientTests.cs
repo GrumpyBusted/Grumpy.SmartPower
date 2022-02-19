@@ -8,26 +8,27 @@ using System.Linq;
 using Grumpy.SmartPower.Core.Dto;
 using Xunit;
 
-namespace Grumpy.PowerPrice.Client.EnergyDataService.IntegrationTests;
-
-public class EnergyDataServiceClientTests
+namespace Grumpy.PowerPrice.Client.EnergyDataService.IntegrationTests
 {
-    [Fact]
-    public void GetPricesShouldReturnList()
+    public class EnergyDataServiceClientTests
     {
-        var cut = CreateTestObject();
+        [Fact]
+        public void GetPricesShouldReturnList()
+        {
+            var cut = CreateTestObject();
 
-        var from = DateTime.Now.Date;
-        var to = from.AddDays(1) - TimeSpan.FromSeconds(1);
+            var from = DateTime.Now.Date;
+            var to = from.AddDays(1) - TimeSpan.FromSeconds(1);
 
-        var res = cut.GetPrices(PriceArea.DK2, from, to).ToList();
+            var res = cut.GetPrices(PriceArea.DK2, from, to).ToList();
 
-        res.Should().HaveCount(24);
-        res.First().Price.Should().BeGreaterThan(0);
-    }
+            res.Should().HaveCount(24);
+            res.First().Price.Should().BeGreaterThan(0);
+        }
 
-    private static IEnergyDataServiceClient CreateTestObject()
-    {
-        return new EnergyDataServiceClient(new RestClientFactory(Substitute.For<ILoggerFactory>()));
+        private static IEnergyDataServiceClient CreateTestObject()
+        {
+            return new EnergyDataServiceClient(new RestClientFactory(Substitute.For<ILoggerFactory>()));
+        }
     }
 }

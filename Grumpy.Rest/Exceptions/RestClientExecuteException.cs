@@ -1,34 +1,35 @@
 ﻿using RestSharp;
 using System.Runtime.Serialization;
 
-namespace Grumpy.Rest.Exceptions;
-
-[Serializable]
-internal class RestClientExecuteException : Exception
+namespace Grumpy.Rest.Exceptions
 {
-    private const string Text = "REST Client Execute Exception";
-    private readonly RestRequest? _request;
-    private readonly RestResponse? _response;
-
-    public RestClientExecuteException(RestRequest request, RestResponse response) : base(Text)
+    [Serializable]
+    internal class RestClientExecuteException : Exception
     {
-        _request = request;
-        _response = response;
-    }
+        private const string Text = "REST Client Execute Exception";
+        private readonly RestRequest? _request;
+        private readonly RestResponse? _response;
 
-    public RestClientExecuteException() : base(Text) { }
+        public RestClientExecuteException(RestRequest request, RestResponse response) : base(Text)
+        {
+            _request = request;
+            _response = response;
+        }
 
-    public RestClientExecuteException(string message) : base(message) { }
+        public RestClientExecuteException() : base(Text) { }
 
-    public RestClientExecuteException(string message, Exception innerException) : base(message, innerException) { }
+        public RestClientExecuteException(string message) : base(message) { }
 
-    protected RestClientExecuteException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        public RestClientExecuteException(string message, Exception innerException) : base(message, innerException) { }
 
-    public override void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        info.AddValue(nameof(_request), _request);
-        info.AddValue(nameof(_response), _response);
+        protected RestClientExecuteException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        base.GetObjectData(info, context);
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue(nameof(_request), _request);
+            info.AddValue(nameof(_response), _response);
+
+            base.GetObjectData(info, context);
+        }
     }
 }

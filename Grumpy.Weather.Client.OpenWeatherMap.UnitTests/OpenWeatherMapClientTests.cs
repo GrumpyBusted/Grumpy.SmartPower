@@ -7,38 +7,39 @@ using NSubstitute;
 using RestSharp;
 using Xunit;
 
-namespace Grumpy.Weather.Client.OpenWeatherMap.UnitTests;
-
-public class OpenWeatherMapClientTests
+namespace Grumpy.Weather.Client.OpenWeatherMap.UnitTests
 {
-    private readonly IRestClientFactory _restClientFactory = Substitute.For<IRestClientFactory>();
-    private readonly IRestClient _restClient = Substitute.For<IRestClient>();
-
-    public OpenWeatherMapClientTests()
+    public class OpenWeatherMapClientTests
     {
-        _restClientFactory.Instance(Arg.Any<string>()).Returns(_restClient);
-    }
+        private readonly IRestClientFactory _restClientFactory = Substitute.For<IRestClientFactory>();
+        private readonly IRestClient _restClient = Substitute.For<IRestClient>();
 
-    [Fact]
-    public void CanGetSunInformation()
-    {
-        var cut = CreateTestObject();
-        _restClient.Execute<WeatherRoot>(Arg.Any<RestRequest>()).Returns(new WeatherRoot());
+        public OpenWeatherMapClientTests()
+        {
+            _restClientFactory.Instance(Arg.Any<string>()).Returns(_restClient);
+        }
 
-        cut.GetSunInformation();
-    }
+        [Fact]
+        public void CanGetSunInformation()
+        {
+            var cut = CreateTestObject();
+            _restClient.Execute<WeatherRoot>(Arg.Any<RestRequest>()).Returns(new WeatherRoot());
 
-    [Fact]
-    public void CanGetForecast()
-    {
-        var cut = CreateTestObject();
-        _restClient.Execute<OneCallRoot>(Arg.Any<RestRequest>()).Returns(new OneCallRoot());
+            cut.GetSunInformation();
+        }
 
-        cut.GetForecast();
-    }
+        [Fact]
+        public void CanGetForecast()
+        {
+            var cut = CreateTestObject();
+            _restClient.Execute<OneCallRoot>(Arg.Any<RestRequest>()).Returns(new OneCallRoot());
 
-    private IOpenWeatherMapClient CreateTestObject()
-    {
-        return new OpenWeatherMapClient(Options.Create(new OpenWeatherMapClientOptions()), _restClientFactory);
+            cut.GetForecast();
+        }
+
+        private IOpenWeatherMapClient CreateTestObject()
+        {
+            return new OpenWeatherMapClient(Options.Create(new OpenWeatherMapClientOptions()), _restClientFactory);
+        }
     }
 }

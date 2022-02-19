@@ -1,24 +1,25 @@
 ﻿using System.Runtime.Caching;
 
-namespace Grumpy.Caching.Extensions;
-
-public static class ObjectCacheExtensions
+namespace Grumpy.Caching.Extensions
 {
-    public static T TryGetIfNotSet<T>(this ObjectCache cache, string key, TimeSpan timeout, Func<T> func)
+    public static class ObjectCacheExtensions
     {
-        T res;
-        var value = cache.Get(key);
-
-        if (value == null)
+        public static T TryGetIfNotSet<T>(this ObjectCache cache, string key, TimeSpan timeout, Func<T> func)
         {
-            res = func();
+            T res;
+            var value = cache.Get(key);
 
-            if (res != null) 
-                cache.Set(key, res, DateTimeOffset.Now.Add(timeout));
+            if (value == null)
+            {
+                res = func();
+
+                if (res != null)
+                    cache.Set(key, res, DateTimeOffset.Now.Add(timeout));
+            }
+            else
+                res = (T)value;
+
+            return res;
         }
-        else
-            res = (T)value;
-
-        return res;
     }
 }

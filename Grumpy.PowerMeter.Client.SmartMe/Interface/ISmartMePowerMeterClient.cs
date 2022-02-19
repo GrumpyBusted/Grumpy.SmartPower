@@ -1,6 +1,7 @@
-﻿namespace Grumpy.PowerMeter.Client.SmartMe.Interface;
-
-public interface ISmartMePowerMeterClient
+﻿namespace Grumpy.PowerMeter.Client.SmartMe.Interface
 {
-    public double GetValue(DateTime dateTime);
+    public interface ISmartMePowerMeterClient
+    {
+        public double GetValue(DateTime dateTime);
+    }
 }

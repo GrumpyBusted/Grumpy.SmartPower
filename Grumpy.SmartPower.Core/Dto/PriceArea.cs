@@ -1,7 +1,8 @@
-﻿namespace Grumpy.SmartPower.Core.Dto;
-
-public enum PriceArea
+﻿namespace Grumpy.SmartPower.Core.Dto
 {
-    DK1,
-    DK2
+    public enum PriceArea
+    {
+        DK1,
+        DK2
+    }
 }

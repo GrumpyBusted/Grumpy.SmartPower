@@ -1,31 +1,32 @@
-﻿using Grumpy.PowerPrice.Client.EnergyDataService.Api.DataStoreSearchSql.Prices;
+﻿using Grumpy.PowerPrice.Client.EnergyDataService.Api.ElSpotPrices.Prices;
 using System.Runtime.Serialization;
 
-namespace Grumpy.PowerPrice.Client.EnergyDataService.Exceptions;
-
-[Serializable]
-internal class EnergyDataServiceException : Exception
+namespace Grumpy.PowerPrice.Client.EnergyDataService.Exceptions
 {
-    private const string Text = "Energy Data Service Exception";
-    private readonly PricesRoot? _response;
-
-    public EnergyDataServiceException(PricesRoot response) : base(Text)
+    [Serializable]
+    internal class EnergyDataServiceException : Exception
     {
-        _response = response;
-    }
+        private const string Text = "Energy Data Service Exception";
+        private readonly PricesRoot? _response;
 
-    public EnergyDataServiceException() : base(Text) { }
+        public EnergyDataServiceException(PricesRoot response) : base(Text)
+        {
+            _response = response;
+        }
 
-    public EnergyDataServiceException(string message) : base(message) { }
+        public EnergyDataServiceException() : base(Text) { }
 
-    public EnergyDataServiceException(string message, Exception inner) : base(message, inner) { }
+        public EnergyDataServiceException(string message) : base(message) { }
 
-    protected EnergyDataServiceException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        public EnergyDataServiceException(string message, Exception inner) : base(message, inner) { }
 
-    public override void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        info.AddValue(nameof(_response), _response);
+        protected EnergyDataServiceException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        base.GetObjectData(info, context);
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue(nameof(_response), _response);
+
+            base.GetObjectData(info, context);
+        }
     }
 }

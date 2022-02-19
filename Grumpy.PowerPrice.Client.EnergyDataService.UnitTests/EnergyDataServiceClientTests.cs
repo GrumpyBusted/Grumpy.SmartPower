@@ -6,22 +6,23 @@ using System;
 using Grumpy.SmartPower.Core.Dto;
 using Xunit;
 
-namespace Grumpy.PowerPrice.Client.EnergyDataService.UnitTests;
-
-public class EnergyDataServiceClientTests
+namespace Grumpy.PowerPrice.Client.EnergyDataService.UnitTests
 {
-    [Fact]
-    public void GetPricesShouldThrow()
+    public class EnergyDataServiceClientTests
     {
-        var cut = CreateTestObject();
+        [Fact]
+        public void GetPricesShouldThrow()
+        {
+            var cut = CreateTestObject();
 
-        var act = () => cut.GetPrices(PriceArea.DK2, DateTime.Now, DateTime.Now);
+            var act = () => cut.GetPrices(PriceArea.DK2, DateTime.Now, DateTime.Now);
 
-        act.Should().Throw<Exception>();
-    }
+            act.Should().Throw<Exception>();
+        }
 
-    private static IEnergyDataServiceClient CreateTestObject()
-    {
-        return new EnergyDataServiceClient(Substitute.For<IRestClientFactory>());
+        private static IEnergyDataServiceClient CreateTestObject()
+        {
+            return new EnergyDataServiceClient(Substitute.For<IRestClientFactory>());
+        }
     }
 }

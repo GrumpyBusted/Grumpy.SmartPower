@@ -1,8 +1,9 @@
-﻿namespace Grumpy.SmartPower.Core.Infrastructure;
-
-public interface ISolarService
+﻿namespace Grumpy.SmartPower.Core.Infrastructure
 {
-    double Altitude(DateTime hour);
-    double Direction(DateTime hour);
-    TimeSpan Sunlight(DateTime hour);
+    public interface ISolarService
+    {
+        double Altitude(DateTime hour);
+        double Direction(DateTime hour);
+        TimeSpan Sunlight(DateTime hour);
+    }
 }

@@ -1,13 +1,14 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Grumpy.HouseBattery.Client.Sonnen.Api.Configurations.TimeOfUseSchedule;
-
-internal class Schedule
+namespace Grumpy.HouseBattery.Client.Sonnen.Api.Configurations.TimeOfUseSchedule
 {
-    [JsonPropertyName("start")]
-    public string Start { get; set; } = "";
-    [JsonPropertyName("stop")]
-    public string Stop { get; set; } = "";
-    [JsonPropertyName("threshold_p_max")]
-    public int Max { get; set; } = 0;
+    internal class Schedule
+    {
+        [JsonPropertyName("start")]
+        public string Start { get; set; } = "";
+        [JsonPropertyName("stop")]
+        public string Stop { get; set; } = "";
+        [JsonPropertyName("threshold_p_max")]
+        public int Max { get; set; } = 0;
+    }
 }

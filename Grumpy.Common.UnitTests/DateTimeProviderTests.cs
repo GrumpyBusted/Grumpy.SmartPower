@@ -3,33 +3,34 @@ using FluentAssertions;
 using Grumpy.Common.Interface;
 using Xunit;
 
-namespace Grumpy.Common.UnitTests;
-
-public class DateTimeProviderTests
+namespace Grumpy.Common.UnitTests
 {
-    [Fact]
-    public void NowShouldReturnNow()
+    public class DateTimeProviderTests
     {
-        var cut = CreateTestObject();
+        [Fact]
+        public void NowShouldReturnNow()
+        {
+            var cut = CreateTestObject();
 
-        var res = cut.Now;
+            var res = cut.Now;
 
-        res.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(30));
+            res.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(30));
+        }
+
+        [Fact]
+        public void TodayShouldReturnToday()
+        {
+            var cut = CreateTestObject();
+
+            var res = cut.Today;
+
+            res.Should().Be(DateTime.Today);
+        }
+
+        private static IDateTimeProvider CreateTestObject()
+        {
+            return new DateTimeProvider();
+        }
+
     }
-
-    [Fact]
-    public void TodayShouldReturnToday()
-    {
-        var cut = CreateTestObject();
-
-        var res = cut.Today;
-
-        res.Should().Be(DateTime.Today);
-    }
-
-    private static IDateTimeProvider CreateTestObject()
-    {
-        return new DateTimeProvider();
-    }
-
 }

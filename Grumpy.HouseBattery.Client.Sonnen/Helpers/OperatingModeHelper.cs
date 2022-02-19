@@ -1,17 +1,18 @@
 ﻿using Grumpy.HouseBattery.Client.Sonnen.Dto;
 
-namespace Grumpy.HouseBattery.Client.Sonnen.Helpers;
-
-public static class OperatingModeHelper
+namespace Grumpy.HouseBattery.Client.Sonnen.Helpers
 {
-    public static OperatingMode Parse(string operatingMode)
+    public static class OperatingModeHelper
     {
-        return operatingMode switch
+        public static OperatingMode Parse(string operatingMode)
         {
-            "1" => OperatingMode.Manual,
-            "2" => OperatingMode.SelfConsumption,
-            "10" => OperatingMode.TimeOfUse,
-            _ => throw new ArgumentException("Unknown Operating Mode", nameof(operatingMode))
-        };
+            return operatingMode switch
+            {
+                "1" => OperatingMode.Manual,
+                "2" => OperatingMode.SelfConsumption,
+                "10" => OperatingMode.TimeOfUse,
+                _ => throw new ArgumentException("Unknown Operating Mode", nameof(operatingMode))
+            };
+        }
     }
 }

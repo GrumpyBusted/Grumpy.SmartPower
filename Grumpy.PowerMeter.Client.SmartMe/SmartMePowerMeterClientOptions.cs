@@ -1,7 +1,8 @@
-﻿namespace Grumpy.PowerMeter.Client.SmartMe;
-
-public class SmartMePowerMeterClientOptions
+﻿namespace Grumpy.PowerMeter.Client.SmartMe
 {
-    public string ApiToken { get; set; } = "";
-    public int SerialNo { get; set; } = 0;
+    public class SmartMePowerMeterClientOptions
+    {
+        public string ApiToken { get; set; } = "";
+        public int SerialNo { get; set; } = 0;
+    }
 }

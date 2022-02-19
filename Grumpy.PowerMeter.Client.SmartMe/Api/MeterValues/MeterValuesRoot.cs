@@ -1,7 +1,8 @@
-﻿namespace Grumpy.PowerMeter.Client.SmartMe.Api.MeterValues;
-
-internal class MeterValuesRoot
+﻿namespace Grumpy.PowerMeter.Client.SmartMe.Api.MeterValues
 {
-    public double CounterReading { get; set; } = 0;
-    public string CounterReadingUnit { get; set; } = "";
+    internal class MeterValuesRoot
+    {
+        public double CounterReading { get; set; } = 0;
+        public string CounterReadingUnit { get; set; } = "";
+    }
 }

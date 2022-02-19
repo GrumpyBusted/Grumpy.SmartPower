@@ -5,91 +5,92 @@ using Grumpy.SmartPower.Core.Model;
 using System.Runtime.Caching;
 using Grumpy.HouseBattery.Client.Sonnen.Dto;
 
-namespace Grumpy.SmartPower.Infrastructure;
-
-public class HouseBatteryService : IHouseBatteryService
+namespace Grumpy.SmartPower.Infrastructure
 {
-    private readonly ISonnenBatteryClient _sonnenBatteryClient;
-    private readonly Lazy<int> _chargeFromGridWatt;
-    private readonly MemoryCache _memoryCache;
-
-    public HouseBatteryService(ISonnenBatteryClient sonnenBatteryClient)
+    public class HouseBatteryService : IHouseBatteryService
     {
-        _sonnenBatteryClient = sonnenBatteryClient;
-        _chargeFromGridWatt = new Lazy<int>(GetBatterySize);
-        _memoryCache = new MemoryCache(GetType().FullName ?? nameof(HouseBatteryService));
-    }
+        private readonly ISonnenBatteryClient _sonnenBatteryClient;
+        private readonly Lazy<int> _chargeFromGridWatt;
+        private readonly MemoryCache _memoryCache;
 
-    public bool IsBatteryFull()
-    {
-        return GetBatteryLevel() > 99;
-    }
-
-    public int GetBatterySize()
-    {
-        return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatterySize", TimeSpan.FromHours(1), GetBatterySizeInt);
-    }
-
-    private int GetBatterySizeInt()
-    {
-        var level = GetBatteryLevel();
-
-        if (level == 0)
-            return _sonnenBatteryClient.GetBatterySize();
-
-        return (int)((double)_sonnenBatteryClient.GetBatteryCapacity() / level * 100);
-    }
-
-    public int GetBatteryCurrent()
-    {
-        return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatteryCapacity", TimeSpan.FromMinutes(1),
-            () => _sonnenBatteryClient.GetBatteryCapacity());
-    }
-
-    public void SetMode(BatteryMode batteryMode, DateTime hour)
-    {
-        var timeOfUseEvent = new TimeOfUseEvent
+        public HouseBatteryService(ISonnenBatteryClient sonnenBatteryClient)
         {
-            Start = hour.ToString("HH:00"),
-            End = hour.AddHours(1).ToString("HH:00")
-        };
-
-        switch (batteryMode)
-        {
-            case BatteryMode.StoreForLater:
-                timeOfUseEvent.Watt = 0;
-                break;
-            case BatteryMode.ChargeFromGrid:
-                timeOfUseEvent.Watt = _chargeFromGridWatt.Value;
-                break;
-            case BatteryMode.Default:
-            default:
-                timeOfUseEvent = null;
-                break;
+            _sonnenBatteryClient = sonnenBatteryClient;
+            _chargeFromGridWatt = new Lazy<int>(GetBatterySize);
+            _memoryCache = new MemoryCache(GetType().FullName ?? nameof(HouseBatteryService));
         }
 
-        if (timeOfUseEvent == null)
-            _sonnenBatteryClient.SetOperatingMode(OperatingMode.SelfConsumption);
-        else
+        public bool IsBatteryFull()
         {
-            _sonnenBatteryClient.SetSchedule(new List<TimeOfUseEvent> { timeOfUseEvent });
-            _sonnenBatteryClient.SetOperatingMode(OperatingMode.TimeOfUse);
+            return GetBatteryLevel() > 99;
         }
-    }
 
-    private int GetBatteryLevel()
-    {
-        return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatteryLevel", TimeSpan.FromMinutes(1),
-            () => _sonnenBatteryClient.GetBatteryLevel());
-    }
+        public int GetBatterySize()
+        {
+            return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatterySize", TimeSpan.FromHours(1), GetBatterySizeInt);
+        }
 
-    public int GetProduction()
-    {
-        return _sonnenBatteryClient.GetProduction();
-    }
+        private int GetBatterySizeInt()
+        {
+            var level = GetBatteryLevel();
 
-    public int GetConsumption()
-    {
-        return _sonnenBatteryClient.GetConsumption();
+            if (level == 0)
+                return _sonnenBatteryClient.GetBatterySize();
+
+            return (int)((double)_sonnenBatteryClient.GetBatteryCapacity() / level * 100);
+        }
+
+        public int GetBatteryCurrent()
+        {
+            return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatteryCapacity", TimeSpan.FromMinutes(1),
+                () => _sonnenBatteryClient.GetBatteryCapacity());
+        }
+
+        public void SetMode(BatteryMode batteryMode, DateTime hour)
+        {
+            var timeOfUseEvent = new TimeOfUseEvent
+            {
+                Start = hour.ToString("HH:00"),
+                End = hour.AddHours(1).ToString("HH:00")
+            };
+
+            switch (batteryMode)
+            {
+                case BatteryMode.StoreForLater:
+                    timeOfUseEvent.Watt = 0;
+                    break;
+                case BatteryMode.ChargeFromGrid:
+                    timeOfUseEvent.Watt = _chargeFromGridWatt.Value;
+                    break;
+                case BatteryMode.Default:
+                default:
+                    timeOfUseEvent = null;
+                    break;
+            }
+
+            if (timeOfUseEvent == null)
+                _sonnenBatteryClient.SetOperatingMode(OperatingMode.SelfConsumption);
+            else
+            {
+                _sonnenBatteryClient.SetSchedule(new List<TimeOfUseEvent> { timeOfUseEvent });
+                _sonnenBatteryClient.SetOperatingMode(OperatingMode.TimeOfUse);
+            }
+        }
+
+        private int GetBatteryLevel()
+        {
+            return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatteryLevel", TimeSpan.FromMinutes(1),
+                () => _sonnenBatteryClient.GetBatteryLevel());
+        }
+
+        public int GetProduction()
+        {
+            return _sonnenBatteryClient.GetProduction();
+        }
+
+        public int GetConsumption()
+        {
+            return _sonnenBatteryClient.GetConsumption();
+        }
     }
 }

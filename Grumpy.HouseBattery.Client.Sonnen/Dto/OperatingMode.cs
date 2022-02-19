@@ -1,8 +1,9 @@
-﻿namespace Grumpy.HouseBattery.Client.Sonnen.Dto;
-
-public enum OperatingMode
+﻿namespace Grumpy.HouseBattery.Client.Sonnen.Dto
 {
-    Manual,
-    SelfConsumption,
-    TimeOfUse
+    public enum OperatingMode
+    {
+        Manual,
+        SelfConsumption,
+        TimeOfUse
+    }
 }

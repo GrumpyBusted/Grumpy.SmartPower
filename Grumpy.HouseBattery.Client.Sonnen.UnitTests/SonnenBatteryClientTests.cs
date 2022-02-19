@@ -9,115 +9,116 @@ using System.Collections.Generic;
 using Grumpy.HouseBattery.Client.Sonnen.Dto;
 using Xunit;
 
-namespace Grumpy.HouseBattery.Client.Sonnen.UnitTests;
-
-public class SonnenBatteryClientTests
+namespace Grumpy.HouseBattery.Client.Sonnen.UnitTests
 {
-    private readonly IRestClientFactory _restClientFactory = Substitute.For<IRestClientFactory>();
-    private readonly IRestClient _restClient = Substitute.For<IRestClient>();
- 
-    public SonnenBatteryClientTests()
+    public class SonnenBatteryClientTests
     {
-        _restClientFactory.Instance(Arg.Any<string>()).Returns(_restClient);
-    }
+        private readonly IRestClientFactory _restClientFactory = Substitute.For<IRestClientFactory>();
+        private readonly IRestClient _restClient = Substitute.For<IRestClient>();
 
-    [Fact]
-    public void GetBatteryLevelShouldThrow()
-    {
-        var cut = CreateTestObject();
+        public SonnenBatteryClientTests()
+        {
+            _restClientFactory.Instance(Arg.Any<string>()).Returns(_restClient);
+        }
 
-        var act = () => cut.GetBatteryLevel();
+        [Fact]
+        public void GetBatteryLevelShouldThrow()
+        {
+            var cut = CreateTestObject();
 
-        act.Should().Throw<Exception>();
-    }
+            var act = () => cut.GetBatteryLevel();
 
-    [Fact]
-    public void GetConsumptionShouldThrow()
-    {
-        var cut = CreateTestObject();
+            act.Should().Throw<Exception>();
+        }
 
-        var act = () => cut.GetConsumption();
+        [Fact]
+        public void GetConsumptionShouldThrow()
+        {
+            var cut = CreateTestObject();
 
-        act.Should().Throw<Exception>();
-    }
+            var act = () => cut.GetConsumption();
 
-    [Fact]
-    public void GetProductionShouldThrow()
-    {
-        var cut = CreateTestObject();
+            act.Should().Throw<Exception>();
+        }
 
-        var act = () => cut.GetProduction();
+        [Fact]
+        public void GetProductionShouldThrow()
+        {
+            var cut = CreateTestObject();
 
-        act.Should().Throw<Exception>();
-    }
+            var act = () => cut.GetProduction();
 
-    [Fact]
-    public void GetBatteryCapacityShouldThrow()
-    {
-        var cut = CreateTestObject();
+            act.Should().Throw<Exception>();
+        }
 
-        var act = () => cut.GetBatteryCapacity();
+        [Fact]
+        public void GetBatteryCapacityShouldThrow()
+        {
+            var cut = CreateTestObject();
 
-        act.Should().Throw<Exception>();
-    }
+            var act = () => cut.GetBatteryCapacity();
 
-    [Fact]
-    public void GetBatterySizeShouldThrow()
-    {
-        var cut = CreateTestObject();
+            act.Should().Throw<Exception>();
+        }
 
-        var act = () => cut.GetBatterySize();
+        [Fact]
+        public void GetBatterySizeShouldThrow()
+        {
+            var cut = CreateTestObject();
 
-        act.Should().Throw<Exception>();
-    }
+            var act = () => cut.GetBatterySize();
 
-    [Fact]
-    public void GetOperatingModeShouldThrow()
-    {
-        var cut = CreateTestObject();
+            act.Should().Throw<Exception>();
+        }
 
-        var act = () => cut.GetOperatingMode();
+        [Fact]
+        public void GetOperatingModeShouldThrow()
+        {
+            var cut = CreateTestObject();
 
-        act.Should().Throw<Exception>();
-    }
+            var act = () => cut.GetOperatingMode();
 
-    [Fact]
-    public void GetTimeOfUseScheduleShouldThrow()
-    {
-        var cut = CreateTestObject();
+            act.Should().Throw<Exception>();
+        }
 
-        var act = () => cut.GetSchedule();
+        [Fact]
+        public void GetTimeOfUseScheduleShouldThrow()
+        {
+            var cut = CreateTestObject();
 
-        act.Should().Throw<Exception>();
-    }
+            var act = () => cut.GetSchedule();
 
-    [Fact]
-    public void ChangeOperatingModeShouldThrow()
-    {
-        var cut = CreateTestObject();
+            act.Should().Throw<Exception>();
+        }
 
-        cut.SetOperatingMode(OperatingMode.Manual);
+        [Fact]
+        public void ChangeOperatingModeShouldThrow()
+        {
+            var cut = CreateTestObject();
 
-        _restClient.Received().Execute(Arg.Any<RestRequest>());
-    }
+            cut.SetOperatingMode(OperatingMode.Manual);
 
-    [Fact]
-    public void ChangeTimeOfUseScheduleShouldThrow()
-    {
-        var schedule = new List<TimeOfUseEvent>
+            _restClient.Received().Execute(Arg.Any<RestRequest>());
+        }
+
+        [Fact]
+        public void ChangeTimeOfUseScheduleShouldThrow()
+        {
+            var schedule = new List<TimeOfUseEvent>
         {
             new() { Start = "03:00", End = "04:00", Watt = 3000},
             new() { Start = "23:00", End = "00:00", Watt = 2000}
         };
-        var cut = CreateTestObject();
+            var cut = CreateTestObject();
 
-        cut.SetSchedule(schedule);
+            cut.SetSchedule(schedule);
 
-        _restClient.Received().Execute(Arg.Any<RestRequest>());
-    }
+            _restClient.Received().Execute(Arg.Any<RestRequest>());
+        }
 
-    private ISonnenBatteryClient CreateTestObject()
-    {
-        return new SonnenBatteryClient(Options.Create(new SonnenBatteryClientOptions()), _restClientFactory);
+        private ISonnenBatteryClient CreateTestObject()
+        {
+            return new SonnenBatteryClient(Options.Create(new SonnenBatteryClientOptions()), _restClientFactory);
+        }
     }
 }

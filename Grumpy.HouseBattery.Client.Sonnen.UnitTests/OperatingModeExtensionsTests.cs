@@ -3,15 +3,16 @@ using Grumpy.HouseBattery.Client.Sonnen.Dto;
 using Grumpy.HouseBattery.Client.Sonnen.Helpers;
 using Xunit;
 
-namespace Grumpy.HouseBattery.Client.Sonnen.UnitTests;
-
-public class OperatingModeExtensionsTests
+namespace Grumpy.HouseBattery.Client.Sonnen.UnitTests
 {
-    [Fact]
-    public void OperatingModeToStringShouldMapCorrectly()
+    public class OperatingModeExtensionsTests
     {
-        OperatingMode.Manual.ToApiString().Should().Be("1");
-        OperatingMode.SelfConsumption.ToApiString().Should().Be("2");
-        OperatingMode.TimeOfUse.ToApiString().Should().Be("10");
+        [Fact]
+        public void OperatingModeToStringShouldMapCorrectly()
+        {
+            OperatingMode.Manual.ToApiString().Should().Be("1");
+            OperatingMode.SelfConsumption.ToApiString().Should().Be("2");
+            OperatingMode.TimeOfUse.ToApiString().Should().Be("10");
+        }
     }
 }

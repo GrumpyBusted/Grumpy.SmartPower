@@ -1,9 +1,10 @@
 ﻿using Grumpy.SmartPower.Core.Model;
 
-namespace Grumpy.Weather.Client.OpenWeatherMap.Interface;
-
-public interface IOpenWeatherMapClient
+namespace Grumpy.Weather.Client.OpenWeatherMap.Interface
 {
-    public SunInformation GetSunInformation();
-    public IEnumerable<WeatherItem> GetForecast();
+    public interface IOpenWeatherMapClient
+    {
+        public SunInformation GetSunInformation();
+        public IEnumerable<WeatherItem> GetForecast();
+    }
 }

@@ -9,125 +9,127 @@ using System.Linq;
 using Grumpy.HouseBattery.Client.Sonnen.Dto;
 using Xunit;
 
-namespace Grumpy.HouseBattery.Client.Sonnen.IntegrationTests;
-
-public class SonnenBatteryClientTests
+namespace Grumpy.HouseBattery.Client.Sonnen.IntegrationTests
 {
-    private readonly SonnenBatteryClientOptions _options = new() { 
-        Ip = "192.168.0.222", 
-        ApiToken = "0ca39846-405a-4c8f-b48c-41f46fe17be1" 
-    };
-
-    [Fact]
-    public void GetBatteryLevelShouldReturnValidLevel()
+    public class SonnenBatteryClientTests
     {
-        var cut = CreateTestObject();
+        private readonly SonnenBatteryClientOptions _options = new()
+        {
+            Ip = "192.168.0.222",
+            ApiToken = "0ca39846-405a-4c8f-b48c-41f46fe17be1"
+        };
 
-        var res = cut.GetBatteryLevel();
+        [Fact]
+        public void GetBatteryLevelShouldReturnValidLevel()
+        {
+            var cut = CreateTestObject();
 
-        res.Should().BeInRange(0, 100);
-    }
+            var res = cut.GetBatteryLevel();
 
-    [Fact]
-    public void GetConsumptionShouldReturnValidLevel()
-    {
-        var cut = CreateTestObject();
+            res.Should().BeInRange(0, 100);
+        }
 
-        var res = cut.GetConsumption();
+        [Fact]
+        public void GetConsumptionShouldReturnValidLevel()
+        {
+            var cut = CreateTestObject();
 
-        res.Should().BeInRange(0, 100000);
-    }
+            var res = cut.GetConsumption();
 
-    [Fact]
-    public void GetProductionShouldReturnValidLevel()
-    {
-        var cut = CreateTestObject();
+            res.Should().BeInRange(0, 100000);
+        }
 
-        var res = cut.GetProduction();
+        [Fact]
+        public void GetProductionShouldReturnValidLevel()
+        {
+            var cut = CreateTestObject();
 
-        res.Should().BeInRange(0, 100000);
-    }
+            var res = cut.GetProduction();
 
-    [Fact]
-    public void GetBatteryCapacityShouldReturnValidLevel()
-    {
-        var cut = CreateTestObject();
+            res.Should().BeInRange(0, 100000);
+        }
 
-        var res = cut.GetBatteryCapacity();
+        [Fact]
+        public void GetBatteryCapacityShouldReturnValidLevel()
+        {
+            var cut = CreateTestObject();
 
-        res.Should().BeInRange(0, 100000);
-    }
+            var res = cut.GetBatteryCapacity();
 
-    [Fact]
-    public void GetBatterySizeShouldReturnValidLevel()
-    {
-        var cut = CreateTestObject();
+            res.Should().BeInRange(0, 100000);
+        }
 
-        var res = cut.GetBatterySize();
+        [Fact]
+        public void GetBatterySizeShouldReturnValidLevel()
+        {
+            var cut = CreateTestObject();
 
-        res.Should().BeInRange(1, 100000);
-    }
+            var res = cut.GetBatterySize();
 
-    [Fact]
-    public void CanGetOperatingMode()
-    {
-        var cut = CreateTestObject();
+            res.Should().BeInRange(1, 100000);
+        }
 
-        var act = () => cut.GetOperatingMode();
+        [Fact]
+        public void CanGetOperatingMode()
+        {
+            var cut = CreateTestObject();
 
-        act.Should().NotThrow();
-    }
+            var act = () => cut.GetOperatingMode();
 
-    [Fact]
-    public void CanGetTimeOfUseSchedule()
-    {
-        var cut = CreateTestObject();
+            act.Should().NotThrow();
+        }
 
-        var act = () => cut.GetSchedule();
+        [Fact]
+        public void CanGetTimeOfUseSchedule()
+        {
+            var cut = CreateTestObject();
 
-        act.Should().NotThrow();
-    }
+            var act = () => cut.GetSchedule();
 
-    [Fact]
-    public void CanChangeOperatingMode()
-    {
-        var cut = CreateTestObject();
+            act.Should().NotThrow();
+        }
 
-        var initial = cut.GetOperatingMode();
+        [Fact]
+        public void CanChangeOperatingMode()
+        {
+            var cut = CreateTestObject();
 
-        cut.SetOperatingMode(OperatingMode.SelfConsumption);
-        cut.GetOperatingMode().Should().Be(OperatingMode.SelfConsumption);
+            var initial = cut.GetOperatingMode();
 
-        cut.SetOperatingMode(OperatingMode.Manual);
-        cut.GetOperatingMode().Should().Be(OperatingMode.Manual);
+            cut.SetOperatingMode(OperatingMode.SelfConsumption);
+            cut.GetOperatingMode().Should().Be(OperatingMode.SelfConsumption);
 
-        cut.SetOperatingMode(initial);
-    }
+            cut.SetOperatingMode(OperatingMode.Manual);
+            cut.GetOperatingMode().Should().Be(OperatingMode.Manual);
 
-    [Fact]
-    public void CanChangeTimeOfUseSchedule()
-    {
-        var cut = CreateTestObject();
+            cut.SetOperatingMode(initial);
+        }
 
-        var initial = cut.GetSchedule();
+        [Fact]
+        public void CanChangeTimeOfUseSchedule()
+        {
+            var cut = CreateTestObject();
 
-        var schedule = new List<TimeOfUseEvent>
+            var initial = cut.GetSchedule();
+
+            var schedule = new List<TimeOfUseEvent>
         {
             new() { Start = "03:00", End = "04:00", Watt = 3000},
             new() { Start = "23:00", End = "00:00", Watt = 2000}
         };
 
-        cut.SetSchedule(schedule);
-        cut.GetSchedule().Should().HaveCount(2);
+            cut.SetSchedule(schedule);
+            cut.GetSchedule().Should().HaveCount(2);
 
-        cut.SetSchedule(Enumerable.Empty<TimeOfUseEvent>());
-        cut.GetSchedule().Should().HaveCount(0);
+            cut.SetSchedule(Enumerable.Empty<TimeOfUseEvent>());
+            cut.GetSchedule().Should().HaveCount(0);
 
-        cut.SetSchedule(initial);
-    }
+            cut.SetSchedule(initial);
+        }
 
-    private ISonnenBatteryClient CreateTestObject()
-    {
-        return new SonnenBatteryClient(Options.Create(_options), new RestClientFactory(Substitute.For<ILoggerFactory>()));
+        private ISonnenBatteryClient CreateTestObject()
+        {
+            return new SonnenBatteryClient(Options.Create(_options), new RestClientFactory(Substitute.For<ILoggerFactory>()));
+        }
     }
 }

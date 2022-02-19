@@ -1,14 +1,15 @@
-﻿namespace Grumpy.Common.Extensions;
-
-public static class DoubleExtensions
+﻿namespace Grumpy.Common.Extensions
 {
-    public static double ToDegrees(this double value)
+    public static class DoubleExtensions
     {
-        return value * (180 / Math.PI);
-    }
+        public static double ToDegrees(this double value)
+        {
+            return value * (180 / Math.PI);
+        }
 
-    public static double ToRadians(this double value)
-    {
-        return value * Math.PI / 180;
+        public static double ToRadians(this double value)
+        {
+            return value * Math.PI / 180;
+        }
     }
 }

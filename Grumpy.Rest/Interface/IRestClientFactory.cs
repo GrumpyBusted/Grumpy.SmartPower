@@ -1,6 +1,7 @@
-﻿namespace Grumpy.Rest.Interface;
-
-public interface IRestClientFactory
+﻿namespace Grumpy.Rest.Interface
 {
-    public IRestClient Instance(string baseUrl);
+    public interface IRestClientFactory
+    {
+        public IRestClient Instance(string baseUrl);
+    }
 }

@@ -1,8 +1,9 @@
-﻿namespace Grumpy.SmartPower.Core.Production;
-
-public class ProductionServiceOptions
+﻿namespace Grumpy.SmartPower.Core.Production
 {
-    public int Direction { get; set; }
-    public int Angle { get; set; }
-    public int Capacity { get; set; }
+    public class ProductionServiceOptions
+    {
+        public int Direction { get; set; }
+        public int Angle { get; set; }
+        public int Capacity { get; set; }
+    }
 }

@@ -1,9 +1,10 @@
-﻿namespace Grumpy.Common.Helpers;
-
-public static class TimeSpanMath
+﻿namespace Grumpy.Common.Helpers
 {
-    public static TimeSpan Max(TimeSpan value1, TimeSpan value2)
+    public static class TimeSpanMath
     {
-        return value1 > value2 ? value1 : value2;
+        public static TimeSpan Max(TimeSpan value1, TimeSpan value2)
+        {
+            return value1 > value2 ? value1 : value2;
+        }
     }
 }

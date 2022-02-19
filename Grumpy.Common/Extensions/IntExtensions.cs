@@ -1,12 +1,13 @@
-﻿namespace Grumpy.Common.Extensions;
-
-public static class IntExtensions
+﻿namespace Grumpy.Common.Extensions
 {
-    public static DateTime UnixTimestampToDateTime(this int unixTimestamp)
+    public static class IntExtensions
     {
-        var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        public static DateTime UnixTimestampToDateTime(this int unixTimestamp)
+        {
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
-        return dateTime.AddSeconds(unixTimestamp).ToLocalTime();
+            return dateTime.AddSeconds(unixTimestamp).ToLocalTime();
+        }
+
     }
-
 }

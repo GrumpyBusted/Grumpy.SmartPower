@@ -1,7 +1,8 @@
-﻿namespace Grumpy.SmartPower.Core.Interface;
-
-public interface ISmartPowerService
+﻿namespace Grumpy.SmartPower.Core.Interface
 {
-    void Execute(DateTime now);
-    void SaveData();
+    public interface ISmartPowerService
+    {
+        void Execute(DateTime now);
+        void SaveData();
+    }
 }

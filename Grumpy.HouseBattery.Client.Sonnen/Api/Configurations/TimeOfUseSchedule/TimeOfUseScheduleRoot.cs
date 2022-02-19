@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Grumpy.HouseBattery.Client.Sonnen.Api.Configurations.TimeOfUseSchedule;
-
-internal class TimeOfUseScheduleRoot
+namespace Grumpy.HouseBattery.Client.Sonnen.Api.Configurations.TimeOfUseSchedule
 {
-    [JsonPropertyName("EM_ToU_Schedule")]
-    public string TimeOfUseSchedule { get; set; } = "";
+    internal class TimeOfUseScheduleRoot
+    {
+        [JsonPropertyName("EM_ToU_Schedule")]
+        public string TimeOfUseSchedule { get; set; } = "";
+    }
 }

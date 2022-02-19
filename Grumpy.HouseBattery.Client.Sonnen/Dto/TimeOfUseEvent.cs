@@ -1,8 +1,9 @@
-﻿namespace Grumpy.HouseBattery.Client.Sonnen.Dto;
-
-public class TimeOfUseEvent
+﻿namespace Grumpy.HouseBattery.Client.Sonnen.Dto
 {
-    public string Start { get; set; } = "";
-    public string End { get; set; } = "";
-    public int Watt { get; set; } = 0;
+    public class TimeOfUseEvent
+    {
+        public string Start { get; set; } = "";
+        public string End { get; set; } = "";
+        public int Watt { get; set; } = 0;
+    }
 }

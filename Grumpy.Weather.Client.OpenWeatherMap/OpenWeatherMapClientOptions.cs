@@ -1,8 +1,9 @@
-﻿namespace Grumpy.Weather.Client.OpenWeatherMap;
-
-public class OpenWeatherMapClientOptions
+﻿namespace Grumpy.Weather.Client.OpenWeatherMap
 {
-    public double Latitude { get; set; } = 0;
-    public double Longitude { get; set; } = 0;
-    public string ApiKey { get; set; } = "";
+    public class OpenWeatherMapClientOptions
+    {
+        public double Latitude { get; set; } = 0;
+        public double Longitude { get; set; } = 0;
+        public string ApiKey { get; set; } = "";
+    }
 }

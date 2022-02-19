@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Grumpy.HouseBattery.Client.Sonnen.Api.Configurations.OperatingMode;
-
-internal class OperatingModeRoot
+namespace Grumpy.HouseBattery.Client.Sonnen.Api.Configurations.OperatingMode
 {
-    [JsonPropertyName("EM_OperatingMode")]
-    public string OperatingMode { get; set; } = "";
+    internal class OperatingModeRoot
+    {
+        [JsonPropertyName("EM_OperatingMode")]
+        public string OperatingMode { get; set; } = "";
+    }
 }

@@ -1,9 +1,10 @@
 ﻿using Grumpy.SmartPower.Core.Consumption;
 
-namespace Grumpy.SmartPower.Core.Infrastructure;
-
-public interface IPredictConsumptionService
+namespace Grumpy.SmartPower.Core.Infrastructure
 {
-    int Predict(PredictionData data);
-    void TrainModel(PredictionData data, int actualWattPerHour);
+    public interface IPredictConsumptionService
+    {
+        int Predict(PredictionData data);
+        void TrainModel(PredictionData data, int actualWattPerHour);
+    }
 }

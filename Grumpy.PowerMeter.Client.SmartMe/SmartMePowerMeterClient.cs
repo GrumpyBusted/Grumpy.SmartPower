@@ -9,61 +9,62 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Grumpy.PowerMeter.Client.SmartMe.UnitTests")]
 
-namespace Grumpy.PowerMeter.Client.SmartMe;
-
-public class SmartMePowerMeterClient : ISmartMePowerMeterClient
+namespace Grumpy.PowerMeter.Client.SmartMe
 {
-    private readonly SmartMePowerMeterClientOptions _options;
-    private readonly IRestClientFactory _restClientFactory;
-    private readonly Lazy<string> _id;
-
-    public SmartMePowerMeterClient(IOptions<SmartMePowerMeterClientOptions> options, IRestClientFactory restClientFactory )
+    public class SmartMePowerMeterClient : ISmartMePowerMeterClient
     {
-        _options = options.Value;
-        _restClientFactory = restClientFactory;
-        _id = new Lazy<string>(() => GetId(_options.SerialNo));
-    }
+        private readonly SmartMePowerMeterClientOptions _options;
+        private readonly IRestClientFactory _restClientFactory;
+        private readonly Lazy<string> _id;
 
-    public double GetValue(DateTime dateTime)
-    {
-        using var client = CreateClient();
+        public SmartMePowerMeterClient(IOptions<SmartMePowerMeterClientOptions> options, IRestClientFactory restClientFactory)
+        {
+            _options = options.Value;
+            _restClientFactory = restClientFactory;
+            _id = new Lazy<string>(() => GetId(_options.SerialNo));
+        }
 
-        var request = CreateRequest($"MeterValues/{_id.Value}", Method.Get)
-            .AddQueryParameter("date", dateTime.ToString("yyyy-MM-ddTHH:mm:ss"));
+        public double GetValue(DateTime dateTime)
+        {
+            using var client = CreateClient();
 
-        var response = client.Execute<MeterValuesRoot>(request);
+            var request = CreateRequest($"MeterValues/{_id.Value}", Method.Get)
+                .AddQueryParameter("date", dateTime.ToString("yyyy-MM-ddTHH:mm:ss"));
 
-        if (response.CounterReadingUnit != "kWh")
-            throw new InvalidMeterValueException(response.CounterReadingUnit, response.CounterReading);
+            var response = client.Execute<MeterValuesRoot>(request);
 
-        if (response.CounterReading < 0.1)
-            throw new InvalidMeterValueException(response.CounterReadingUnit, response.CounterReading);
+            if (response.CounterReadingUnit != "kWh")
+                throw new InvalidMeterValueException(response.CounterReadingUnit, response.CounterReading);
 
-        return response.CounterReading;
-    }
+            if (response.CounterReading < 0.1)
+                throw new InvalidMeterValueException(response.CounterReadingUnit, response.CounterReading);
 
-    private string GetId(int serialNo)
-    {
-        using var client = CreateClient();
+            return response.CounterReading;
+        }
 
-        var request = CreateRequest("DeviceBySerial", Method.Get)
-            .AddQueryParameter("serial", serialNo);
+        private string GetId(int serialNo)
+        {
+            using var client = CreateClient();
 
-        var response = client.Execute<DeviceBySerialRoot>(request);
+            var request = CreateRequest("DeviceBySerial", Method.Get)
+                .AddQueryParameter("serial", serialNo);
 
-        return response.Id;
-    }
+            var response = client.Execute<DeviceBySerialRoot>(request);
 
-    private IRestClient CreateClient()
-    {
-        return _restClientFactory.Instance("https://smart-me.com:443/api");
-    }
+            return response.Id;
+        }
 
-    private RestRequest CreateRequest(string resource, Method method)
-    {
-        var request = new RestRequest(resource, method)
-            .AddHeader("Authorization", $"Basic {_options.ApiToken}");
+        private IRestClient CreateClient()
+        {
+            return _restClientFactory.Instance("https://smart-me.com:443/api");
+        }
 
-        return request;
+        private RestRequest CreateRequest(string resource, Method method)
+        {
+            var request = new RestRequest(resource, method)
+                .AddHeader("Authorization", $"Basic {_options.ApiToken}");
+
+            return request;
+        }
     }
 }

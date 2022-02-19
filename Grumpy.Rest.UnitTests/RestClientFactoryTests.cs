@@ -3,17 +3,18 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
-namespace Grumpy.Rest.UnitTests;
-
-public class RestClientFactoryTests
+namespace Grumpy.Rest.UnitTests
 {
-    [Fact]
-    public void CanUseRestClientFactory()
+    public class RestClientFactoryTests
     {
-        var cut = new RestClientFactory(Substitute.For<ILoggerFactory>());
+        [Fact]
+        public void CanUseRestClientFactory()
+        {
+            var cut = new RestClientFactory(Substitute.For<ILoggerFactory>());
 
-        var res = cut.Instance("http://0.0.0.0");
+            var res = cut.Instance("http://0.0.0.0");
 
-        res.Should().BeOfType<RestClient>();
+            res.Should().BeOfType<RestClient>();
+        }
     }
 }

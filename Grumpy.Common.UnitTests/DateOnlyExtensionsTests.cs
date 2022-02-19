@@ -3,27 +3,28 @@ using Grumpy.Common.Extensions;
 using System;
 using Xunit;
 
-namespace Grumpy.Common.UnitTests;
-
-public class DateOnlyExtensionsTests
+namespace Grumpy.Common.UnitTests
 {
-    [Fact]
-    public void TimeZoneOffsetDuringStandardTimeShouldBeOneHours()
+    public class DateOnlyExtensionsTests
     {
-        var value = new DateOnly(2022, 1, 1);
+        [Fact]
+        public void TimeZoneOffsetDuringStandardTimeShouldBeOneHours()
+        {
+            var value = new DateOnly(2022, 1, 1);
 
-        var res = value.TimeZoneOffset();
+            var res = value.TimeZoneOffset();
 
-        res.Should().Be(TimeSpan.FromHours(1));
-    }
+            res.Should().Be(TimeSpan.FromHours(1));
+        }
 
-    [Fact]
-    public void TimeZoneOffsetDuringDayLightSavingShouldBeTwoHours()
-    {
-        var value = new DateOnly(2022, 6, 1);
+        [Fact]
+        public void TimeZoneOffsetDuringDayLightSavingShouldBeTwoHours()
+        {
+            var value = new DateOnly(2022, 6, 1);
 
-        var res = value.TimeZoneOffset();
+            var res = value.TimeZoneOffset();
 
-        res.Should().Be(TimeSpan.FromHours(2));
+            res.Should().Be(TimeSpan.FromHours(2));
+        }
     }
 }

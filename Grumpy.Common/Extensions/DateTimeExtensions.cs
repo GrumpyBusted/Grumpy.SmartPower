@@ -1,19 +1,20 @@
-﻿namespace Grumpy.Common.Extensions;
-
-public static class DateTimeExtensions
+﻿namespace Grumpy.Common.Extensions
 {
-    public static DateOnly ToDateOnly(this DateTime dateTime)
+    public static class DateTimeExtensions
     {
-        return new DateOnly(dateTime.Year, dateTime.Month, dateTime.Day);
-    }
+        public static DateOnly ToDateOnly(this DateTime dateTime)
+        {
+            return new DateOnly(dateTime.Year, dateTime.Month, dateTime.Day);
+        }
 
-    public static double ToExcelDateValue(this DateTime value)
-    {
-        return value.Date <= new DateTime(1900, 1, 1) ? 1 + (value.ToOADate() - Math.Floor(value.ToOADate())) : value.ToOADate();
-    }
+        public static double ToExcelDateValue(this DateTime value)
+        {
+            return value.Date <= new DateTime(1900, 1, 1) ? 1 + (value.ToOADate() - Math.Floor(value.ToOADate())) : value.ToOADate();
+        }
 
-    public static int ToUnixTimestamp(this DateTime value)
-    {
-        return (int)value.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        public static int ToUnixTimestamp(this DateTime value)
+        {
+            return (int)value.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        }
     }
 }

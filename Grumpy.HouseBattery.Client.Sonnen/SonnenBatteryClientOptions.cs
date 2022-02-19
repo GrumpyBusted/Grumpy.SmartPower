@@ -1,7 +1,8 @@
-﻿namespace Grumpy.HouseBattery.Client.Sonnen;
-
-public class SonnenBatteryClientOptions
+﻿namespace Grumpy.HouseBattery.Client.Sonnen
 {
-    public string Ip { get; set; } = "";
-    public string ApiToken { get; set; } = "";
+    public class SonnenBatteryClientOptions
+    {
+        public string Ip { get; set; } = "";
+        public string ApiToken { get; set; } = "";
+    }
 }
