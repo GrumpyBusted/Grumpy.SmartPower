@@ -17,8 +17,8 @@ namespace Grumpy.Rest
 
             var options = new RestClientOptions(baseUrl)
             {
-                ThrowOnAnyError = false,
-                ThrowOnDeserializationError = false
+                ThrowOnAnyError = true,
+                ThrowOnDeserializationError = true
             };
 
             _client = new RestSharp.RestClient(options);

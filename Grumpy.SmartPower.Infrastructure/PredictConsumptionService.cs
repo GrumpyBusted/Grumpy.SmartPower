@@ -1,4 +1,5 @@
-﻿using Grumpy.SmartPower.Core.Consumption;
+﻿using Grumpy.Common.Extensions;
+using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Infrastructure.PredictConsumptionModel;
 using Microsoft.Extensions.Options;
@@ -54,12 +55,15 @@ namespace Grumpy.SmartPower.Infrastructure
 
         public void TrainModel(PredictionData data, int actualWattPerHour)
         {
-            if (!File.Exists(_options.DataPath))
-                File.Create(_options.DataPath);
-
             var input = MapToModelInput(data, actualWattPerHour);
 
-            File.AppendAllText(_options.DataPath, ToCsv(input, ';') + Environment.NewLine);
+            if (!File.Exists(_options.DataPath))
+            {
+                File.Create(_options.DataPath);
+                File.AppendAllText(_options.DataPath, input.CsvHeader(';') + Environment.NewLine);
+            }
+
+            File.AppendAllText(_options.DataPath, input.CsvRecord(';') + Environment.NewLine);
 
             var dataView = _context.Data.LoadFromTextFile<Input>(_options.DataPath, ';');
 
@@ -99,26 +103,6 @@ namespace Grumpy.SmartPower.Infrastructure
             var model = pipeline.Fit(dataView);
 
             _context.Model.Save(model, dataView.Schema, _options.ModelPath);
-        }
-
-        private static string ToCsv<T>(T obj, char separator)
-        {
-            //var properties = typeof(T).GetProperties();
-            //var res = "";
-            //foreach(var property in properties.Select(p => new { order = p.GetCustomAttribute(typeof(LoadColumnAttribute)), value = p.GetValue(p)}).Where(x => x.order != null).OrderBy(s => s.order))
-            //{
-            //    res += property.value.ToString() + separator;
-            //}
-
-            ////string header = String.Join(separator, fields.Select(f => f.Name).ToArray());
-
-            ////StringBuilder csvdata = new StringBuilder();
-            ////csvdata.AppendLine(header);
-
-            ////foreach (var o in objectlist)
-            ////    csvdata.AppendLine(ToCsvFields(separator, fields, o));
-
-            return "";
         }
 
         private static Input MapToModelInput(PredictionData data, int wattPerHour = 0)

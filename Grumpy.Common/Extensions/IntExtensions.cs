@@ -8,6 +8,5 @@
 
             return dateTime.AddSeconds(unixTimestamp).ToLocalTime();
         }
-
     }
 }

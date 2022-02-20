@@ -23,7 +23,27 @@ namespace Grumpy.PowerPrice.Client.EnergyDataService.IntegrationTests
             var res = cut.GetPrices(PriceArea.DK2, from, to).ToList();
 
             res.Should().HaveCount(24);
-            res.First().Price.Should().BeGreaterThan(0);
+            res.First().SpotPriceEUR.Should().BeGreaterThan(0);
+        }
+
+        [Fact]
+        public void GetExchangeRateShouldGetValue()
+        {
+            var cut = CreateTestObject();
+
+            var res = cut.GetExchangeRate(PriceArea.DK2, DateTime.Now);
+
+            res.Should().BeInRange(700, 800);
+        }
+
+        [Fact]
+        public void GetExchangeRateWherePriceIsNullShouldGetValue()
+        {
+            var cut = CreateTestObject();
+
+            var res = cut.GetExchangeRate(PriceArea.DK2, DateTime.Parse("2022-02-20T16:00:00"));
+
+            res.Should().BeInRange(700, 800);
         }
 
         private static IEnergyDataServiceClient CreateTestObject()

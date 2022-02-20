@@ -20,6 +20,16 @@ namespace Grumpy.PowerPrice.Client.EnergyDataService.UnitTests
             act.Should().Throw<Exception>();
         }
 
+        [Fact]
+        public void GetExchangeRateShouldThrow()
+        {
+            var cut = CreateTestObject();
+
+            var act = () => cut.GetExchangeRate(PriceArea.DK2, DateTime.Now);
+
+            act.Should().Throw<Exception>();
+        }
+
         private static IEnergyDataServiceClient CreateTestObject()
         {
             return new EnergyDataServiceClient(Substitute.For<IRestClientFactory>());

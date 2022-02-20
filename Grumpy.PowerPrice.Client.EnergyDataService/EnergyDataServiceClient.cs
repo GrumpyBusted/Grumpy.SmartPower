@@ -1,11 +1,11 @@
-﻿using Grumpy.PowerPrice.Client.EnergyDataService.Exceptions;
-using Grumpy.PowerPrice.Client.EnergyDataService.Interface;
+﻿using Grumpy.PowerPrice.Client.EnergyDataService.Interface;
 using Grumpy.Rest.Interface;
 using RestSharp;
 using System.Runtime.CompilerServices;
 using Grumpy.SmartPower.Core.Dto;
-using Grumpy.PowerPrice.Client.EnergyDataService.Api.ElSpotPrices.Prices;
 using Grumpy.PowerPrice.Client.EnergyDataService.Api.ElSpotPrices.ExchangeRate;
+using Grumpy.PowerPrice.Client.EnergyDataService.Api.ElSpotPrices.Prices;
+using Grumpy.PowerPrice.Client.EnergyDataService.Exceptions;
 
 [assembly: InternalsVisibleTo("Grumpy.PowerPrice.Client.EnergyDataService.UnitTests")]
 
@@ -34,6 +34,19 @@ namespace Grumpy.PowerPrice.Client.EnergyDataService
             return MapToPriceList(response.Data.Records, priceArea, from);
         }
 
+        public double GetExchangeRate(PriceArea priceArea, DateTime dateTime)
+        {
+            var client = CreateClient();
+
+            var request = CreateRequest("query { elspotprices(where: { HourDK: { _lte: \"" + dateTime.ToString("yyyy-MM-ddTHH:mm:ss.000Z") + "\"}, PriceArea: { _eq: \"" + priceArea + "\"}, SpotPriceEUR: { _gt: 0}, SpotPriceDKK: { _gt: 0} } order_by: { HourDK: desc}, limit: 1) { SpotPriceDKK SpotPriceEUR }}");
+
+            var response = client.Execute<ExchangeRateRoot>(request);
+
+            var record = response.Data.Records.FirstOrDefault();
+
+            return record == null ? 765 : record.SpotPriceDKK / record.SpotPriceEUR * 100;
+        }
+
         private static RestRequest CreateRequest(string query)
         {
             return new RestRequest("v1/graphql", Method.Post)
@@ -46,30 +59,13 @@ namespace Grumpy.PowerPrice.Client.EnergyDataService
 
             foreach (var record in records)
             {
-                var powerPrice = new Dto.PowerPrice
+                yield return new Dto.PowerPrice
                 {
                     Hour = record.Hour,
-                    Price = record.SpotPriceDKK
+                    SpotPriceDKK = record.SpotPriceDKK,
+                    SpotPriceEUR = record.SpotPriceEUR
                 };
-
-                if (powerPrice.Price == 0)
-                    powerPrice.Price = record.SpotPriceEUR * rate.Value;
-
-                yield return powerPrice;
             }
-        }
-
-        private double GetExchangeRate(PriceArea priceArea, DateTime dateTime)
-        {
-            var client = CreateClient();
-
-            var request = CreateRequest("query { elspotprices(where: { HourDK: { _lte: \"" + dateTime.ToString("yyyy-MM-ddTHH:mm:ss.000Z") + "\"}, PriceArea: { _eq: \"" + priceArea + "\"}, SpotPriceEUR: { _gt: 0}, SpotPriceDKK: { _gt: 0} } order_by: { HourDK: desc}, limit: 1) { SpotPriceDKK SpotPriceEUR }}");
-
-            var response = client.Execute<ExchangeRateRoot>(request);
-
-            var record = response.Data.Records.FirstOrDefault();
-
-            return record == null ? 7.65 : record.SpotPriceDKK / record.SpotPriceEUR;
         }
 
         private IRestClient CreateClient()

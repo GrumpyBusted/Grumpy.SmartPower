@@ -18,7 +18,7 @@ namespace Grumpy.SmartPower.Infrastructure.IntegrationTests
         {
             var cut = CreateTestObject();
 
-            var res = cut.GetPrices(PriceArea.DK2, DateTime.Now, DateTime.Now.AddDays(1)).ToList();
+            var res = cut.GetPrices(PriceArea.DK2, PriceArea.DK, DateTime.Now, DateTime.Now.AddDays(1)).ToList();
 
             res.Should().HaveCountGreaterThan(6);
         }
