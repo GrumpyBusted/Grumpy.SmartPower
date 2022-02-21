@@ -9,32 +9,31 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
-namespace Grumpy.Weather.Client.VisualCrossing.IntegrationTests
+namespace Grumpy.Weather.Client.VisualCrossing.IntegrationTests;
+
+public class VisualCrossingWeatherClientTests
 {
-    public class VisualCrossingWeatherClientTests
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private readonly VisualCrossingWeatherClientOptions _options = new()
     {
-        [SuppressMessage("ReSharper", "StringLiteralTypo")]
-        private readonly VisualCrossingWeatherClientOptions _options = new()
-        {
 
-            Latitude = 55.5763,
-            Longitude = 12.2932,
-            ApiKey = "2CPMKXLX4PYPSKU4W3TEK5CPP"
-        };
+        Latitude = 55.5763,
+        Longitude = 12.2932,
+        ApiKey = "2CPMKXLX4PYPSKU4W3TEK5CPP"
+    };
 
-        [Fact]
-        public void CanGet()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void CanGet()
+    {
+        var cut = CreateTestObject();
 
-            var res = cut.Get(DateTime.Now.ToDateOnly());
+        var res = cut.Get(DateTime.Now.ToDateOnly());
 
-            res.Should().HaveCount(24);
-        }
+        res.Should().HaveCount(24);
+    }
 
-        private IVisualCrossingWeatherClient CreateTestObject()
-        {
-            return new VisualCrossingWeatherClient(Options.Create(_options), new RestClientFactory(Substitute.For<ILoggerFactory>()));
-        }
+    private IVisualCrossingWeatherClient CreateTestObject()
+    {
+        return new VisualCrossingWeatherClient(Options.Create(_options), new RestClientFactory(Substitute.For<ILoggerFactory>()));
     }
 }

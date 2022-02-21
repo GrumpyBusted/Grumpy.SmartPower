@@ -8,54 +8,53 @@ using System;
 using Grumpy.SmartPower.Core.Dto;
 using Xunit;
 
-namespace Grumpy.SmartPower.Core.UnitTests
+namespace Grumpy.SmartPower.Core.UnitTests;
+
+public class SmartPowerServiceTests
 {
-    public class SmartPowerServiceTests
+    private readonly SmartPowerServiceOptions _options = new()
     {
-        private readonly SmartPowerServiceOptions _options = new()
-        {
-            PriceArea = PriceArea.DK2
-        };
+        PriceArea = PriceArea.DK2
+    };
 
-        private readonly IPowerPriceService _powerPriceService = Substitute.For<IPowerPriceService>();
-        private readonly IHouseBatteryService _houseBatteryService = Substitute.For<IHouseBatteryService>();
-        private readonly IProductionService _productionService = Substitute.For<IProductionService>();
-        private readonly IConsumptionService _consumptionService = Substitute.For<IConsumptionService>();
-        private readonly IRealTimeReadingRepository _realTimeReadingRepository = Substitute.For<IRealTimeReadingRepository>();
+    private readonly IPowerPriceService _powerPriceService = Substitute.For<IPowerPriceService>();
+    private readonly IHouseBatteryService _houseBatteryService = Substitute.For<IHouseBatteryService>();
+    private readonly IProductionService _productionService = Substitute.For<IProductionService>();
+    private readonly IConsumptionService _consumptionService = Substitute.For<IConsumptionService>();
+    private readonly IRealTimeReadingRepository _realTimeReadingRepository = Substitute.For<IRealTimeReadingRepository>();
 
-        [Fact]
-        public void CanCreateObject()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void CanCreateObject()
+    {
+        var cut = CreateTestObject();
 
-            cut.Should().NotBeNull();
-        }
+        cut.Should().NotBeNull();
+    }
 
-        [Fact]
-        public void GetShouldReturnPowerProfile()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void GetShouldReturnPowerProfile()
+    {
+        var cut = CreateTestObject();
 
-            var act = () => cut.Execute(DateTime.Now);
+        var act = () => cut.Execute(DateTime.Now);
 
-            act.Should().NotThrow();
-        }
+        act.Should().NotThrow();
+    }
 
-        [Fact]
-        public void SaveDataShouldUseRepository()
-        {
-            var cut = CreateTestObject();
-            _houseBatteryService.GetConsumption().Returns(1);
-            _houseBatteryService.GetProduction().Returns(2);
+    [Fact]
+    public void SaveDataShouldUseRepository()
+    {
+        var cut = CreateTestObject();
+        _houseBatteryService.GetConsumption().Returns(1);
+        _houseBatteryService.GetProduction().Returns(2);
 
-            cut.SaveData(DateTime.Now);
+        cut.SaveData(DateTime.Now);
 
-            _realTimeReadingRepository.Received(1).Save(Arg.Any<DateTime>(), 1, 2);
-        }
+        _realTimeReadingRepository.Received(1).Save(Arg.Any<DateTime>(), 1, 2);
+    }
 
-        private SmartPowerService CreateTestObject()
-        {
-            return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository);
-        }
+    private SmartPowerService CreateTestObject()
+    {
+        return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository);
     }
 }

@@ -4,51 +4,50 @@ using Microsoft.Extensions.Options;
 using System;
 using Xunit;
 
-namespace Grumpy.SmartPower.Infrastructure.IntegrationTests
+namespace Grumpy.SmartPower.Infrastructure.IntegrationTests;
+
+public class SolarServiceTests
 {
-    public class SolarServiceTests
+    private readonly SolarServiceOptions _options = new()
     {
-        private readonly SolarServiceOptions _options = new()
-        {
-            Latitude = 55.5763,
-            Longitude = 12.2932
-        };
+        Latitude = 55.5763,
+        Longitude = 12.2932
+    };
 
-        [Fact]
-        public void DirectionShouldBeCorrect()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void DirectionShouldBeCorrect()
+    {
+        var cut = CreateTestObject();
 
-            var res = cut.Direction(DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Direction(DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.Should().BeApproximately(181.29, 0.1);
-        }
+        res.Should().BeApproximately(181.29, 0.1);
+    }
 
-        [Fact]
-        public void AltitudeShouldBeCorrect()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void AltitudeShouldBeCorrect()
+    {
+        var cut = CreateTestObject();
 
-            var res = cut.Altitude(DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Altitude(DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.Should().BeApproximately(20.77, 0.1);
-        }
+        res.Should().BeApproximately(20.77, 0.1);
+    }
 
-        [Fact]
-        public void SunlightShouldBeCorrect()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void SunlightShouldBeCorrect()
+    {
+        var cut = CreateTestObject();
 
-            var res = cut.Sunlight(DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Sunlight(DateTime.Parse("2022-02-13T12:00:00"));
 
-            res.Should().Be(TimeSpan.FromMinutes(60));
-        }
+        res.Should().Be(TimeSpan.FromMinutes(60));
+    }
 
-        private ISolarService CreateTestObject()
-        {
-            var library = new SolarInformation.SolarInformation();
+    private ISolarService CreateTestObject()
+    {
+        var library = new SolarInformation.SolarInformation();
 
-            return new SolarService(Options.Create(_options), library);
-        }
+        return new SolarService(Options.Create(_options), library);
     }
 }

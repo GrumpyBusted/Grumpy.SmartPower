@@ -1,55 +1,54 @@
 ﻿using Grumpy.SmartPower.Core.Infrastructure;
 
-namespace Grumpy.SmartPower.Core.Consumption
+namespace Grumpy.SmartPower.Core.Consumption;
+
+public class ConsumptionService : IConsumptionService
 {
-    public class ConsumptionService : IConsumptionService
+    private readonly IPowerMeterService _powerMeterService;
+    private readonly IWeatherService _weatherService;
+    private readonly IPredictConsumptionService _predictConsumptionService;
+
+    public ConsumptionService(IPowerMeterService powerMeterService, IWeatherService weatherService, IPredictConsumptionService predictConsumptionService)
     {
-        private readonly IPowerMeterService _powerMeterService;
-        private readonly IWeatherService _weatherService;
-        private readonly IPredictConsumptionService _predictConsumptionService;
+        _powerMeterService = powerMeterService;
+        _weatherService = weatherService;
+        _predictConsumptionService = predictConsumptionService;
+    }
 
-        public ConsumptionService(IPowerMeterService powerMeterService, IWeatherService weatherService, IPredictConsumptionService predictConsumptionService)
+    public IEnumerable<ConsumptionItem> Predict(DateTime from, DateTime to)
+    {
+        var forecast = _weatherService.GetForecast(from, to);
+        var history = _weatherService.GetHistory(from.AddDays(-8), to.AddDays(-1)).ToList();
+
+        foreach (var item in forecast)
         {
-            _powerMeterService = powerMeterService;
-            _weatherService = weatherService;
-            _predictConsumptionService = predictConsumptionService;
-        }
+            var yesterday = item.Hour.AddDays(-1);
+            var lastWeek = item.Hour.AddDays(-7);
+            var lastWeekFromYesterday = item.Hour.AddDays(-8);
 
-        public IEnumerable<ConsumptionItem> Predict(DateTime from, DateTime to)
-        {
-            var forecast = _weatherService.GetForecast(from, to);
-            var history = _weatherService.GetHistory(from.AddDays(-8), to.AddDays(-1)).ToList();
-
-            foreach (var item in forecast)
+            var data = new PredictionData
             {
-                var yesterday = item.Hour.AddDays(-1);
-                var lastWeek = item.Hour.AddDays(-7);
-                var lastWeekFromYesterday = item.Hour.AddDays(-8);
-
-                var data = new PredictionData
+                Hour = item.Hour,
+                Weather = new PredictionWeatherData
                 {
-                    Hour = item.Hour,
-                    Weather = new PredictionWeatherData
-                    {
-                        Forecast = item,
-                        Yesterday = history.First(i => i.Hour == yesterday),
-                        LastWeek = history.First(i => i.Hour == lastWeek),
-                        LastWeekFromYesterday = history.First(i => i.Hour == lastWeekFromYesterday)
-                    },
-                    Consumption = new PredictionConsumptionData
-                    {
-                        Yesterday = _powerMeterService.GetWattPerHour(yesterday),
-                        LastWeek = _powerMeterService.GetWattPerHour(lastWeek),
-                        LastWeekFromYesterday = _powerMeterService.GetWattPerHour(lastWeekFromYesterday)
-                    }
-                };
-
-                yield return new ConsumptionItem
+                    Forecast = item,
+                    Yesterday = history.First(i => i.Hour == yesterday),
+                    LastWeek = history.First(i => i.Hour == lastWeek),
+                    LastWeekFromYesterday = history.First(i => i.Hour == lastWeekFromYesterday)
+                },
+                Consumption = new PredictionConsumptionData
                 {
-                    Hour = item.Hour,
-                    WattPerHour = _predictConsumptionService.Predict(data)
-                };
-            }
+                    Yesterday = _powerMeterService.GetWattPerHour(yesterday),
+                    LastWeek = _powerMeterService.GetWattPerHour(lastWeek),
+                    LastWeekFromYesterday = _powerMeterService.GetWattPerHour(lastWeekFromYesterday)
+                }
+            };
+
+            yield return new ConsumptionItem
+            {
+                Hour = item.Hour,
+                WattPerHour = _predictConsumptionService.Predict(data)
+            };
         }
     }
 }

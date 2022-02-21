@@ -1,8 +1,7 @@
-﻿namespace Grumpy.SmartPower.Core.Infrastructure
+﻿namespace Grumpy.SmartPower.Core.Infrastructure;
+
+public interface IPowerMeterService
 {
-    public interface IPowerMeterService
-    {
-        int GetWattPerHour(DateTime hour);
-        double GetReading(DateTime dateTime);
-    }
+    int GetWattPerHour(DateTime hour);
+    double GetReading(DateTime dateTime);
 }

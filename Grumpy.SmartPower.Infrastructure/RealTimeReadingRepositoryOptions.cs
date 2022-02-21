@@ -1,7 +1,6 @@
-﻿namespace Grumpy.SmartPower.Infrastructure
+﻿namespace Grumpy.SmartPower.Infrastructure;
+
+public class RealTimeReadingRepositoryOptions
 {
-    public class RealTimeReadingRepositoryOptions
-    {
-        public string RepositoryPath { get; set; } = "";
-    }
+    public string RepositoryPath { get; set; } = "";
 }

@@ -1,8 +1,7 @@
-﻿namespace Grumpy.SmartPower.Core.Consumption
+﻿namespace Grumpy.SmartPower.Core.Consumption;
+
+public class ConsumptionItem
 {
-    public class ConsumptionItem
-    {
-        public DateTime Hour { get; set; } = DateTime.MinValue;
-        public int WattPerHour { get; set; } = 0;
-    }
+    public DateTime Hour { get; set; } = DateTime.MinValue;
+    public int WattPerHour { get; set; } = 0;
 }

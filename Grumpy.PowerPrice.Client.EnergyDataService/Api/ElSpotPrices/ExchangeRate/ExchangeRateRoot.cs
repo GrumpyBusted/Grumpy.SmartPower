@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Grumpy.PowerPrice.Client.EnergyDataService.Api.ElSpotPrices.ExchangeRate
+namespace Grumpy.PowerPrice.Client.EnergyDataService.Api.ElSpotPrices.ExchangeRate;
+
+public class ExchangeRateRoot
 {
-    public class ExchangeRateRoot
-    {
-        [JsonPropertyName("data")]
-        public Data Data { get; set; } = new Data();
-    }
+    [JsonPropertyName("data")]
+    public Data Data { get; set; } = new();
 }

@@ -1,7 +1,6 @@
-﻿namespace Grumpy.PowerMeter.Client.SmartMe.Api.DeviceBySerial
+﻿namespace Grumpy.PowerMeter.Client.SmartMe.Api.DeviceBySerial;
+
+internal class DeviceBySerialRoot
 {
-    internal class DeviceBySerialRoot
-    {
-        public string Id { get; set; } = "";
-    }
+    public string Id { get; set; } = "";
 }

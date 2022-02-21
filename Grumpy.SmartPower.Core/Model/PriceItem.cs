@@ -1,8 +1,7 @@
-﻿namespace Grumpy.SmartPower.Core.Model
+﻿namespace Grumpy.SmartPower.Core.Model;
+
+public class PriceItem
 {
-    public class PriceItem
-    {
-        public DateTime Hour { get; set; }
-        public double Price { get; set; }
-    }
+    public DateTime Hour { get; set; }
+    public double Price { get; set; }
 }

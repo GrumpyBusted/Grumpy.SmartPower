@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Grumpy.Weather.Client.VisualCrossing.Api.Timeline
+namespace Grumpy.Weather.Client.VisualCrossing.Api.Timeline;
+
+internal class Day
 {
-    internal class Day
-    {
-        [JsonPropertyName("hours")]
-        public List<Hour> Hours { get; set; } = new();
-    }
+    [JsonPropertyName("hours")]
+    public List<Hour> Hours { get; set; } = new();
 }

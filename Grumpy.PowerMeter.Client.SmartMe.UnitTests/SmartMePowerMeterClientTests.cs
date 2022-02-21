@@ -6,23 +6,22 @@ using NSubstitute;
 using System;
 using Xunit;
 
-namespace Grumpy.PowerMeter.Client.SmartMe.UnitTests
+namespace Grumpy.PowerMeter.Client.SmartMe.UnitTests;
+
+public class SmartMePowerMeterClientTests
 {
-    public class SmartMePowerMeterClientTests
+    [Fact]
+    public void GetPricesShouldThrow()
     {
-        [Fact]
-        public void GetPricesShouldThrow()
-        {
-            var cut = CreateTestObject();
+        var cut = CreateTestObject();
 
-            var act = () => cut.GetValue(DateTime.Now);
+        var act = () => cut.GetValue(DateTime.Now);
 
-            act.Should().Throw<Exception>();
-        }
+        act.Should().Throw<Exception>();
+    }
 
-        private static ISmartMePowerMeterClient CreateTestObject()
-        {
-            return new SmartMePowerMeterClient(Options.Create(new SmartMePowerMeterClientOptions()), Substitute.For<IRestClientFactory>());
-        }
+    private static ISmartMePowerMeterClient CreateTestObject()
+    {
+        return new SmartMePowerMeterClient(Options.Create(new SmartMePowerMeterClientOptions()), Substitute.For<IRestClientFactory>());
     }
 }

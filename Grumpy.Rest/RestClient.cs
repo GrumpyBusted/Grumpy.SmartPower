@@ -3,68 +3,67 @@ using Grumpy.Rest.Interface;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 
-namespace Grumpy.Rest
+namespace Grumpy.Rest;
+
+public class RestClient : IRestClient
 {
-    public class RestClient : IRestClient
+    private bool _disposed;
+    private readonly ILogger<RestClient> _logger;
+    private readonly RestSharp.RestClient _client;
+
+    internal RestClient(string baseUrl, ILogger<RestClient> logger)
     {
-        private bool _disposed;
-        private readonly ILogger<RestClient> _logger;
-        private readonly RestSharp.RestClient _client;
+        _logger = logger;
 
-        internal RestClient(string baseUrl, ILogger<RestClient> logger)
+        var options = new RestClientOptions(baseUrl)
         {
-            _logger = logger;
+            ThrowOnAnyError = true,
+            ThrowOnDeserializationError = true
+        };
 
-            var options = new RestClientOptions(baseUrl)
-            {
-                ThrowOnAnyError = true,
-                ThrowOnDeserializationError = true
-            };
+        _client = new RestSharp.RestClient(options);
+    }
 
-            _client = new RestSharp.RestClient(options);
-        }
+    public T Execute<T>(RestRequest request)
+    {
+        _logger.LogInformation("Executing REST Web Service {0}", request);
 
-        public T Execute<T>(RestRequest request)
-        {
-            _logger.LogInformation("Executing REST Web Service {0}", request);
+        var response = _client.ExecuteAsync<T>(request);
 
-            var response = _client.ExecuteAsync<T>(request);
+        _logger.LogInformation("Response from REST Web Service {0}", response.Result);
 
-            _logger.LogInformation("Response from REST Web Service {0}", response.Result);
+        if (response.Result.StatusCode != System.Net.HttpStatusCode.OK)
+            throw new RestClientExecuteException(request, response.Result);
 
-            if (response.Result.StatusCode != System.Net.HttpStatusCode.OK)
-                throw new RestClientExecuteException(request, response.Result);
+        return response.Result.Data ?? throw new RestClientExecuteException(request, response.Result);
+    }
 
-            return response.Result.Data ?? throw new RestClientExecuteException(request, response.Result);
-        }
+    public void Execute(RestRequest request)
+    {
+        _logger.LogInformation("Executing REST Web Service {0}", request);
 
-        public void Execute(RestRequest request)
-        {
-            _logger.LogInformation("Executing REST Web Service {0}", request);
+        var response = _client.ExecuteAsync(request);
 
-            var response = _client.ExecuteAsync(request);
+        _logger.LogInformation("Response from REST Web Service {0}", response.Result);
 
-            _logger.LogInformation("Response from REST Web Service {0}", response.Result);
+        if (response.Result.StatusCode != System.Net.HttpStatusCode.OK)
+            throw new RestClientExecuteException(request, response.Result);
+    }
 
-            if (response.Result.StatusCode != System.Net.HttpStatusCode.OK)
-                throw new RestClientExecuteException(request, response.Result);
-        }
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
+        if (disposing)
+            _client.Dispose();
 
-            if (disposing)
-                _client.Dispose();
+        _disposed = true;
+    }
 
-            _disposed = true;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }

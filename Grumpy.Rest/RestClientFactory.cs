@@ -1,20 +1,19 @@
 ﻿using Grumpy.Rest.Interface;
 using Microsoft.Extensions.Logging;
 
-namespace Grumpy.Rest
+namespace Grumpy.Rest;
+
+public class RestClientFactory : IRestClientFactory
 {
-    public class RestClientFactory : IRestClientFactory
+    private readonly ILoggerFactory _loggerFactory;
+
+    public RestClientFactory(ILoggerFactory loggerFactory)
     {
-        private readonly ILoggerFactory _loggerFactory;
+        _loggerFactory = loggerFactory;
+    }
 
-        public RestClientFactory(ILoggerFactory loggerFactory)
-        {
-            _loggerFactory = loggerFactory;
-        }
-
-        public IRestClient Instance(string baseUrl)
-        {
-            return new RestClient(baseUrl, _loggerFactory.CreateLogger<RestClient>());
-        }
+    public IRestClient Instance(string baseUrl)
+    {
+        return new RestClient(baseUrl, _loggerFactory.CreateLogger<RestClient>());
     }
 }

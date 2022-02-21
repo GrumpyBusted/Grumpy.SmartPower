@@ -1,7 +1,6 @@
-﻿namespace Grumpy.SmartPower.Infrastructure.PredictConsumptionModel
+﻿namespace Grumpy.SmartPower.Infrastructure.PredictConsumptionModel;
+
+public class Output
 {
-    public class Output
-    {
-        public float Score { get; set; }
-    }
+    public float Score { get; set; }
 }

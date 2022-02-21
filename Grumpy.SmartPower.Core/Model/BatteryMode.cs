@@ -1,9 +1,8 @@
-﻿namespace Grumpy.SmartPower.Core.Model
+﻿namespace Grumpy.SmartPower.Core.Model;
+
+public enum BatteryMode
 {
-    public enum BatteryMode
-    {
-        StoreForLater,
-        ChargeFromGrid,
-        Default
-    }
+    StoreForLater,
+    ChargeFromGrid,
+    Default
 }

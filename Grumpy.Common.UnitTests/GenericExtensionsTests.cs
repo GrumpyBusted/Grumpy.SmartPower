@@ -1,56 +1,54 @@
 ﻿using FluentAssertions;
 using Grumpy.Common.Extensions;
-using Grumpy.Common.Helpers;
 using System;
 using Xunit;
 
-namespace Grumpy.Common.UnitTests
+namespace Grumpy.Common.UnitTests;
+
+public class GenericExtensionsTests
 {
-    public class GenericExtensionsTests
+    [Fact]
+    public void CsvHeaderShouldList()
     {
-        [Fact]
-        public void CsvHeaderShouldList()
+        var value = new
         {
-            var value = new
-            {
-                Name = "Anders",
-                Year = 1973
-            };
+            Name = "Anders",
+            Year = 1973
+        };
 
-            var res = value.CsvHeader(';');
+        var res = value.CsvHeader(';');
 
-            res.Should().Be("Name;Year");
-        }
+        res.Should().Be("Name;Year");
+    }
 
-        [Fact]
-        public void CsvRecordShouldList()
+    [Fact]
+    public void CsvRecordShouldList()
+    {
+        var value = new
         {
-            var value = new
-            {
-                Name = "Anders",
-                Year = 1973,
-                Birthday = DateTime.Parse("1973-10-25T09:14:00"),
-                Salary = 123.45
-            };
+            Name = "Anders",
+            Year = 1973,
+            Birthday = DateTime.Parse("1973-10-25T09:14:00"),
+            Salary = 123.45
+        };
 
-            var res = value.CsvRecord(';');
+        var res = value.CsvRecord(';');
 
-            res.Should().Be("Anders;1973;1973-10-25T09:14:00;123.45");
-        }
+        res.Should().Be("Anders;1973;1973-10-25T09:14:00;123.45");
+    }
 
-        [Fact]
-        public void CsvRecordWithQuetsShouldList()
+    [Fact]
+    public void CsvRecordWithQuotesShouldList()
+    {
+        var value = new
         {
-            var value = new
-            {
-                Name = "Anders Busted-Janum",
-                Text = "Semicolon;Text",
-                Comment = "With\""
-            };
+            Name = "Anders Busted-Janum",
+            Text = "Semicolon;Text",
+            Comment = "With\""
+        };
 
-            var res = value.CsvRecord(';');
+        var res = value.CsvRecord(';');
             
-            res.Should().Be("\"Anders Busted-Janum\";\"Semicolon;Text\";\"With\\\"\"");
-        }
+        res.Should().Be("\"Anders Busted-Janum\";\"Semicolon;Text\";\"With\\\"\"");
     }
 }

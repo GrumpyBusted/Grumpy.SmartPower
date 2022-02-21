@@ -10,24 +10,24 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Grumpy.Weather.Client.VisualCrossing.UnitTests
+namespace Grumpy.Weather.Client.VisualCrossing.UnitTests;
+
+public class VisualCrossingWeatherClientTests
 {
-    public class VisualCrossingWeatherClientTests
+    private readonly IRestClientFactory _restClientFactory = Substitute.For<IRestClientFactory>();
+    private readonly IRestClient _restClient = Substitute.For<IRestClient>();
+
+    public VisualCrossingWeatherClientTests()
     {
-        private readonly IRestClientFactory _restClientFactory = Substitute.For<IRestClientFactory>();
-        private readonly IRestClient _restClient = Substitute.For<IRestClient>();
+        _restClientFactory.Instance(Arg.Any<string>()).Returns(_restClient);
+    }
 
-        public VisualCrossingWeatherClientTests()
+    [Fact]
+    public void GetShouldReturnFromRestRequest()
+    {
+        var exp = new Root
         {
-            _restClientFactory.Instance(Arg.Any<string>()).Returns(_restClient);
-        }
-
-        [Fact]
-        public void GetShouldReturnFromRestRequest()
-        {
-            var exp = new Root
-            {
-                Days = new List<Day>
+            Days = new List<Day>
             {
                 new()
                 {
@@ -40,19 +40,18 @@ namespace Grumpy.Weather.Client.VisualCrossing.UnitTests
                     }
                 }
             }
-            };
-            _restClient.Execute<Root>(Arg.Any<RestRequest>()).Returns(exp);
-            var cut = CreateTestObject();
+        };
+        _restClient.Execute<Root>(Arg.Any<RestRequest>()).Returns(exp);
+        var cut = CreateTestObject();
 
-            var res = cut.Get(DateOnly.Parse("2022-02-13")).ToList();
+        var res = cut.Get(DateOnly.Parse("2022-02-13")).ToList();
 
-            res.Should().HaveCount(1);
-            res.First().Temperature.Should().Be(2);
-        }
+        res.Should().HaveCount(1);
+        res.First().Temperature.Should().Be(2);
+    }
 
-        private IVisualCrossingWeatherClient CreateTestObject()
-        {
-            return new VisualCrossingWeatherClient(Options.Create(new VisualCrossingWeatherClientOptions()), _restClientFactory);
-        }
+    private IVisualCrossingWeatherClient CreateTestObject()
+    {
+        return new VisualCrossingWeatherClient(Options.Create(new VisualCrossingWeatherClientOptions()), _restClientFactory);
     }
 }

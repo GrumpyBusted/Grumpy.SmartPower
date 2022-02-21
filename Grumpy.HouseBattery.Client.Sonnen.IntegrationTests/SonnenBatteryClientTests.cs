@@ -9,127 +9,126 @@ using System.Linq;
 using Grumpy.HouseBattery.Client.Sonnen.Dto;
 using Xunit;
 
-namespace Grumpy.HouseBattery.Client.Sonnen.IntegrationTests
+namespace Grumpy.HouseBattery.Client.Sonnen.IntegrationTests;
+
+public class SonnenBatteryClientTests
 {
-    public class SonnenBatteryClientTests
+    private readonly SonnenBatteryClientOptions _options = new()
     {
-        private readonly SonnenBatteryClientOptions _options = new()
-        {
-            Ip = "192.168.0.222",
-            ApiToken = "0ca39846-405a-4c8f-b48c-41f46fe17be1"
-        };
+        Ip = "192.168.0.222",
+        ApiToken = "0ca39846-405a-4c8f-b48c-41f46fe17be1"
+    };
 
-        [Fact]
-        public void GetBatteryLevelShouldReturnValidLevel()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void GetBatteryLevelShouldReturnValidLevel()
+    {
+        var cut = CreateTestObject();
 
-            var res = cut.GetBatteryLevel();
+        var res = cut.GetBatteryLevel();
 
-            res.Should().BeInRange(0, 100);
-        }
+        res.Should().BeInRange(0, 100);
+    }
 
-        [Fact]
-        public void GetConsumptionShouldReturnValidLevel()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void GetConsumptionShouldReturnValidLevel()
+    {
+        var cut = CreateTestObject();
 
-            var res = cut.GetConsumption();
+        var res = cut.GetConsumption();
 
-            res.Should().BeInRange(0, 100000);
-        }
+        res.Should().BeInRange(0, 100000);
+    }
 
-        [Fact]
-        public void GetProductionShouldReturnValidLevel()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void GetProductionShouldReturnValidLevel()
+    {
+        var cut = CreateTestObject();
 
-            var res = cut.GetProduction();
+        var res = cut.GetProduction();
 
-            res.Should().BeInRange(0, 100000);
-        }
+        res.Should().BeInRange(0, 100000);
+    }
 
-        [Fact]
-        public void GetBatteryCapacityShouldReturnValidLevel()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void GetBatteryCapacityShouldReturnValidLevel()
+    {
+        var cut = CreateTestObject();
 
-            var res = cut.GetBatteryCapacity();
+        var res = cut.GetBatteryCapacity();
 
-            res.Should().BeInRange(0, 100000);
-        }
+        res.Should().BeInRange(0, 100000);
+    }
 
-        [Fact]
-        public void GetBatterySizeShouldReturnValidLevel()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void GetBatterySizeShouldReturnValidLevel()
+    {
+        var cut = CreateTestObject();
 
-            var res = cut.GetBatterySize();
+        var res = cut.GetBatterySize();
 
-            res.Should().BeInRange(1, 100000);
-        }
+        res.Should().BeInRange(1, 100000);
+    }
 
-        [Fact]
-        public void CanGetOperatingMode()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void CanGetOperatingMode()
+    {
+        var cut = CreateTestObject();
 
-            var act = () => cut.GetOperatingMode();
+        var act = () => cut.GetOperatingMode();
 
-            act.Should().NotThrow();
-        }
+        act.Should().NotThrow();
+    }
 
-        [Fact]
-        public void CanGetTimeOfUseSchedule()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void CanGetTimeOfUseSchedule()
+    {
+        var cut = CreateTestObject();
 
-            var act = () => cut.GetSchedule();
+        var act = () => cut.GetSchedule();
 
-            act.Should().NotThrow();
-        }
+        act.Should().NotThrow();
+    }
 
-        [Fact]
-        public void CanChangeOperatingMode()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void CanChangeOperatingMode()
+    {
+        var cut = CreateTestObject();
 
-            var initial = cut.GetOperatingMode();
+        var initial = cut.GetOperatingMode();
 
-            cut.SetOperatingMode(OperatingMode.SelfConsumption);
-            cut.GetOperatingMode().Should().Be(OperatingMode.SelfConsumption);
+        cut.SetOperatingMode(OperatingMode.SelfConsumption);
+        cut.GetOperatingMode().Should().Be(OperatingMode.SelfConsumption);
 
-            cut.SetOperatingMode(OperatingMode.Manual);
-            cut.GetOperatingMode().Should().Be(OperatingMode.Manual);
+        cut.SetOperatingMode(OperatingMode.Manual);
+        cut.GetOperatingMode().Should().Be(OperatingMode.Manual);
 
-            cut.SetOperatingMode(initial);
-        }
+        cut.SetOperatingMode(initial);
+    }
 
-        [Fact]
-        public void CanChangeTimeOfUseSchedule()
-        {
-            var cut = CreateTestObject();
+    [Fact]
+    public void CanChangeTimeOfUseSchedule()
+    {
+        var cut = CreateTestObject();
 
-            var initial = cut.GetSchedule();
+        var initial = cut.GetSchedule();
 
-            var schedule = new List<TimeOfUseEvent>
+        var schedule = new List<TimeOfUseEvent>
         {
             new() { Start = "03:00", End = "04:00", Watt = 3000},
             new() { Start = "23:00", End = "00:00", Watt = 2000}
         };
 
-            cut.SetSchedule(schedule);
-            cut.GetSchedule().Should().HaveCount(2);
+        cut.SetSchedule(schedule);
+        cut.GetSchedule().Should().HaveCount(2);
 
-            cut.SetSchedule(Enumerable.Empty<TimeOfUseEvent>());
-            cut.GetSchedule().Should().HaveCount(0);
+        cut.SetSchedule(Enumerable.Empty<TimeOfUseEvent>());
+        cut.GetSchedule().Should().HaveCount(0);
 
-            cut.SetSchedule(initial);
-        }
+        cut.SetSchedule(initial);
+    }
 
-        private ISonnenBatteryClient CreateTestObject()
-        {
-            return new SonnenBatteryClient(Options.Create(_options), new RestClientFactory(Substitute.For<ILoggerFactory>()));
-        }
+    private ISonnenBatteryClient CreateTestObject()
+    {
+        return new SonnenBatteryClient(Options.Create(_options), new RestClientFactory(Substitute.For<ILoggerFactory>()));
     }
 }

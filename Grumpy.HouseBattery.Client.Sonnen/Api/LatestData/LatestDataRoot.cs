@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Grumpy.HouseBattery.Client.Sonnen.Api.LatestData
+namespace Grumpy.HouseBattery.Client.Sonnen.Api.LatestData;
+
+internal class LatestDataRoot
 {
-    internal class LatestDataRoot
-    {
-        [JsonPropertyName("FullChargeCapacity")]
-        public int FullChargeCapacity { get; set; } = 0;
-    }
+    [JsonPropertyName("FullChargeCapacity")]
+    public int FullChargeCapacity { get; set; } = 0;
 }

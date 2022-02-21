@@ -1,8 +1,7 @@
-﻿namespace Grumpy.SmartPower.Infrastructure
+﻿namespace Grumpy.SmartPower.Infrastructure;
+
+public class SolarServiceOptions
 {
-    public class SolarServiceOptions
-    {
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
-    }
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
 }

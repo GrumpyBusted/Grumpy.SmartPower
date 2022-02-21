@@ -1,9 +1,8 @@
-﻿namespace Grumpy.SmartPower.Infrastructure
+﻿namespace Grumpy.SmartPower.Infrastructure;
+
+internal class RealTimeReading
 {
-    internal class RealTimeReading
-    {
-        public DateTime DateTime { get; set; }
-        public int? Consumption { get; set; }
-        public int? Production { get; set; }
-    }
+    public DateTime DateTime { get; set; }
+    public int? Consumption { get; set; }
+    public int? Production { get; set; }
 }
