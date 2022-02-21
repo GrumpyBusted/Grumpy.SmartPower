@@ -23,21 +23,23 @@ namespace Grumpy.SmartPower
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                var now = DateTime.Now;
 
-                if (DateTime.Now - lastCalibrate > TimeSpan.FromMilliseconds(_options.Interval))
+                _logger.LogInformation("Worker running at: {time}", now);
+
+                if (now - lastCalibrate > TimeSpan.FromMilliseconds(_options.Interval))
                 {
-                    lastCalibrate = DateTime.Now;
-                    _smartPowerService.Execute(DateTime.Now);
+                    lastCalibrate = now;
+                    _smartPowerService.Execute(now);
                 }
 
-                if (DateTime.Now.Hour != lastModelUpdate.Hour)
+                if (now.Hour != lastModelUpdate.Hour)
                 {
-                    lastModelUpdate = DateTime.Now;
+                    lastModelUpdate = now;
                     //_smartPowerService.UpdateModel();
                 }
 
-                _smartPowerService.SaveData();
+                _smartPowerService.SaveData(now);
 
                 await Task.Delay(60000, stoppingToken);
             }

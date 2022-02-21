@@ -3,6 +3,6 @@
     public interface ISmartPowerService
     {
         void Execute(DateTime now);
-        void SaveData();
+        void SaveData(DateTime now);
     }
 }

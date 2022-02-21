@@ -32,7 +32,7 @@ namespace Grumpy.Common.Extensions
 
             foreach (var prop in properties)
             {
-                string? item = null;
+                string? item;
 
                 if (prop.PropertyType == typeof(DateTime))
                     item = ((DateTime?)prop.GetValue(value))?.ToString("s");

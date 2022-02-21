@@ -14,14 +14,16 @@ namespace Grumpy.SmartPower.Core
         private readonly IHouseBatteryService _houseBatteryService;
         private readonly IProductionService _productionService;
         private readonly IConsumptionService _consumptionService;
+        private readonly IRealTimeReadingRepository _realTimeReadingRepository;
 
-        public SmartPowerService(IOptions<SmartPowerServiceOptions> options, IPowerPriceService powerPriceService, IHouseBatteryService houseBatteryService, IProductionService productionService, IConsumptionService consumptionService)
+        public SmartPowerService(IOptions<SmartPowerServiceOptions> options, IPowerPriceService powerPriceService, IHouseBatteryService houseBatteryService, IProductionService productionService, IConsumptionService consumptionService, IRealTimeReadingRepository realTimeReadingRepository)
         {
             _options = options.Value;
             _powerPriceService = powerPriceService;
             _houseBatteryService = houseBatteryService;
             _productionService = productionService;
             _consumptionService = consumptionService;
+            _realTimeReadingRepository = realTimeReadingRepository;
         }
 
         public void Execute(DateTime now)
@@ -36,10 +38,12 @@ namespace Grumpy.SmartPower.Core
             _houseBatteryService.GetBatterySize();
         }
 
-        public void SaveData()
+        public void SaveData(DateTime now)
         {
             var production = _houseBatteryService.GetProduction();
             var consumption = _houseBatteryService.GetConsumption();
+
+            _realTimeReadingRepository.Save(now, consumption, production);
         }
     }
 }

@@ -30,4 +30,5 @@ namespace Grumpy.SmartPower.Infrastructure
                 () => _smartMePowerMeterClient.GetValue(dateTime));
         }
     }
+
 }

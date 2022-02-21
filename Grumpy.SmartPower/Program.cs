@@ -42,6 +42,7 @@ var host = Host.CreateDefaultBuilder(args)
             .AddSingleton<IConsumptionService, ConsumptionService>()
             .AddSingleton<IPredictConsumptionService, PredictConsumptionService>()
             .AddSingleton<IVisualCrossingWeatherClient, VisualCrossingWeatherClient>()
+            .AddSingleton<IRealTimeReadingRepository, RealTimeReadingRepository>()
             .AddSingleton<IDateTimeProvider, DateTimeProvider>()
             .Configure<WorkerOptions>(context.Configuration.GetSection("Application"))
             .Configure<SmartPowerServiceOptions>(context.Configuration.GetSection("SmartPower"))
@@ -53,7 +54,8 @@ var host = Host.CreateDefaultBuilder(args)
             .Configure<ProductionServiceOptions>(context.Configuration.GetSection("SmartPower:SolarPanel"))
             .Configure<VisualCrossingWeatherClientOptions>(context.Configuration.GetSection("SmartPower:Location"))
             .Configure<VisualCrossingWeatherClientOptions>(context.Configuration.GetSection("VisualCrossingWeather"))
-            .Configure<PredictConsumptionServiceOptions>(context.Configuration.GetSection("SmartPower:MachineLearning"));
+            .Configure<PredictConsumptionServiceOptions>(context.Configuration.GetSection("SmartPower:MachineLearning"))
+            .Configure<RealTimeReadingRepositoryOptions>(context.Configuration.GetSection("SmartPower"));
     })
     .Build();
 

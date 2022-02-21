@@ -59,8 +59,10 @@ namespace Grumpy.SmartPower.Infrastructure
 
             if (!File.Exists(_options.DataPath))
             {
-                File.Create(_options.DataPath);
-                File.AppendAllText(_options.DataPath, input.CsvHeader(';') + Environment.NewLine);
+                if (!Directory.Exists(Path.GetDirectoryName(_options.DataPath) ?? "."))
+                    Directory.CreateDirectory(Path.GetDirectoryName(_options.DataPath) ?? ".");
+
+                File.WriteAllText(_options.DataPath, input.CsvHeader(';') + Environment.NewLine);
             }
 
             File.AppendAllText(_options.DataPath, input.CsvRecord(';') + Environment.NewLine);
@@ -101,6 +103,9 @@ namespace Grumpy.SmartPower.Infrastructure
                 .Append(_context.Regression.Trainers.FastForest());
 
             var model = pipeline.Fit(dataView);
+
+            if (!Directory.Exists(Path.GetDirectoryName(_options.ModelPath) ?? "."))
+                Directory.CreateDirectory(Path.GetDirectoryName(_options.ModelPath) ?? ".");
 
             _context.Model.Save(model, dataView.Schema, _options.ModelPath);
         }
