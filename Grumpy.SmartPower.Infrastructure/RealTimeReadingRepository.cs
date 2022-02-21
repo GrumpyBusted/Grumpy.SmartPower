@@ -9,12 +9,12 @@ namespace Grumpy.SmartPower.Infrastructure;
 
 public class RealTimeReadingRepository : IRealTimeReadingRepository
 {
-    private readonly IOptions<RealTimeReadingRepositoryOptions> _options;
+    private readonly RealTimeReadingRepositoryOptions _options;
     private readonly FileCache _fileCache;
 
     public RealTimeReadingRepository(IOptions<RealTimeReadingRepositoryOptions> options)
     {
-        _options = options;
+        _options = options.Value;
         _fileCache = new FileCache(FileCacheManagers.Hashed);
     }
 
@@ -27,15 +27,15 @@ public class RealTimeReadingRepository : IRealTimeReadingRepository
             Production = production
         };
 
-        var folder = Path.GetDirectoryName(_options.Value.RepositoryPath) ?? ".";
+        var folder = Path.GetDirectoryName(_options.RepositoryPath) ?? ".";
 
-        if (!Directory.Exists(folder))
+        if (folder != "" && !Directory.Exists(folder))
             Directory.CreateDirectory(folder);
 
-        if (!File.Exists(_options.Value.RepositoryPath))
-            File.WriteAllText(_options.Value.RepositoryPath, record.CsvHeader(';') + Environment.NewLine);
+        if (!File.Exists(_options.RepositoryPath))
+            File.WriteAllText(_options.RepositoryPath, record.CsvHeader(';') + Environment.NewLine);
 
-        File.AppendAllText(_options.Value.RepositoryPath, record.CsvRecord(';') + Environment.NewLine);
+        File.AppendAllText(_options.RepositoryPath, record.CsvRecord(';') + Environment.NewLine);
     }
 
     public int? GetConsumption(DateTime hour)
@@ -58,7 +58,7 @@ public class RealTimeReadingRepository : IRealTimeReadingRepository
         if (to > DateTime.Now)
             throw new ArgumentException("Only ask for passed readings", nameof(hour));
 
-        var list = ReadFrom(_options.Value.RepositoryPath).Where(r => r.DateTime >= from && r.DateTime <= to).ToList();
+        var list = ReadFrom(_options.RepositoryPath).Where(r => r.DateTime >= from && r.DateTime <= to).ToList();
 
         return new RealTimeReading
         {

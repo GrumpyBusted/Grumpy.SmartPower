@@ -34,6 +34,7 @@ public class SmartPowerServiceTests
     [Fact]
     public void SaveDataShouldSaveToFile()
     {
+        _productionServiceOptions.Direction = 112;
         var cut = CreateTestObject();
         _realTimeReadingRepositoryOptions.RepositoryPath = $"Repository-{Guid.NewGuid()}.csv";
         _sonnenBatteryClientOptions.Ip = "192.168.0.222";
@@ -61,9 +62,9 @@ public class SmartPowerServiceTests
         var smartMePowerMeterClient = new SmartMePowerMeterClient(Options.Create(_smartMePowerMeterClientOptions), restClientFactory);
         var powerMeterService = new PowerMeterService(smartMePowerMeterClient);
         var predictConsumptionService = new PredictConsumptionService(Options.Create(_predictConsumptionServiceOptions));
-        var consumptionService = new ConsumptionService(powerMeterService, weatherService, predictConsumptionService);
         var realTimeReadingRepository = new RealTimeReadingRepository(Options.Create(_realTimeReadingRepositoryOptions));
+        var consumptionService = new ConsumptionService(powerMeterService, weatherService, predictConsumptionService, realTimeReadingRepository);
 
-        return new SmartPowerService(Options.Create(_smartPowerServiceOptions), powerPriceService, houseBatteryService, productionService, consumptionService, realTimeReadingRepository);
+        return new SmartPowerService(Options.Create(_smartPowerServiceOptions), powerPriceService, houseBatteryService, productionService, consumptionService, realTimeReadingRepository, Substitute.For<ILogger<SmartPowerService>>());
     }
 }

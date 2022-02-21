@@ -11,46 +11,44 @@ public class PredictConsumptionService : IPredictConsumptionService
 {
     private readonly PredictConsumptionServiceOptions _options;
     private readonly MLContext _context;
-    private readonly Lazy<ITransformer> _model;
-    private readonly Lazy<PredictionEngine<Input, Output>> _predictionEngine;
+    private readonly Lazy<ITransformer?> _model;
+    private readonly Lazy<PredictionEngine<Input, Output>?> _predictionEngine;
 
     public PredictConsumptionService(IOptions<PredictConsumptionServiceOptions> options)
     {
         _options = options.Value;
         _context = new MLContext();
-        _model = new Lazy<ITransformer>(GetModel);
-        _predictionEngine = new Lazy<PredictionEngine<Input, Output>>(GetPredictionEngine);
+        _model = new Lazy<ITransformer?>(GetModel);
+        _predictionEngine = new Lazy<PredictionEngine<Input, Output>?>(GetPredictionEngine);
     }
 
-    private ITransformer GetModel()
+    private ITransformer? GetModel()
     {
-        return _context.Model.Load(_options.ModelPath, out _);
+        if (File.Exists(_options.ModelPath))
+            return _context.Model.Load(_options.ModelPath, out _);
+
+        return null;
     }
 
-    private PredictionEngine<Input, Output> GetPredictionEngine()
+    private PredictionEngine<Input, Output>? GetPredictionEngine()
     {
+        if (_model?.Value == null)
+            return null;    
+
         return _context.Model.CreatePredictionEngine<Input, Output>(_model.Value);
     }
 
-    public int Predict(PredictionData data)
+    public int? Predict(PredictionData data)
     {
         var input = MapToModelInput(data);
 
-        var output = new Output();
+        var c = _predictionEngine?.Value;
+        var output = c?.Predict(input);
 
-        try
-        {
-            output = _predictionEngine.Value.Predict(input);
-        }
-        catch (FileNotFoundException)
-        {
-            output.Score = float.NaN;
-        }
+        if (float.IsNaN(output?.Score ?? float.NaN))
+            return null;
 
-        if (float.IsNaN(output.Score))
-            return (int)(data.Consumption.LastWeek * ((double)data.Consumption.Yesterday / data.Consumption.LastWeekFromYesterday));
-
-        return (int)Math.Round(output.Score, 0);
+        return output?.Score == null ? null : (int)Math.Round(output.Score, 0);
     }
 
     public void TrainModel(PredictionData data, int actualWattPerHour)
@@ -59,15 +57,17 @@ public class PredictConsumptionService : IPredictConsumptionService
 
         if (!File.Exists(_options.DataPath))
         {
-            if (!Directory.Exists(Path.GetDirectoryName(_options.DataPath) ?? "."))
-                Directory.CreateDirectory(Path.GetDirectoryName(_options.DataPath) ?? ".");
+            var f = Path.GetDirectoryName(_options.DataPath) ?? ".";
+
+            if (f != "" && !Directory.Exists(f))
+                Directory.CreateDirectory(f);
 
             File.WriteAllText(_options.DataPath, input.CsvHeader(';') + Environment.NewLine);
         }
 
         File.AppendAllText(_options.DataPath, input.CsvRecord(';') + Environment.NewLine);
 
-        var dataView = _context.Data.LoadFromTextFile<Input>(_options.DataPath, ';');
+        var dataView = _context.Data.LoadFromTextFile<Input>(_options.DataPath, ';', true);
 
         var pipeline = _context.Transforms.Conversion.ConvertType(nameof(Input.WattPerHour))
             .Append(_context.Transforms.Categorical.OneHotEncoding(nameof(Input.Weekday)))
@@ -104,8 +104,10 @@ public class PredictConsumptionService : IPredictConsumptionService
 
         var model = pipeline.Fit(dataView);
 
-        if (!Directory.Exists(Path.GetDirectoryName(_options.ModelPath) ?? "."))
-            Directory.CreateDirectory(Path.GetDirectoryName(_options.ModelPath) ?? ".");
+        var folder = Path.GetDirectoryName(_options.ModelPath) ?? ".";
+
+        if (folder != "" && !Directory.Exists(folder))
+            Directory.CreateDirectory(folder);
 
         _context.Model.Save(model, dataView.Schema, _options.ModelPath);
     }

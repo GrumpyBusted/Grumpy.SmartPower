@@ -7,6 +7,7 @@ using NSubstitute;
 using System;
 using Grumpy.SmartPower.Core.Dto;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace Grumpy.SmartPower.Core.UnitTests;
 
@@ -55,6 +56,6 @@ public class SmartPowerServiceTests
 
     private SmartPowerService CreateTestObject()
     {
-        return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository);
+        return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository, Substitute.For<ILogger<SmartPowerService>>());
     }
 }

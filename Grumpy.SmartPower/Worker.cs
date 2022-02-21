@@ -36,7 +36,7 @@ public class Worker : BackgroundService
             if (now.Hour != lastModelUpdate.Hour)
             {
                 lastModelUpdate = now;
-                //_smartPowerService.UpdateModel();
+                _smartPowerService.UpdateModel(now);
             }
 
             _smartPowerService.SaveData(now);

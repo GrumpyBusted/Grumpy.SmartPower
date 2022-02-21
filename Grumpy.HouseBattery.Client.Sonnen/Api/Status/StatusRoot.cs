@@ -8,7 +8,7 @@ internal class StatusRoot
 {
     [JsonPropertyName("Production_W")]
     public int Production { get; set; } = 0;
-    [JsonPropertyName("Consumption_W")]
+    [JsonPropertyName("Consumption_AVG")]
     public int Consumption { get; set; } = 0;
     [JsonPropertyName("RemainingCapacity_Wh")]
     public int RemainingCapacity { get; set; } = 0;
