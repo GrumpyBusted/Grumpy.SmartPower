@@ -77,19 +77,10 @@ public class RealTimeReadingRepository : IRealTimeReadingRepository
 
         for (var line = reader.ReadLine(); line != null; line = reader.ReadLine())
         {
-            if (line.StartsWith("DateTime")) 
+            if (line.IsCsvHeader<RealTimeReading>(';')) 
                 continue;
 
-            var fields = line.Split(';');
-
-            var record = new RealTimeReading
-            {
-                DateTime = DateTime.Parse(fields[0], CultureInfo.InvariantCulture),
-                Consumption = int.Parse(fields[1], CultureInfo.InvariantCulture),
-                Production = int.Parse(fields[2], CultureInfo.InvariantCulture)
-            };
-
-            yield return record;
+            yield return line.ParseCsv<RealTimeReading>(';');
         }
     }
 }
