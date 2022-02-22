@@ -25,7 +25,7 @@ public class PredictConsumptionServiceTests
         var data = new ConsumptionData
         {
             Hour = DateTime.Parse("2022-02-21T09:00:00"),
-            ConsumptionDataConsumption = new ConsumptionDataConsumption
+            Consumption = new ConsumptionDataConsumption
             {
                 Yesterday = 10,
                 LastWeek = 20,
@@ -80,7 +80,7 @@ public class PredictConsumptionServiceTests
         var data = new ConsumptionData
         {
             Hour = DateTime.Parse("2022-02-21T09:00:00"),
-            ConsumptionDataConsumption = new ConsumptionDataConsumption
+            Consumption = new ConsumptionDataConsumption
             {
                 Yesterday = 10,
                 LastWeek = 20,
@@ -117,11 +117,11 @@ public class PredictConsumptionServiceTests
 
         for(var i = 1; i <= 40; i++)
         {
-            data.ConsumptionDataConsumption.Yesterday = i;
+            data.Consumption.Yesterday = i;
             cut.FitModel(data, 100 + i);
         }
 
-        data.ConsumptionDataConsumption.Yesterday = 1;
+        data.Consumption.Yesterday = 1;
         var res = cut.Predict(data);
 
         res.Should().BeInRange(100, 120);

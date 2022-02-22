@@ -17,21 +17,23 @@ public class Input
     [LoadColumn(5)]
     public int WattPerHourLastWeekFromYesterday { get; set; }
     [LoadColumn(6)]
-    public double TemperatureForecast { get; set; }
+    public double WattPerHourWeekFactor { get; set; }
     [LoadColumn(7)]
-    public double WindSpeedForecast { get; set; }
+    public double TemperatureForecast { get; set; }
     [LoadColumn(8)]
-    public double TemperatureYesterday { get; set; }
+    public double WindSpeedForecast { get; set; }
     [LoadColumn(9)]
-    public double WindSpeedYesterday { get; set; }
+    public double TemperatureYesterday { get; set; }
     [LoadColumn(10)]
-    public double TemperatureLastWeek { get; set; }
+    public double WindSpeedYesterday { get; set; }
     [LoadColumn(11)]
-    public double WindSpeedLastWeek { get; set; }
+    public double TemperatureLastWeek { get; set; }
     [LoadColumn(12)]
-    public double TemperatureLastWeekFromYesterday { get; set; }
+    public double WindSpeedLastWeek { get; set; }
     [LoadColumn(13)]
-    public double WindSpeedLastWeekFromYesterday { get; set; }
+    public double TemperatureLastWeekFromYesterday { get; set; }
     [LoadColumn(14)]
+    public double WindSpeedLastWeekFromYesterday { get; set; }
+    [LoadColumn(15)]
     public int WattPerHour { get; set; }
 }

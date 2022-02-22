@@ -67,6 +67,7 @@ public class PredictConsumptionService : IPredictConsumptionService
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.WattPerHourYesterday)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.WattPerHourLastWeek)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.WattPerHourLastWeekFromYesterday)))
+            .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.WattPerHourWeekFactor)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.TemperatureForecast)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.WindSpeedForecast)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.TemperatureYesterday)))
@@ -82,6 +83,7 @@ public class PredictConsumptionService : IPredictConsumptionService
                 nameof(Input.WattPerHourYesterday),
                 nameof(Input.WattPerHourLastWeek),
                 nameof(Input.WattPerHourLastWeekFromYesterday),
+                nameof(Input.WattPerHourWeekFactor),
                 nameof(Input.TemperatureForecast),
                 nameof(Input.WindSpeedForecast),
                 nameof(Input.TemperatureYesterday),
@@ -110,9 +112,10 @@ public class PredictConsumptionService : IPredictConsumptionService
             Weekday = data.Hour.DayOfWeek.ToString(),
             Hour = data.Hour.Hour,
             Month = data.Hour.Month,
-            WattPerHourYesterday = data.ConsumptionDataConsumption.Yesterday,
-            WattPerHourLastWeek = data.ConsumptionDataConsumption.LastWeek,
-            WattPerHourLastWeekFromYesterday = data.ConsumptionDataConsumption.LastWeekFromYesterday,
+            WattPerHourYesterday = data.Consumption.Yesterday,
+            WattPerHourLastWeek = data.Consumption.LastWeek,
+            WattPerHourLastWeekFromYesterday = data.Consumption.LastWeekFromYesterday,
+            WattPerHourWeekFactor = data.Consumption.WeekFactor,
             TemperatureForecast = data.Weather.Forecast.Temperature,
             WindSpeedForecast = data.Weather.Forecast.WindSpeed,
             TemperatureYesterday = data.Weather.Yesterday.Temperature,

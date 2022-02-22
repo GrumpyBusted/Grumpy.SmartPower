@@ -69,7 +69,8 @@ public class SmartPowerServiceTests
         var predictConsumptionService = new PredictConsumptionService(Options.Create(_predictConsumptionServiceOptions));
         var realTimeReadingRepository = new RealTimeReadingRepository(Options.Create(_realTimeReadingRepositoryOptions), cacheFactory);
         var consumptionService = new ConsumptionService(powerMeterService, weatherService, predictConsumptionService, realTimeReadingRepository);
+        var logger = Substitute.For<ILogger<SmartPowerService>>();
 
-        return new SmartPowerService(Options.Create(_smartPowerServiceOptions), powerPriceService, houseBatteryService, productionService, consumptionService, realTimeReadingRepository, Substitute.For<ILogger<SmartPowerService>>());
+        return new SmartPowerService(Options.Create(_smartPowerServiceOptions), powerPriceService, houseBatteryService, productionService, consumptionService, realTimeReadingRepository, logger, predictConsumptionService, predictProductionService, weatherService);
     }
 }

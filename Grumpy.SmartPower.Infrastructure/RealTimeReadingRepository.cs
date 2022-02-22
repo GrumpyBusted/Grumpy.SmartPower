@@ -45,7 +45,7 @@ public class RealTimeReadingRepository : IRealTimeReadingRepository
     public int? GetProduction(DateTime hour)
     {
         return _fileCache.TryGetIfNotSet($"{GetType().FullName}:Production:{hour}", TimeSpan.FromDays(365),
-            () => GetValues(hour).Consumption);
+            () => GetValues(hour).Production);
     }
 
     private RealTimeReading GetValues(DateTime hour)

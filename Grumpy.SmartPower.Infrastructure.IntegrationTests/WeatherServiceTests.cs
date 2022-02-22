@@ -10,6 +10,7 @@ using NSubstitute;
 using System;
 using Grumpy.Caching.Interface;
 using Xunit;
+using Grumpy.Caching.TestMocks;
 
 namespace Grumpy.SmartPower.Infrastructure.IntegrationTests;
 
@@ -65,6 +66,6 @@ public class WeatherServiceTests
         var openWeatherMapClient = new OpenWeatherMapClient(Options.Create(_openWeatherMapClientOptions), new RestClientFactory(Substitute.For<ILoggerFactory>()));
         var visualCrossingWeatherClient = new VisualCrossingWeatherClient(Options.Create(_visualCrossingWeatherClientOptions), new RestClientFactory(Substitute.For<ILoggerFactory>()));
 
-        return new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider(), Substitute.For<ICacheFactory>());
+        return new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider(), TestCacheFactory.Instance);
     }
 }

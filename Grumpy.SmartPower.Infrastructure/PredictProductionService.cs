@@ -26,7 +26,7 @@ public class PredictProductionService : IPredictProductionService
             return null;
 
         var model = _context.Model.Load(_options.ModelPath, out _);
-        
+
         return _context.Model.CreatePredictionEngine<Input, Output>(model);
     }
 
@@ -66,6 +66,8 @@ public class PredictProductionService : IPredictProductionService
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.Sunlight)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.SunAltitude)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.SunDirection)))
+            .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.HorizontalAngle)))
+            .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.VerticalAngle)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.Temperature)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.CloudCover)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.WindSpeed)))
@@ -76,12 +78,15 @@ public class PredictProductionService : IPredictProductionService
                 nameof(Input.Sunlight),
                 nameof(Input.SunAltitude),
                 nameof(Input.SunDirection),
+                nameof(Input.HorizontalAngle),
+                nameof(Input.VerticalAngle),
                 nameof(Input.Temperature),
                 nameof(Input.CloudCover),
                 nameof(Input.WindSpeed),
                 nameof(Input.Calculated)))
             .Append(_context.Transforms.CopyColumns("Label", nameof(Input.WattPerHour)))
             .Append(_context.Regression.Trainers.FastForest());
+
         var model = pipeline.Fit(dataView);
 
         var folder = Path.GetDirectoryName(_options.ModelPath) ?? ".";
@@ -98,9 +103,11 @@ public class PredictProductionService : IPredictProductionService
         {
             Hour = data.Hour.Hour,
             Month = data.Hour.Month,
-            Sunlight = data.Sun.Sunlight,
+            Sunlight = (int)data.Sun.Sunlight.TotalSeconds,
             SunAltitude = data.Sun.Altitude,
             SunDirection = data.Sun.Direction,
+            HorizontalAngle = data.Sun.HorizontalAngle,
+            VerticalAngle = data.Sun.VerticalAngle,
             Temperature = data.Weather.Temperature,
             CloudCover = data.Weather.CloudCover,
             WindSpeed = data.Weather.WindSpeed,

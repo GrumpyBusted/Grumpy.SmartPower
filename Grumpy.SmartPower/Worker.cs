@@ -19,7 +19,7 @@ public class Worker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var lastCalibrate = DateTime.Now.AddDays(-1);
-        var lastModelUpdate = DateTime.Now;
+        var lastModelUpdate = DateTime.Now.AddDays(-1);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -27,19 +27,19 @@ public class Worker : BackgroundService
 
             _logger.LogInformation("Worker running at: {time}", now);
 
-            if (now - lastCalibrate > TimeSpan.FromMilliseconds(_options.Interval))
-            {
-                lastCalibrate = now;
-                _smartPowerService.Execute(now);
-            }
+            _smartPowerService.SaveData(now);
 
-            if (now.Hour != lastModelUpdate.Hour)
+            if (now.ToString("yyyy-MM-ddTHH") != lastModelUpdate.ToString("yyyy-MM-ddTHH"))
             {
                 lastModelUpdate = now;
                 _smartPowerService.UpdateModel(now);
             }
 
-            _smartPowerService.SaveData(now);
+            if (now - lastCalibrate > TimeSpan.FromMilliseconds(_options.Interval))
+            {
+                lastCalibrate = now;
+                _smartPowerService.Execute(now);
+            }
 
             await Task.Delay(60000, stoppingToken);
         }

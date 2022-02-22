@@ -112,7 +112,7 @@ public class RealTimeReadingRepositoryTests
 
         var res = cut.GetProduction(DateTime.Parse("2022-02-21T09:00:00"));
 
-        res.Should().Be(2);
+        res.Should().Be(12);
     }
 
     private static IRealTimeReadingRepository CreateTestObject(string path)

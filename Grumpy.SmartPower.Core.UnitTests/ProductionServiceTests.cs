@@ -247,6 +247,37 @@ public class ProductionServiceTests
         res.First().WattPerHour.Should().BeCloseTo(7000, 200);
     }
 
+
+    [Fact]
+    public void GetDataShouldReturnData()
+    {
+        var hour = DateTime.Parse("2022-02-21T09:00:00");
+
+        var weatherItem = new WeatherItem()
+        {
+            Hour = hour,
+            Temperature = 1,
+            CloudCover = 2,
+            WindSpeed = 3
+        };
+
+        var cut = CreateTestObject(23, 112, 9000, 55, 150, 0.5, 0);
+
+        var res = cut.GetData(weatherItem);
+
+        res.Hour.Should().Be(DateTime.Parse("2022-02-21T09:00:00"));
+        res.Weather.Temperature.Should().Be(1);
+        res.Weather.CloudCover.Should().Be(2);
+        res.Weather.WindSpeed.Should().Be(3);
+        res.Sun.Sunlight.Should().Be(TimeSpan.FromHours(0.5));
+        res.Sun.Altitude.Should().Be(55);
+        res.Sun.Direction.Should().Be(150);
+        res.Sun.HorizontalAngle.Should().Be(52);
+        res.Sun.VerticalAngle.Should().Be(78);
+        res.Calculated.Should().Be(3430);
+    }
+
+
     private static ProductionService CreateTestObject(int panelAngle, int panelDirection, int panelCapacity, double sunAltitude, double sunDirection, double sunlightHours, int cloudCover)
     {
         var options = new ProductionServiceOptions
