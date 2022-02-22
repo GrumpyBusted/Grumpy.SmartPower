@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Linq;
+using Grumpy.Caching.TestMocks;
 using Xunit;
 
 namespace Grumpy.SmartPower.Infrastructure.UnitTests;
@@ -99,6 +100,21 @@ public class RealTimeReadingRepositoryTests
         res.Should().Be(2);
     }
 
+    [Fact]
+    public void GetProductionReadFileWithMoreRecordsShouldReturnCorrectValue()
+    {
+        var fileName = $"Repository\\{Guid.NewGuid()}.csv";
+
+        var cut = CreateTestObject(fileName);
+        cut.Save(DateTime.Parse("2022-02-21T09:00:00"), 1, 11);
+        cut.Save(DateTime.Parse("2022-02-21T09:10:00"), 3, 13);
+        cut.Save(DateTime.Parse("2022-02-21T10:00:00"), 5, 15);
+
+        var res = cut.GetProduction(DateTime.Parse("2022-02-21T09:00:00"));
+
+        res.Should().Be(2);
+    }
+
     private static IRealTimeReadingRepository CreateTestObject(string path)
     {
         var options = new RealTimeReadingRepositoryOptions
@@ -106,6 +122,6 @@ public class RealTimeReadingRepositoryTests
             RepositoryPath = path
         };
 
-        return new RealTimeReadingRepository(Options.Create(options));
+        return new RealTimeReadingRepository(Options.Create(options), TestCacheFactory.Instance);
     }
 }

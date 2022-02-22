@@ -1,19 +1,18 @@
-﻿using Grumpy.Caching.Extensions;
-using Grumpy.PowerMeter.Client.SmartMe.Interface;
+﻿using Grumpy.PowerMeter.Client.SmartMe.Interface;
 using Grumpy.SmartPower.Core.Infrastructure;
-using System.Runtime.Caching;
+using Grumpy.Caching.Interface;
 
 namespace Grumpy.SmartPower.Infrastructure;
 
 public class PowerMeterService : IPowerMeterService
 {
     private readonly ISmartMePowerMeterClient _smartMePowerMeterClient;
-    private readonly FileCache _fileCache;
+    private readonly ICache _fileCache;
 
-    public PowerMeterService(ISmartMePowerMeterClient smartMePowerMeterClient)
+    public PowerMeterService(ISmartMePowerMeterClient smartMePowerMeterClient, ICacheFactory cacheFactory)
     {
         _smartMePowerMeterClient = smartMePowerMeterClient;
-        _fileCache = new FileCache(FileCacheManagers.Hashed);
+        _fileCache = cacheFactory.FileCacheInstance(GetType().FullName ?? nameof(PowerMeterService));
     }
 
     public int GetWattPerHour(DateTime hour)

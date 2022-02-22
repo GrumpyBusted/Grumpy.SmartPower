@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using FluentAssertions;
 using Grumpy.Common.Extensions;
 using Xunit;
@@ -41,12 +40,25 @@ public class StringExtensionsTests
         res.Should().BeFalse();
     }
 
-    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
+    [Fact]
+    public void ValidFileNameShouldWork()
+    {
+        const string value = "Test:File\\Name";
+
+        var res = value.ValidFileName();
+
+        res.Should().Be("Test_File_Name");
+    }
+
     private class TestClass
     {
+        // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
         public string Name { get; set; } = "";
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public int Year { get; set; }
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public DateTime Birthday { get; set; }
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         public double Salary { get; set; }
     }
 }

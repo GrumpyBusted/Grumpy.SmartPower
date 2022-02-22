@@ -1,8 +1,7 @@
-﻿using Grumpy.Caching.Extensions;
-using Grumpy.HouseBattery.Client.Sonnen.Interface;
+﻿using Grumpy.HouseBattery.Client.Sonnen.Interface;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Model;
-using System.Runtime.Caching;
+using Grumpy.Caching.Interface;
 using Grumpy.HouseBattery.Client.Sonnen.Dto;
 
 namespace Grumpy.SmartPower.Infrastructure;
@@ -11,13 +10,13 @@ public class HouseBatteryService : IHouseBatteryService
 {
     private readonly ISonnenBatteryClient _sonnenBatteryClient;
     private readonly Lazy<int> _chargeFromGridWatt;
-    private readonly MemoryCache _memoryCache;
+    private readonly ICache _memoryCache;
 
-    public HouseBatteryService(ISonnenBatteryClient sonnenBatteryClient)
+    public HouseBatteryService(ISonnenBatteryClient sonnenBatteryClient, ICacheFactory cacheFactory)
     {
         _sonnenBatteryClient = sonnenBatteryClient;
         _chargeFromGridWatt = new Lazy<int>(GetBatterySize);
-        _memoryCache = new MemoryCache(GetType().FullName ?? nameof(HouseBatteryService));
+        _memoryCache = cacheFactory.MemoryCacheInstance(GetType().FullName ?? nameof(HouseBatteryService));
     }
 
     public bool IsBatteryFull()

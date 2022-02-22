@@ -8,6 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="FileCache" Version="3.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Grumpy.Common\Grumpy.Common.csproj" />
   </ItemGroup>
 
 </Project>

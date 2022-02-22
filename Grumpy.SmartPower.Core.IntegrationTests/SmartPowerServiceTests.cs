@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using System;
 using System.IO;
+using Grumpy.Caching;
 using Xunit;
 
 namespace Grumpy.SmartPower.Core.IntegrationTests;
@@ -30,6 +31,7 @@ public class SmartPowerServiceTests
     private readonly SmartMePowerMeterClientOptions _smartMePowerMeterClientOptions = new();
     private readonly PredictConsumptionServiceOptions _predictConsumptionServiceOptions = new();
     private readonly RealTimeReadingRepositoryOptions _realTimeReadingRepositoryOptions = new();
+    private readonly CacheOptions _cacheOptions = new();
 
     [Fact]
     public void SaveDataShouldSaveToFile()
@@ -48,21 +50,22 @@ public class SmartPowerServiceTests
     private ISmartPowerService CreateTestObject()
     {
         var dateTimeProvider = new DateTimeProvider();
+        var cacheFactory = new CacheFactory(Options.Create(_cacheOptions)); 
         var solarInformation = new SolarInformation.SolarInformation();
         var solarService = new SolarService(Options.Create(_solarServiceOptions), solarInformation);
         var restClientFactory = new RestClientFactory(Substitute.For<ILoggerFactory>());
         var openWeatherMapClient = new OpenWeatherMapClient(Options.Create(_openWeatherMapClientOptions), restClientFactory);
         var visualCrossingWeatherClient = new VisualCrossingWeatherClient(Options.Create(_visualCrossingWeatherOptions), restClientFactory);
-        var weatherService = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, dateTimeProvider);
+        var weatherService = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, dateTimeProvider, cacheFactory);
         var productionService = new ProductionService(Options.Create(_productionServiceOptions), solarService, weatherService);
         var energyDataServiceClient = new EnergyDataServiceClient(restClientFactory);
-        var powerPriceService = new PowerPriceService(energyDataServiceClient);
+        var powerPriceService = new PowerPriceService(energyDataServiceClient, cacheFactory);
         var sonnenBatteryClient = new SonnenBatteryClient(Options.Create(_sonnenBatteryClientOptions), restClientFactory);
-        var houseBatteryService = new HouseBatteryService(sonnenBatteryClient);
+        var houseBatteryService = new HouseBatteryService(sonnenBatteryClient, cacheFactory);
         var smartMePowerMeterClient = new SmartMePowerMeterClient(Options.Create(_smartMePowerMeterClientOptions), restClientFactory);
-        var powerMeterService = new PowerMeterService(smartMePowerMeterClient);
+        var powerMeterService = new PowerMeterService(smartMePowerMeterClient, cacheFactory);
         var predictConsumptionService = new PredictConsumptionService(Options.Create(_predictConsumptionServiceOptions));
-        var realTimeReadingRepository = new RealTimeReadingRepository(Options.Create(_realTimeReadingRepositoryOptions));
+        var realTimeReadingRepository = new RealTimeReadingRepository(Options.Create(_realTimeReadingRepositoryOptions), cacheFactory);
         var consumptionService = new ConsumptionService(powerMeterService, weatherService, predictConsumptionService, realTimeReadingRepository);
 
         return new SmartPowerService(Options.Create(_smartPowerServiceOptions), powerPriceService, houseBatteryService, productionService, consumptionService, realTimeReadingRepository, Substitute.For<ILogger<SmartPowerService>>());

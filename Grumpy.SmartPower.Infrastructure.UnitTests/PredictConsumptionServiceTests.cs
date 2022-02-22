@@ -3,6 +3,7 @@ using Grumpy.SmartPower.Core.Consumption;
 using Microsoft.Extensions.Options;
 using System;
 using System.IO;
+using Grumpy.SmartPower.Core.Model;
 using Xunit;
 
 namespace Grumpy.SmartPower.Infrastructure.UnitTests;
@@ -12,7 +13,7 @@ public class PredictConsumptionServiceTests
     [Fact]
     public void TrainModelShouldCreateFiles()
     {
-        var options = new PredictConsumptionServiceOptions()
+        var options = new PredictConsumptionServiceOptions
         {
             DataPath = $"ConsumptionData-{Guid.NewGuid()}.csv",
             ModelPath = $"ConsumptionModel-{Guid.NewGuid()}.zip"
@@ -20,40 +21,40 @@ public class PredictConsumptionServiceTests
 
         var cut = new PredictConsumptionService(Options.Create(options));
 
-        var data = new PredictionData()
+        var data = new PredictionData
         {
             Hour = DateTime.Parse("2022-02-21T09:00:00"),
-            Consumption = new()
+            Consumption = new PredictionConsumptionData
             {
                 Yesterday = 10,
                 LastWeek = 20,
                 LastWeekFromYesterday = 30
             },
-            Weather = new()
+            Weather = new PredictionWeatherData
             {
-                Forecast = new()
+                Forecast = new WeatherItem
                 {
                     Temperature = 1,
                     CloudCover = 2,
-                    WindSpeed = 3,
+                    WindSpeed = 3
                 },
-                Yesterday = new()
+                Yesterday = new WeatherItem
                 {
                     Temperature = 4,
                     CloudCover = 5,
-                    WindSpeed = 6,
+                    WindSpeed = 6
                 },
-                LastWeek = new()
+                LastWeek = new WeatherItem
                 {
                     Temperature = 7,
                     CloudCover = 8,
-                    WindSpeed = 9,
+                    WindSpeed = 9
                 },
-                LastWeekFromYesterday = new()
+                LastWeekFromYesterday = new WeatherItem
                 {
                     Temperature = 10,
                     CloudCover = 11,
-                    WindSpeed = 12,
+                    WindSpeed = 12
                 }
             }
         };
@@ -67,7 +68,7 @@ public class PredictConsumptionServiceTests
     [Fact]
     public void AfterTrainingShouldPredict()
     {
-        var options = new PredictConsumptionServiceOptions()
+        var options = new PredictConsumptionServiceOptions
         {
             DataPath = $"ConsumptionData-{Guid.NewGuid()}.csv",
             ModelPath = $"ConsumptionModel-{Guid.NewGuid()}.zip"
@@ -75,40 +76,40 @@ public class PredictConsumptionServiceTests
 
         var cut = new PredictConsumptionService(Options.Create(options));
 
-        var data = new PredictionData()
+        var data = new PredictionData
         {
             Hour = DateTime.Parse("2022-02-21T09:00:00"),
-            Consumption = new()
+            Consumption = new PredictionConsumptionData
             {
                 Yesterday = 10,
                 LastWeek = 20,
                 LastWeekFromYesterday = 30
             },
-            Weather = new()
+            Weather = new PredictionWeatherData
             {
-                Forecast = new()
+                Forecast = new WeatherItem
                 {
                     Temperature = 1,
                     CloudCover = 2,
-                    WindSpeed = 3,
+                    WindSpeed = 3
                 },
-                Yesterday = new()
+                Yesterday = new WeatherItem
                 {
                     Temperature = 4,
                     CloudCover = 5,
-                    WindSpeed = 6,
+                    WindSpeed = 6
                 },
-                LastWeek = new()
+                LastWeek = new WeatherItem
                 {
                     Temperature = 7,
                     CloudCover = 8,
-                    WindSpeed = 9,
+                    WindSpeed = 9
                 },
-                LastWeekFromYesterday = new()
+                LastWeekFromYesterday = new WeatherItem
                 {
                     Temperature = 10,
                     CloudCover = 11,
-                    WindSpeed = 12,
+                    WindSpeed = 12
                 }
             }
         };

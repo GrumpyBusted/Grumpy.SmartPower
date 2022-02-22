@@ -1,12 +1,10 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Grumpy.Caching.Extensions;
-using Grumpy.Common.Extensions;
+﻿using Grumpy.Common.Extensions;
 using Grumpy.Common.Interface;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Model;
 using Grumpy.Weather.Client.OpenWeatherMap.Interface;
 using Grumpy.Weather.Client.VisualCrossing.Interface;
-using System.Runtime.Caching;
+using Grumpy.Caching.Interface;
 
 namespace Grumpy.SmartPower.Infrastructure;
 
@@ -15,16 +13,16 @@ public class WeatherService : IWeatherService
     private readonly IOpenWeatherMapClient _openWeatherMapClient;
     private readonly IVisualCrossingWeatherClient _visualCrossingWeatherClient;
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly FileCache _fileCache;
-    private readonly MemoryCache _memoryCache;
+    private readonly ICache _fileCache;
+    private readonly ICache _memoryCache;
 
-    public WeatherService(IOpenWeatherMapClient openWeatherMapClient, IVisualCrossingWeatherClient visualCrossingWeatherClient, IDateTimeProvider dateTimeProvider)
+    public WeatherService(IOpenWeatherMapClient openWeatherMapClient, IVisualCrossingWeatherClient visualCrossingWeatherClient, IDateTimeProvider dateTimeProvider, ICacheFactory cacheFactory)
     {
         _openWeatherMapClient = openWeatherMapClient;
         _visualCrossingWeatherClient = visualCrossingWeatherClient;
         _dateTimeProvider = dateTimeProvider;
-        _fileCache = new FileCache(FileCacheManagers.Hashed);
-        _memoryCache = new MemoryCache(GetType().FullName ?? nameof(WeatherService));
+        _fileCache = cacheFactory.FileCacheInstance(GetType().FullName ?? nameof(WeatherService));
+        _memoryCache = cacheFactory.MemoryCacheInstance(GetType().FullName ?? nameof(WeatherService));
     }
 
     public IEnumerable<WeatherItem> GetForecast(DateTime from, DateTime to)
@@ -40,7 +38,6 @@ public class WeatherService : IWeatherService
             () => _openWeatherMapClient.GetForecast().Where(i => i.Hour >= from && i.Hour <= to).OrderBy(x => x.Hour).ToList());
     }
 
-    [SuppressMessage("ReSharper", "AccessToModifiedClosure")]
     public IEnumerable<WeatherItem> GetHistory(DateTime from, DateTime to)
     {
         if (from > to)
@@ -56,6 +53,7 @@ public class WeatherService : IWeatherService
         {
             var timeout = date == today ? TimeSpan.FromHours(1) : TimeSpan.FromDays(365);
 
+            // ReSharper disable once AccessToModifiedClosure
             list.AddRange(_fileCache.TryGetIfNotSet($"{GetType().FullName}:History:{date}", timeout, () => GetHistory(date)));
         }
 
@@ -72,3 +70,4 @@ public class WeatherService : IWeatherService
         return _openWeatherMapClient.GetSunInformation();
     }
 }
+

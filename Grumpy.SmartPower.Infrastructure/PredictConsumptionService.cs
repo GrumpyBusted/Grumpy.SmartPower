@@ -24,25 +24,19 @@ public class PredictConsumptionService : IPredictConsumptionService
 
     private ITransformer? GetModel()
     {
-        if (File.Exists(_options.ModelPath))
-            return _context.Model.Load(_options.ModelPath, out _);
-
-        return null;
+        return File.Exists(_options.ModelPath) ? _context.Model.Load(_options.ModelPath, out _) : null;
     }
 
     private PredictionEngine<Input, Output>? GetPredictionEngine()
     {
-        if (_model?.Value == null)
-            return null;    
-
-        return _context.Model.CreatePredictionEngine<Input, Output>(_model.Value);
+        return _model.Value == null ? null : _context.Model.CreatePredictionEngine<Input, Output>(_model.Value);
     }
 
     public int? Predict(PredictionData data)
     {
         var input = MapToModelInput(data);
 
-        var c = _predictionEngine?.Value;
+        var c = _predictionEngine.Value;
         var output = c?.Predict(input);
 
         if (float.IsNaN(output?.Score ?? float.NaN))

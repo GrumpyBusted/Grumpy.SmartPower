@@ -1,21 +1,19 @@
-﻿using Grumpy.Caching.Extensions;
-using Grumpy.Common.Extensions;
+﻿using Grumpy.Common.Extensions;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Microsoft.Extensions.Options;
-using System.Globalization;
-using System.Runtime.Caching;
+using Grumpy.Caching.Interface;
 
 namespace Grumpy.SmartPower.Infrastructure;
 
 public class RealTimeReadingRepository : IRealTimeReadingRepository
 {
     private readonly RealTimeReadingRepositoryOptions _options;
-    private readonly FileCache _fileCache;
+    private readonly ICache _fileCache;
 
-    public RealTimeReadingRepository(IOptions<RealTimeReadingRepositoryOptions> options)
+    public RealTimeReadingRepository(IOptions<RealTimeReadingRepositoryOptions> options, ICacheFactory cacheFactory)
     {
         _options = options.Value;
-        _fileCache = new FileCache(FileCacheManagers.Hashed);
+        _fileCache = cacheFactory.FileCacheInstance(GetType().FullName ?? nameof(RealTimeReadingRepository));
     }
 
     public void Save(DateTime dateTime, int consumption, int production)

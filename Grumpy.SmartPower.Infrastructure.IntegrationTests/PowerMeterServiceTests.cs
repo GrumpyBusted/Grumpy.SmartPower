@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using System;
+using Grumpy.Caching.TestMocks;
 using Xunit;
 
 namespace Grumpy.SmartPower.Infrastructure.IntegrationTests;
@@ -32,6 +33,6 @@ public class PowerMeterServiceTests
     {
         var client = new SmartMePowerMeterClient(Options.Create(_options), new RestClientFactory(Substitute.For<ILoggerFactory>()));
 
-        return new PowerMeterService(client);
+        return new PowerMeterService(client, TestCacheFactory.Instance);
     }
 }

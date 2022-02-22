@@ -8,6 +8,7 @@ using System;
 using Grumpy.SmartPower.Core.Dto;
 using Xunit;
 using System.Linq;
+using Grumpy.Caching.TestMocks;
 
 namespace Grumpy.SmartPower.Infrastructure.IntegrationTests;
 
@@ -27,6 +28,6 @@ public class PowerPriceServiceTests
     {
         var client = new EnergyDataServiceClient(new RestClientFactory(Substitute.For<ILoggerFactory>()));
 
-        return new PowerPriceService(client);
+        return new PowerPriceService(client, TestCacheFactory.Instance);
     }
 }

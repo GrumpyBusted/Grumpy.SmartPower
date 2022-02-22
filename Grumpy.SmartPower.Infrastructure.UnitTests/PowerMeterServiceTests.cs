@@ -2,6 +2,7 @@
 using Grumpy.PowerMeter.Client.SmartMe.Interface;
 using NSubstitute;
 using System;
+using Grumpy.Caching.TestMocks;
 using Xunit;
 
 namespace Grumpy.SmartPower.Infrastructure.UnitTests;
@@ -14,7 +15,7 @@ public class PowerMeterServiceTests
         var client = Substitute.For<ISmartMePowerMeterClient>();
         client.GetValue(Arg.Any<DateTime>()).Returns(123);
 
-        var cut = new PowerMeterService(client);
+        var cut = new PowerMeterService(client, TestCacheFactory.Instance);
 
         var res = cut.GetReading(DateTime.Now);
 
@@ -28,7 +29,7 @@ public class PowerMeterServiceTests
         client.GetValue(DateTime.Parse("2022-02-12T13:00:00")).Returns(300);
         client.GetValue(DateTime.Parse("2022-02-12T14:00:00")).Returns(400);
 
-        var cut = new PowerMeterService(client);
+        var cut = new PowerMeterService(client, TestCacheFactory.Instance);
 
         var res = cut.GetWattPerHour(DateTime.Parse("2022-02-12T13:34:00"));
 

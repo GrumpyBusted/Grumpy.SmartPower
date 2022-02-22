@@ -1,3 +1,5 @@
+using Grumpy.Caching;
+using Grumpy.Caching.Interface;
 using Grumpy.Common;
 using Grumpy.Common.Interface;
 using Grumpy.HouseBattery.Client.Sonnen;
@@ -44,6 +46,7 @@ var host = Host.CreateDefaultBuilder(args)
             .AddSingleton<IVisualCrossingWeatherClient, VisualCrossingWeatherClient>()
             .AddSingleton<IRealTimeReadingRepository, RealTimeReadingRepository>()
             .AddSingleton<IDateTimeProvider, DateTimeProvider>()
+            .AddSingleton<ICacheFactory, CacheFactory>()
             .Configure<WorkerOptions>(context.Configuration.GetSection("Application"))
             .Configure<SmartPowerServiceOptions>(context.Configuration.GetSection("SmartPower"))
             .Configure<SolarServiceOptions>(context.Configuration.GetSection("SmartPower:Location"))
@@ -55,6 +58,7 @@ var host = Host.CreateDefaultBuilder(args)
             .Configure<VisualCrossingWeatherClientOptions>(context.Configuration.GetSection("SmartPower:Location"))
             .Configure<VisualCrossingWeatherClientOptions>(context.Configuration.GetSection("VisualCrossingWeather"))
             .Configure<PredictConsumptionServiceOptions>(context.Configuration.GetSection("SmartPower:MachineLearning"))
+            .Configure<CacheOptions>(context.Configuration.GetSection("SmartPower:Cache"))
             .Configure<RealTimeReadingRepositoryOptions>(context.Configuration.GetSection("SmartPower"));
     })
     .Build();

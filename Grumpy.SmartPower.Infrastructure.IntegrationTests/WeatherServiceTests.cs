@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using System;
-using System.Diagnostics.CodeAnalysis;
+using Grumpy.Caching.Interface;
 using Xunit;
 
 namespace Grumpy.SmartPower.Infrastructure.IntegrationTests;
@@ -22,11 +22,11 @@ public class WeatherServiceTests
         ApiKey = "b4afbfcc5aacca25a5345d0ed4d17dd3"
     };
 
-    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private readonly VisualCrossingWeatherClientOptions _visualCrossingWeatherClientOptions = new()
     {
         Latitude = 55.5763,
         Longitude = 12.2932,
+        // ReSharper disable twice StringLiteralTypo
         ApiKey = "2CPMKXLX4PYPSKU4W3TEK5CPP"
     };
 
@@ -65,6 +65,6 @@ public class WeatherServiceTests
         var openWeatherMapClient = new OpenWeatherMapClient(Options.Create(_openWeatherMapClientOptions), new RestClientFactory(Substitute.For<ILoggerFactory>()));
         var visualCrossingWeatherClient = new VisualCrossingWeatherClient(Options.Create(_visualCrossingWeatherClientOptions), new RestClientFactory(Substitute.For<ILoggerFactory>()));
 
-        return new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider());
+        return new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider(), Substitute.For<ICacheFactory>());
     }
 }

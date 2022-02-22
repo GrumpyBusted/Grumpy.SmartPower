@@ -1,7 +1,6 @@
+using System.Threading;
 using FluentAssertions;
 using Grumpy.Caching.Extensions;
-using System.Runtime.Caching;
-using System.Threading;
 using Xunit;
 
 namespace Grumpy.Caching.UnitTests;
@@ -11,7 +10,7 @@ public class ObjectCacheExtensionsTests
     [Fact]
     public void TryGetIfNotSetWithLowTimeSpanShouldNotUseCache()
     {
-        var cache = new MemoryCache("Test");
+        var cache = new System.Runtime.Caching.MemoryCache("Test");
 
         var first = cache.TryGetIfNotSet("Key", System.TimeSpan.FromMilliseconds(1), () => 1);
 
@@ -27,7 +26,7 @@ public class ObjectCacheExtensionsTests
     [Fact]
     public void TryGetIfNotSetWitHeightTimeSpanShouldUseCache()
     {
-        var cache = new MemoryCache("Test");
+        var cache = new System.Runtime.Caching.MemoryCache("Test");
 
         var first = cache.TryGetIfNotSet("Key", System.TimeSpan.FromHours(1), () => 1);
 

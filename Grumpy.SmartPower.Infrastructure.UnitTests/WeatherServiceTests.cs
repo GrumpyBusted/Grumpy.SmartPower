@@ -9,6 +9,8 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Grumpy.Caching.Interface;
+using Grumpy.Caching.TestMocks;
 using Xunit;
 
 namespace Grumpy.SmartPower.Infrastructure.UnitTests;
@@ -26,7 +28,7 @@ public class WeatherServiceTests
         });
         var visualCrossingWeatherClient = Substitute.For<IVisualCrossingWeatherClient>();
 
-        var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider());
+        var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider(), Substitute.For<ICacheFactory>());
 
         var res = cut.GetSunInformation();
 
@@ -56,7 +58,7 @@ public class WeatherServiceTests
         var dateTimeProvider = Substitute.For<IDateTimeProvider>();
         dateTimeProvider.Now.Returns(DateTime.Parse("2022-01-01T00:00:00"));
 
-        var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, dateTimeProvider);
+        var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, dateTimeProvider, TestCacheFactory.Instance);
 
         var res = cut.GetForecast(DateTime.Parse("2022-01-02T00:00:00"), DateTime.Parse("2022-01-02T23:59:59"));
 
@@ -87,7 +89,7 @@ public class WeatherServiceTests
         var visualCrossingWeatherClient = Substitute.For<IVisualCrossingWeatherClient>();
         visualCrossingWeatherClient.Get(Arg.Any<DateOnly>()).Returns(list);
 
-        var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider());
+        var cut = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, new DateTimeProvider(), TestCacheFactory.Instance);
 
         var res = cut.GetHistory(DateTime.Parse("2022-01-03T11:00:00"), DateTime.Parse("2022-01-03T13:00:00")).ToList();
 

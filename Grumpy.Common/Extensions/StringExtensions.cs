@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Security.AccessControl;
+using System.Text;
 
 namespace Grumpy.Common.Extensions;
 
@@ -21,7 +20,7 @@ public static class StringExtensions
             var field = list[index++];
 
             if (field[0] == '\"' && field[^1] == '\"')
-                field = field[1 .. ^1];
+                field = field[1..^1];
 
             var type = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
@@ -38,5 +37,29 @@ public static class StringExtensions
         var header = res.CsvHeader(separator);
 
         return header == value;
+    }
+
+    private static readonly Lazy<char[]> Invalids = new(Path.GetInvalidFileNameChars());
+
+    public static string ValidFileName(this string value)
+    {
+        var sb = new StringBuilder(value.Length);
+        var changed = false;
+
+        foreach (var c in value)
+        {
+            if (Invalids.Value.Contains(c))
+            {
+                changed = true;
+                sb.Append('_');
+            }
+            else
+                sb.Append(c);
+        }
+
+        if (sb.Length == 0)
+            return "_";
+
+        return changed ? sb.ToString() : value;
     }
 }

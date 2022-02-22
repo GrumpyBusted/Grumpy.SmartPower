@@ -20,7 +20,7 @@ public class ConsumptionServiceTests
     [Fact]
     public void PredictWithResultFromPredictionServiceShouldUseValue()
     {
-        _weatherService.GetForecast(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<WeatherItem>()
+        _weatherService.GetForecast(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<WeatherItem>
         {
             new()
             {
@@ -40,15 +40,15 @@ public class ConsumptionServiceTests
     public void PredictNoAnswerFromPredictionServiceShouldLastWeekConsumption()
     {
         var testDate = DateTime.Parse("2022-02-21T09:00:00");
-        _weatherService.GetForecast(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<WeatherItem>()
+        _weatherService.GetForecast(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<WeatherItem>
         {
             new()
             {
                 Hour = testDate
             }
         });
-        _predictConsumptionService.Predict(Arg.Any<PredictionData>()).Returns<int?>(_ => null);
-        _realTimeReadingRepository.GetConsumption(Arg.Is<DateTime>(testDate.AddDays(-7))).Returns(1);
+        _predictConsumptionService.Predict(Arg.Any<PredictionData>()).Returns(_ => null);
+        _realTimeReadingRepository.GetConsumption(Arg.Is(testDate.AddDays(-7))).Returns(1);
 
         var cut = CreateTestObject();
 
@@ -61,16 +61,16 @@ public class ConsumptionServiceTests
     public void PredictNoAnswerFromPredictionServiceAndNothingFromRepositoryShouldLastWeekConsumptionFromPowerMeter()
     {
         var testDate = DateTime.Parse("2022-02-21T09:00:00");
-        _weatherService.GetForecast(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<WeatherItem>()
+        _weatherService.GetForecast(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<WeatherItem>
         {
             new()
             {
                 Hour = testDate
             }
         });
-        _predictConsumptionService.Predict(Arg.Any<PredictionData>()).Returns<int?>(_ => null);
-        _realTimeReadingRepository.GetConsumption(Arg.Is<DateTime>(testDate.AddDays(-7))).Returns<int?>(_ => null);
-        _powerMeterService.GetWattPerHour(Arg.Is<DateTime>(testDate.AddDays(-7))).Returns(1);
+        _predictConsumptionService.Predict(Arg.Any<PredictionData>()).Returns(_ => null);
+        _realTimeReadingRepository.GetConsumption(Arg.Is(testDate.AddDays(-7))).Returns(_ => null);
+        _powerMeterService.GetWattPerHour(Arg.Is(testDate.AddDays(-7))).Returns(1);
 
         var cut = CreateTestObject();
 
@@ -82,7 +82,7 @@ public class ConsumptionServiceTests
     [Fact]
     public void TwoHoursInForecastShouldReturnListOfTwo()
     {
-        _weatherService.GetForecast(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<WeatherItem>()
+        _weatherService.GetForecast(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<WeatherItem>
         {
             new()
             {

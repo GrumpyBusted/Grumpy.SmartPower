@@ -1,8 +1,7 @@
-﻿using Grumpy.Caching.Extensions;
-using Grumpy.PowerPrice.Client.EnergyDataService.Interface;
+﻿using Grumpy.PowerPrice.Client.EnergyDataService.Interface;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Model;
-using System.Runtime.Caching;
+using Grumpy.Caching.Interface;
 using Grumpy.SmartPower.Core.Dto;
 
 namespace Grumpy.SmartPower.Infrastructure;
@@ -10,12 +9,12 @@ namespace Grumpy.SmartPower.Infrastructure;
 public class PowerPriceService : IPowerPriceService
 {
     private readonly IEnergyDataServiceClient _energyDataServiceClient;
-    private readonly MemoryCache _memoryCache;
+    private readonly ICache _memoryCache;
 
-    public PowerPriceService(IEnergyDataServiceClient energyDataServiceClient)
+    public PowerPriceService(IEnergyDataServiceClient energyDataServiceClient, ICacheFactory cacheFactory)
     {
         _energyDataServiceClient = energyDataServiceClient;
-        _memoryCache = new MemoryCache(GetType().FullName ?? nameof(PowerPriceService));
+        _memoryCache = cacheFactory.MemoryCacheInstance(GetType().FullName ?? nameof(PowerPriceService));
     }
 
     public IEnumerable<PriceItem> GetPrices(PriceArea priceArea, PriceArea fallBackPriceArea, DateTime from, DateTime to)

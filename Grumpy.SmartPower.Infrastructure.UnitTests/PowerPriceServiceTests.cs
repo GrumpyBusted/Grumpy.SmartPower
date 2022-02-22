@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Grumpy.SmartPower.Core.Dto;
 using Xunit;
 using System.Linq;
+using Grumpy.Caching.TestMocks;
 
 namespace Grumpy.SmartPower.Infrastructure.UnitTests;
 
@@ -23,7 +24,7 @@ public class PowerPriceServiceTests
             }
         });
 
-        var cut = new PowerPriceService(client);
+        var cut = new PowerPriceService(client, TestCacheFactory.Instance);
 
         var res = cut.GetPrices(PriceArea.DK2, PriceArea.DK, DateTime.Parse("2022-02-01T00:00:00"), DateTime.Parse("2022-02-01T00:59:59"));
 
@@ -44,7 +45,7 @@ public class PowerPriceServiceTests
         });
         client.GetExchangeRate(Arg.Is(PriceArea.DK2), Arg.Is(DateTime.Parse("2022-03-01T00:00:00"))).Returns(750);
 
-        var cut = new PowerPriceService(client);
+        var cut = new PowerPriceService(client, TestCacheFactory.Instance);
 
         var res = cut.GetPrices(PriceArea.DK2, PriceArea.DK, DateTime.Parse("2022-03-01T00:00:00"), DateTime.Parse("2022-03-01T00:59:59"));
 
@@ -70,7 +71,7 @@ public class PowerPriceServiceTests
             }
         });
 
-        var cut = new PowerPriceService(client);
+        var cut = new PowerPriceService(client, TestCacheFactory.Instance);
 
         var res = cut.GetPrices(PriceArea.DK2, PriceArea.DK, DateTime.Parse("2022-03-01T00:00:00"), DateTime.Parse("2022-03-01T01:59:59")).ToList();
 
@@ -91,7 +92,7 @@ public class PowerPriceServiceTests
             }
         });
 
-        var cut = new PowerPriceService(client);
+        var cut = new PowerPriceService(client, TestCacheFactory.Instance);
 
         var res = cut.GetPrices(PriceArea.DK2, PriceArea.DK, DateTime.Parse("2022-03-01T00:00:00"), DateTime.Parse("2022-03-01T02:59:59")).ToList();
 
@@ -112,7 +113,7 @@ public class PowerPriceServiceTests
             }
         });
 
-        var cut = new PowerPriceService(client);
+        var cut = new PowerPriceService(client, TestCacheFactory.Instance);
 
         var res = cut.GetPrices(PriceArea.DK2, PriceArea.DK, DateTime.Parse("2022-03-01T00:00:00"), DateTime.Parse("2022-03-01T01:59:59")).ToList();
 
