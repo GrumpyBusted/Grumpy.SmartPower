@@ -27,7 +27,7 @@ public class ConsumptionServiceTests
                 Hour = DateTime.Parse("2022-02-21T09:00:00")
             }
         });
-        _predictConsumptionService.Predict(Arg.Any<PredictionData>()).Returns(1);
+        _predictConsumptionService.Predict(Arg.Any<ConsumptionData>()).Returns(1);
 
         var cut = CreateTestObject();
 
@@ -47,7 +47,7 @@ public class ConsumptionServiceTests
                 Hour = testDate
             }
         });
-        _predictConsumptionService.Predict(Arg.Any<PredictionData>()).Returns(_ => null);
+        _predictConsumptionService.Predict(Arg.Any<ConsumptionData>()).Returns(_ => null);
         _realTimeReadingRepository.GetConsumption(Arg.Is(testDate.AddDays(-7))).Returns(1);
 
         var cut = CreateTestObject();
@@ -68,7 +68,7 @@ public class ConsumptionServiceTests
                 Hour = testDate
             }
         });
-        _predictConsumptionService.Predict(Arg.Any<PredictionData>()).Returns(_ => null);
+        _predictConsumptionService.Predict(Arg.Any<ConsumptionData>()).Returns(_ => null);
         _realTimeReadingRepository.GetConsumption(Arg.Is(testDate.AddDays(-7))).Returns(_ => null);
         _powerMeterService.GetWattPerHour(Arg.Is(testDate.AddDays(-7))).Returns(1);
 

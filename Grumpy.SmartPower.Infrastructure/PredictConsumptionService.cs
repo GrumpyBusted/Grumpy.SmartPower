@@ -11,33 +11,30 @@ public class PredictConsumptionService : IPredictConsumptionService
 {
     private readonly PredictConsumptionServiceOptions _options;
     private readonly MLContext _context;
-    private readonly Lazy<ITransformer?> _model;
     private readonly Lazy<PredictionEngine<Input, Output>?> _predictionEngine;
 
     public PredictConsumptionService(IOptions<PredictConsumptionServiceOptions> options)
     {
         _options = options.Value;
         _context = new MLContext();
-        _model = new Lazy<ITransformer?>(GetModel);
         _predictionEngine = new Lazy<PredictionEngine<Input, Output>?>(GetPredictionEngine);
-    }
-
-    private ITransformer? GetModel()
-    {
-        return File.Exists(_options.ModelPath) ? _context.Model.Load(_options.ModelPath, out _) : null;
     }
 
     private PredictionEngine<Input, Output>? GetPredictionEngine()
     {
-        return _model.Value == null ? null : _context.Model.CreatePredictionEngine<Input, Output>(_model.Value);
+        if (!File.Exists(_options.ModelPath))
+            return null;
+
+        var model = _context.Model.Load(_options.ModelPath, out _);
+
+        return _context.Model.CreatePredictionEngine<Input, Output>(model);
     }
 
-    public int? Predict(PredictionData data)
+    public int? Predict(ConsumptionData data)
     {
         var input = MapToModelInput(data);
 
-        var c = _predictionEngine.Value;
-        var output = c?.Predict(input);
+        var output = _predictionEngine.Value?.Predict(input);
 
         if (float.IsNaN(output?.Score ?? float.NaN))
             return null;
@@ -45,7 +42,7 @@ public class PredictConsumptionService : IPredictConsumptionService
         return output?.Score == null ? null : (int)Math.Round(output.Score, 0);
     }
 
-    public void TrainModel(PredictionData data, int actualWattPerHour)
+    public void FitModel(ConsumptionData data, int actualWattPerHour)
     {
         var input = MapToModelInput(data, actualWattPerHour);
 
@@ -106,16 +103,16 @@ public class PredictConsumptionService : IPredictConsumptionService
         _context.Model.Save(model, dataView.Schema, _options.ModelPath);
     }
 
-    private static Input MapToModelInput(PredictionData data, int wattPerHour = 0)
+    private static Input MapToModelInput(ConsumptionData data, int wattPerHour = 0)
     {
         return new Input
         {
             Weekday = data.Hour.DayOfWeek.ToString(),
             Hour = data.Hour.Hour,
             Month = data.Hour.Month,
-            WattPerHourYesterday = data.Consumption.Yesterday,
-            WattPerHourLastWeek = data.Consumption.LastWeek,
-            WattPerHourLastWeekFromYesterday = data.Consumption.LastWeekFromYesterday,
+            WattPerHourYesterday = data.ConsumptionDataConsumption.Yesterday,
+            WattPerHourLastWeek = data.ConsumptionDataConsumption.LastWeek,
+            WattPerHourLastWeekFromYesterday = data.ConsumptionDataConsumption.LastWeekFromYesterday,
             TemperatureForecast = data.Weather.Forecast.Temperature,
             WindSpeedForecast = data.Weather.Forecast.WindSpeed,
             TemperatureYesterday = data.Weather.Yesterday.Temperature,

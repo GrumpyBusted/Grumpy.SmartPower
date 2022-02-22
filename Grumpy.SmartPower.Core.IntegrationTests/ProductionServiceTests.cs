@@ -36,6 +36,7 @@ public class ProductionServiceTests
             });
         }
         weatherService.GetForecast(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(forecast);
+        var predictProductionService = Substitute.For<IPredictProductionService>();
 
         var productionServiceOptions = new ProductionServiceOptions
         {
@@ -43,9 +44,9 @@ public class ProductionServiceTests
             Direction = 112,
             Capacity = 9000
         };
-        var cut = new ProductionService(Options.Create(productionServiceOptions), solarService, weatherService);
+        var cut = new ProductionService(Options.Create(productionServiceOptions), solarService, weatherService, predictProductionService);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T00:00:00"), DateTime.Parse("2022-02-13T23:59:59")).ToList();
+        var res = cut.Predict(DateTime.Parse("2022-02-13T00:00:00"), DateTime.Parse("2022-02-13T23:59:59")).ToList();
 
         res.Should().HaveCount(24);
         res.First().WattPerHour.Should().Be(0);

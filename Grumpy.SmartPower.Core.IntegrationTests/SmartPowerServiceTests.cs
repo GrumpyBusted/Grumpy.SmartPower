@@ -30,6 +30,7 @@ public class SmartPowerServiceTests
     private readonly SonnenBatteryClientOptions _sonnenBatteryClientOptions = new();
     private readonly SmartMePowerMeterClientOptions _smartMePowerMeterClientOptions = new();
     private readonly PredictConsumptionServiceOptions _predictConsumptionServiceOptions = new();
+    private readonly PredictProductionServiceOptions _predictProductionServiceOptions = new();
     private readonly RealTimeReadingRepositoryOptions _realTimeReadingRepositoryOptions = new();
     private readonly CacheOptions _cacheOptions = new();
 
@@ -57,7 +58,8 @@ public class SmartPowerServiceTests
         var openWeatherMapClient = new OpenWeatherMapClient(Options.Create(_openWeatherMapClientOptions), restClientFactory);
         var visualCrossingWeatherClient = new VisualCrossingWeatherClient(Options.Create(_visualCrossingWeatherOptions), restClientFactory);
         var weatherService = new WeatherService(openWeatherMapClient, visualCrossingWeatherClient, dateTimeProvider, cacheFactory);
-        var productionService = new ProductionService(Options.Create(_productionServiceOptions), solarService, weatherService);
+        var predictProductionService = new PredictProductionService(Options.Create(_predictProductionServiceOptions));
+        var productionService = new ProductionService(Options.Create(_productionServiceOptions), solarService, weatherService, predictProductionService);
         var energyDataServiceClient = new EnergyDataServiceClient(restClientFactory);
         var powerPriceService = new PowerPriceService(energyDataServiceClient, cacheFactory);
         var sonnenBatteryClient = new SonnenBatteryClient(Options.Create(_sonnenBatteryClientOptions), restClientFactory);

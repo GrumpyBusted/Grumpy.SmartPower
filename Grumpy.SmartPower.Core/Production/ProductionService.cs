@@ -8,34 +8,49 @@ public class ProductionService : IProductionService
     private readonly ProductionServiceOptions _options;
     private readonly ISolarService _solarService;
     private readonly IWeatherService _weatherService;
+    private readonly IPredictProductionService _predictProductionService;
 
-    public ProductionService(IOptions<ProductionServiceOptions> options, ISolarService solarService, IWeatherService weatherService)
+    public ProductionService(IOptions<ProductionServiceOptions> options, ISolarService solarService, IWeatherService weatherService, IPredictProductionService predictProductionService)
     {
         _options = options.Value;
         _solarService = solarService;
         _weatherService = weatherService;
+        _predictProductionService = predictProductionService;
 
         if (_options.Direction is < 90 or > 270)
             throw new OptionsValidationException(nameof(_options.Direction), typeof(ProductionServiceOptions), new List<string> { "Invalid panel direction" });
     }
 
-    public IEnumerable<ProductionItem> Forecast(DateTime from, DateTime to)
+    public IEnumerable<ProductionItem> Predict(DateTime from, DateTime to)
     {
         var forecast = _weatherService.GetForecast(from, to);
 
-        foreach (var hour in forecast)
+        foreach (var item in forecast)
         {
-            var sun = _solarService.Sunlight(hour.Hour);
-            var altitude = _solarService.Altitude(hour.Hour);
-            var direction = _solarService.Direction(hour.Hour);
+            var sunlight = _solarService.Sunlight(item.Hour);
+            var altitude = _solarService.Altitude(item.Hour);
+            var direction = _solarService.Direction(item.Hour);
 
-            var item = new ProductionItem
+            var data = new ProductionData
             {
-                Hour = hour.Hour,
-                WattPerHour = CalcWattPerHour(sun, altitude, direction, hour.CloudCover)
+                Hour = item.Hour,
+                Sun = new ProductionDataSun
+                {
+                    Sunlight = sunlight,
+                    Altitude = altitude,
+                    Direction = direction
+                },
+                Weather = item,
+                Calculated = CalcWattPerHour(sunlight, altitude, direction, item.CloudCover)
             };
 
-            yield return item;
+            var wattPerHour = _predictProductionService.Predict(data) ?? data.Calculated;
+
+            yield return new ProductionItem
+            {
+                Hour = item.Hour,
+                WattPerHour = wattPerHour
+            };
         }
     }
 

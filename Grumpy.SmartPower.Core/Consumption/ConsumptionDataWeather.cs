@@ -2,7 +2,7 @@
 
 namespace Grumpy.SmartPower.Core.Consumption;
 
-public class PredictionWeatherData
+public class ConsumptionDataWeather
 {
     public WeatherItem Forecast { get; set; } = new();
     public WeatherItem LastWeek { get; set; } = new();

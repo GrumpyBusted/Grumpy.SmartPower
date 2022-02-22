@@ -3,6 +3,7 @@ using Grumpy.SmartPower.Core.Consumption;
 using Microsoft.Extensions.Options;
 using System;
 using System.IO;
+using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Model;
 using Xunit;
 
@@ -19,18 +20,18 @@ public class PredictConsumptionServiceTests
             ModelPath = $"ConsumptionModel-{Guid.NewGuid()}.zip"
         };
 
-        var cut = new PredictConsumptionService(Options.Create(options));
+        IPredictConsumptionService cut = new PredictConsumptionService(Options.Create(options));
 
-        var data = new PredictionData
+        var data = new ConsumptionData
         {
             Hour = DateTime.Parse("2022-02-21T09:00:00"),
-            Consumption = new PredictionConsumptionData
+            ConsumptionDataConsumption = new ConsumptionDataConsumption
             {
                 Yesterday = 10,
                 LastWeek = 20,
                 LastWeekFromYesterday = 30
             },
-            Weather = new PredictionWeatherData
+            Weather = new ConsumptionDataWeather
             {
                 Forecast = new WeatherItem
                 {
@@ -59,7 +60,7 @@ public class PredictConsumptionServiceTests
             }
         };
 
-        cut.TrainModel(data, 100);
+        cut.FitModel(data, 100);
 
         File.Exists(options.DataPath).Should().BeTrue();
         File.Exists(options.ModelPath).Should().BeTrue();
@@ -74,18 +75,18 @@ public class PredictConsumptionServiceTests
             ModelPath = $"ConsumptionModel-{Guid.NewGuid()}.zip"
         };
 
-        var cut = new PredictConsumptionService(Options.Create(options));
+        IPredictConsumptionService cut = new PredictConsumptionService(Options.Create(options));
 
-        var data = new PredictionData
+        var data = new ConsumptionData
         {
             Hour = DateTime.Parse("2022-02-21T09:00:00"),
-            Consumption = new PredictionConsumptionData
+            ConsumptionDataConsumption = new ConsumptionDataConsumption
             {
                 Yesterday = 10,
                 LastWeek = 20,
                 LastWeekFromYesterday = 30
             },
-            Weather = new PredictionWeatherData
+            Weather = new ConsumptionDataWeather
             {
                 Forecast = new WeatherItem
                 {
@@ -116,11 +117,11 @@ public class PredictConsumptionServiceTests
 
         for(var i = 1; i <= 40; i++)
         {
-            data.Consumption.Yesterday = i;
-            cut.TrainModel(data, 100 + i);
+            data.ConsumptionDataConsumption.Yesterday = i;
+            cut.FitModel(data, 100 + i);
         }
 
-        data.Consumption.Yesterday = 1;
+        data.ConsumptionDataConsumption.Yesterday = 1;
         var res = cut.Predict(data);
 
         res.Should().BeInRange(100, 120);

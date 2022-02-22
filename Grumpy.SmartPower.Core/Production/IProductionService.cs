@@ -2,5 +2,5 @@
 
 public interface IProductionService
 {
-    IEnumerable<ProductionItem> Forecast(DateTime from, DateTime to);
+    IEnumerable<ProductionItem> Predict(DateTime from, DateTime to);
 }

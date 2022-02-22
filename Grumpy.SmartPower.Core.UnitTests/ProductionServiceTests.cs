@@ -18,7 +18,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 112, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(9000);
     }
@@ -28,7 +28,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 112, 1, 20);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(7200);
     }
@@ -38,7 +38,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 112, 1, 100);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(0);
     }
@@ -48,7 +48,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 112, 0.5, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(4500);
     }
@@ -58,7 +58,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 112, 0, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(0);
     }
@@ -68,7 +68,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 102, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(9000, 400);
     }
@@ -78,7 +78,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 32, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(0, 400);
     }
@@ -88,7 +88,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 22, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(0);
     }
@@ -98,7 +98,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 12, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(0);
     }
@@ -108,7 +108,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 352, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(0);
     }
@@ -118,7 +118,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 122, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(9000, 400);
     }
@@ -128,7 +128,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 192, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(0, 400);
     }
@@ -138,7 +138,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 202, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(0);
     }
@@ -148,7 +148,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 212, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(0);
     }
@@ -158,7 +158,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 70, 350, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(0);
     }
@@ -168,7 +168,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, -1, 112, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().Be(0);
     }
@@ -178,7 +178,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 0, 112, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(0, 400);
     }
@@ -188,7 +188,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 10, 112, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(2000, 400);
     }
@@ -198,7 +198,7 @@ public class ProductionServiceTests
     {
         var cut = CreateTestObject(20, 112, 9000, 60, 112, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T12:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(9000, 400);
     }
@@ -209,7 +209,7 @@ public class ProductionServiceTests
         // Actual readings
         var cut = CreateTestObject(23, 112, 9000, 12, 160, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-01-17T11:00:00"), DateTime.Parse("2022-01-17T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-01-17T11:00:00"), DateTime.Parse("2022-01-17T12:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(2900, 400);
     }
@@ -220,7 +220,7 @@ public class ProductionServiceTests
         // Actual readings
         var cut = CreateTestObject(23, 112, 9000, 14, 160, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-01-30T11:00:00"), DateTime.Parse("2022-01-30T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-01-30T11:00:00"), DateTime.Parse("2022-01-30T12:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(3900, 400);
     }
@@ -231,7 +231,7 @@ public class ProductionServiceTests
         // Actual readings
         var cut = CreateTestObject(23, 112, 9000, 18, 160, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-02-13T11:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-02-13T11:00:00"), DateTime.Parse("2022-02-13T12:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(4900, 400);
     }
@@ -242,7 +242,7 @@ public class ProductionServiceTests
         // Estimated readings
         var cut = CreateTestObject(23, 112, 9000, 55, 150, 1, 0);
 
-        var res = cut.Forecast(DateTime.Parse("2022-06-22T12:00:00"), DateTime.Parse("2022-06-22T13:00:00"));
+        var res = cut.Predict(DateTime.Parse("2022-06-22T12:00:00"), DateTime.Parse("2022-06-22T13:00:00"));
 
         res.First().WattPerHour.Should().BeCloseTo(7000, 200);
     }
@@ -270,7 +270,8 @@ public class ProductionServiceTests
                 CloudCover = cloudCover
             }
         });
+        var predictProductionService = Substitute.For<IPredictProductionService>();
 
-        return new ProductionService(Options.Create(options), solarService, weatherService);
+        return new ProductionService(Options.Create(options), solarService, weatherService, predictProductionService);
     }
 }

@@ -34,7 +34,7 @@ public class WeatherService : IWeatherService
         if (from < now.Date.AddHours(now.Hour))
             throw new ArgumentOutOfRangeException(nameof(from), "Most be in the future");
 
-        return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:Forecast:{from}:{to}", TimeSpan.FromHours(1),
+        return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:Predict:{from}:{to}", TimeSpan.FromHours(1),
             () => _openWeatherMapClient.GetForecast().Where(i => i.Hour >= from && i.Hour <= to).OrderBy(x => x.Hour).ToList());
     }
 

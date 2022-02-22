@@ -38,7 +38,7 @@ public class SmartPowerService : ISmartPowerService
 
         _houseBatteryService.SetMode(Model.BatteryMode.Default, from);
 
-        var production = _productionService.Forecast(from, to).SerializeToJson();
+        var production = _productionService.Predict(from, to).SerializeToJson();
         var consumption = _consumptionService.Predict(from, to).SerializeToJson();
         var prices = _powerPriceService.GetPrices(_options.PriceArea, _options.FallBackPriceArea, from, to).SerializeToJson();
 

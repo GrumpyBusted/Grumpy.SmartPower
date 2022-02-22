@@ -1,6 +1,6 @@
 ﻿namespace Grumpy.SmartPower.Core.Consumption;
 
-public class PredictionConsumptionData
+public class ConsumptionDataConsumption
 {
     public int LastWeek { get; set; }
     public int Yesterday { get; set; }

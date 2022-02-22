@@ -28,17 +28,17 @@ public class ConsumptionService : IConsumptionService
             var lastWeek = item.Hour.AddDays(-7);
             var lastWeekFromYesterday = item.Hour.AddDays(-8);
 
-            var data = new PredictionData
+            var data = new ConsumptionData
             {
                 Hour = item.Hour,
-                Weather = new PredictionWeatherData
+                Weather = new ConsumptionDataWeather
                 {
                     Forecast = item,
                     Yesterday = history.FirstOrDefault(i => i.Hour == yesterday) ?? item,
                     LastWeek = history.FirstOrDefault(i => i.Hour == lastWeek) ?? item,
                     LastWeekFromYesterday = history.FirstOrDefault(i => i.Hour == lastWeekFromYesterday) ?? item
                 },
-                Consumption = new PredictionConsumptionData
+                ConsumptionDataConsumption = new ConsumptionDataConsumption
                 {
                     Yesterday = _realTimeReadingRepository.GetConsumption(yesterday) ?? _powerMeterService.GetWattPerHour(yesterday),
                     LastWeek = _realTimeReadingRepository.GetConsumption(lastWeek) ?? _powerMeterService.GetWattPerHour(lastWeek),
@@ -46,7 +46,7 @@ public class ConsumptionService : IConsumptionService
                 }
             };
 
-            var wattPerHour = _predictConsumptionService.Predict(data) ?? data.Consumption.LastWeek;
+            var wattPerHour = _predictConsumptionService.Predict(data) ?? data.ConsumptionDataConsumption.LastWeek;
 
             yield return new ConsumptionItem
             {
