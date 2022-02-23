@@ -11,13 +11,14 @@ public class PredictProductionService : IPredictProductionService
 {
     private readonly PredictProductionServiceOptions _options;
     private readonly MLContext _context;
-    private readonly Lazy<PredictionEngine<Input, Output>?> _predictionEngine;
+    private PredictionEngine<Input, Output>? _predictionEngine;
+    private bool disposed;
 
     public PredictProductionService(IOptions<PredictProductionServiceOptions> options)
     {
         _options = options.Value;
         _context = new MLContext();
-        _predictionEngine = new Lazy<PredictionEngine<Input, Output>?>(GetPredictionEngine);
+        _predictionEngine = null;
     }
 
     private PredictionEngine<Input, Output>? GetPredictionEngine()
@@ -32,9 +33,12 @@ public class PredictProductionService : IPredictProductionService
 
     public int? Predict(ProductionData data)
     {
+        if (_predictionEngine == null)
+            _predictionEngine = GetPredictionEngine();
+
         var input = MapToModelInput(data);
 
-        var output = _predictionEngine.Value?.Predict(input);
+        var output = _predictionEngine?.Predict(input);
 
         if (float.IsNaN(output?.Score ?? float.NaN))
             return null;
@@ -95,14 +99,19 @@ public class PredictProductionService : IPredictProductionService
             Directory.CreateDirectory(folder);
 
         _context.Model.Save(model, dataView.Schema, _options.ModelPath);
+
+        _predictionEngine?.Dispose();
+        _predictionEngine = null;
     }
 
     private static Input MapToModelInput(ProductionData data, int wattPerHour = 0)
     {
+        var utc = data.Hour.ToUniversalTime();
+
         return new Input
         {
-            Hour = data.Hour.Hour,
-            Month = data.Hour.Month,
+            Hour = utc.Hour,
+            Month = utc.Month,
             Sunlight = (int)data.Sun.Sunlight.TotalSeconds,
             SunAltitude = data.Sun.Altitude,
             SunDirection = data.Sun.Direction,
@@ -114,5 +123,22 @@ public class PredictProductionService : IPredictProductionService
             Calculated = data.Calculated,
             WattPerHour = wattPerHour
         };
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            if (disposing)
+                _predictionEngine?.Dispose();
+
+            disposed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

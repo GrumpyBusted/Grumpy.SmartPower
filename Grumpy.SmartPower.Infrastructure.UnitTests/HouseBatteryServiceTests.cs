@@ -14,6 +14,47 @@ namespace Grumpy.SmartPower.Infrastructure.UnitTests;
 public class HouseBatteryServiceTests
 {
     [Fact]
+    public void GetBatteryModeWhenOperatingModeIsSelfConsumptionShouldBeDefault()
+    {
+        var client = Substitute.For<ISonnenBatteryClient>();
+        client.GetOperatingMode().Returns(OperatingMode.SelfConsumption);
+
+        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+
+        var res = cut.GetBatteryMode();
+
+        res.Should().Be(BatteryMode.Default);
+    }
+
+    [Fact]
+    public void GetBatteryModeWhenOperatingModeIsTimeOfUseWithNoGridChargeShouldBeStoreForLater()
+    {
+        var client = Substitute.For<ISonnenBatteryClient>();
+        client.GetOperatingMode().Returns(OperatingMode.TimeOfUse);
+        client.GetSchedule().Returns(new List<TimeOfUseEvent>() { new() { Watt = 0 } });
+
+        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+
+        var res = cut.GetBatteryMode();
+
+        res.Should().Be(BatteryMode.StoreForLater);
+    }
+
+    [Fact]
+    public void GetBatteryModeWhenOperatingModeIsTimeOfUseWithGridChargeShouldBeStoreForLater()
+    {
+        var client = Substitute.For<ISonnenBatteryClient>();
+        client.GetOperatingMode().Returns(OperatingMode.TimeOfUse);
+        client.GetSchedule().Returns(new List<TimeOfUseEvent>() { new() { Watt = 1 } });
+
+        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+
+        var res = cut.GetBatteryMode();
+
+        res.Should().Be(BatteryMode.ChargeFromGrid);
+    }
+
+    [Fact]
     public void IsBatteryFullWith100ShouldBeTrue()
     {
         var client = Substitute.For<ISonnenBatteryClient>();
@@ -127,7 +168,7 @@ public class HouseBatteryServiceTests
 
         cut.SetMode(BatteryMode.StoreForLater, DateTime.Parse("2022-02-15T12:00:00"));
 
-        client.Received(1).SetSchedule(Arg.Is<IEnumerable<TimeOfUseEvent>>(x => x.All(i => i.Start == "12:00" & i.End == "13:00")));
+        client.Received(1).SetSchedule(Arg.Is<IEnumerable<TimeOfUseEvent>>(x => x.All(i => i.Start == "12:00" & i.End == "14:00")));
         client.Received(1).SetSchedule(Arg.Is<IEnumerable<TimeOfUseEvent>>(x => x.Count() == 1));
     }
 

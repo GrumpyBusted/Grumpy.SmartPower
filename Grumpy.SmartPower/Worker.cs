@@ -5,13 +5,11 @@ namespace Grumpy.SmartPower;
 
 public class Worker : BackgroundService
 {
-    private readonly WorkerOptions _options;
     private readonly ILogger<Worker> _logger;
     private readonly ISmartPowerService _smartPowerService;
 
-    public Worker(IOptions<WorkerOptions> options, ILogger<Worker> logger, ISmartPowerService smartPowerService)
+    public Worker(ILogger<Worker> logger, ISmartPowerService smartPowerService)
     {
-        _options = options.Value;
         _logger = logger;
         _smartPowerService = smartPowerService;
     }
@@ -35,7 +33,7 @@ public class Worker : BackgroundService
                 _smartPowerService.UpdateModel(now);
             }
 
-            if (now - lastCalibrate > TimeSpan.FromMilliseconds(_options.Interval))
+            if (now.ToString("yyyy-MM-ddTHH") != lastCalibrate.ToString("yyyy-MM-ddTHH"))
             {
                 lastCalibrate = now;
                 _smartPowerService.Execute(now);

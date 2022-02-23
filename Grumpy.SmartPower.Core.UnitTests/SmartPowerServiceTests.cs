@@ -76,6 +76,122 @@ public class SmartPowerServiceTests
         _predictProductionService.Received(1).FitModel(Arg.Any<ProductionData>(), Arg.Is(2));
     }
 
+    [Fact]
+    public void ExecuteWithChangeOfModeShouldSetBatteryMode()
+    {
+        var now = DateTime.Parse("2022-02-13T12:00:00");
+        var cut = CreateTestObject();
+        _houseBatteryService.GetBatteryMode().Returns(BatteryMode.StoreForLater);
+
+        cut.Execute(now);
+
+        _houseBatteryService.Received(1).SetMode(BatteryMode.Default, now);
+    }
+
+    [Fact]
+    public void ExecuteWithSameModeShouldNotSetBatteryMode()
+    {
+        var now = DateTime.Parse("2022-02-13T12:00:00");
+        var cut = CreateTestObject();
+        _houseBatteryService.GetBatteryMode().Returns(BatteryMode.Default);
+
+        cut.Execute(now);
+
+        _houseBatteryService.Received(0).SetMode(Arg.Any<BatteryMode>(), Arg.Any<DateTime>());
+    }
+
+    [Fact]
+    public void LowPriceNowShouldChargeFromGrid()
+    {
+        var now = DateTime.Parse("2022-02-13T12:00:00");
+        var cut = CreateTestObject();
+        _houseBatteryService.GetBatteryMode().Returns(BatteryMode.Default);
+        _productionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ProductionItem>()
+        {
+            new() { Hour = now.AddHours(0), WattPerHour = 0 },
+            new() { Hour = now.AddHours(1), WattPerHour = 0 },
+            new() { Hour = now.AddHours(2), WattPerHour = 0 },
+        });
+        _consumptionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ConsumptionItem>()
+        {
+            new() { Hour = now.AddHours(0), WattPerHour = 1000 },
+            new() { Hour = now.AddHours(1), WattPerHour = 1000 },
+            new() { Hour = now.AddHours(2), WattPerHour = 1000 },
+        });
+        _powerPriceService.GetPrices(Arg.Any<PriceArea>(), Arg.Any<PriceArea>(), Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<PriceItem>()
+        {
+            new() { Hour = now.AddHours(0), Price = 1 },
+            new() { Hour = now.AddHours(1), Price = 2 },
+            new() { Hour = now.AddHours(2), Price = 3 },
+        });
+
+        cut.Execute(now);
+
+        _houseBatteryService.Received(1).SetMode(BatteryMode.ChargeFromGrid, now);
+    }
+
+    [Fact]
+    public void PriceNowLowerThanNextPriceShouldChargeFromGrid()
+    {
+        var now = DateTime.Parse("2022-02-13T12:00:00");
+        var cut = CreateTestObject();
+        _houseBatteryService.GetBatteryMode().Returns(BatteryMode.Default);
+        _productionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ProductionItem>()
+        {
+            new() { Hour = now.AddHours(0), WattPerHour = 0 },
+            new() { Hour = now.AddHours(1), WattPerHour = 0 },
+            new() { Hour = now.AddHours(2), WattPerHour = 0 },
+        });
+        _consumptionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ConsumptionItem>()
+        {
+            new() { Hour = now.AddHours(0), WattPerHour = 1000 },
+            new() { Hour = now.AddHours(1), WattPerHour = 1000 },
+            new() { Hour = now.AddHours(2), WattPerHour = 1000 },
+        });
+        _powerPriceService.GetPrices(Arg.Any<PriceArea>(), Arg.Any<PriceArea>(), Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<PriceItem>()
+        {
+            new() { Hour = now.AddHours(0), Price = 2 },
+            new() { Hour = now.AddHours(1), Price = 3 },
+            new() { Hour = now.AddHours(2), Price = 1 },
+        });
+
+        cut.Execute(now);
+
+        _houseBatteryService.Received(1).SetMode(BatteryMode.ChargeFromGrid, now);
+    }
+
+    //[Fact]
+    //public void aShouldChargeFromGrid()
+    //{
+    //    var now = DateTime.Parse("2022-02-13T12:00:00");
+    //    var cut = CreateTestObject();
+    //    _houseBatteryService.GetBatteryMode().Returns(BatteryMode.Default);
+    //    _houseBatteryService.GetBatterySize().Returns(1000);
+    //    _houseBatteryService.GetBatteryCurrent().Returns(0);
+    //    _productionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ProductionItem>()
+    //    {
+    //        new() { Hour = now.AddHours(0), WattPerHour = 0 },
+    //        new() { Hour = now.AddHours(1), WattPerHour = 0 },
+    //        new() { Hour = now.AddHours(2), WattPerHour = 0 },
+    //    });
+    //    _consumptionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ConsumptionItem>()
+    //    {
+    //        new() { Hour = now.AddHours(0), WattPerHour = 1000 },
+    //        new() { Hour = now.AddHours(1), WattPerHour = 1000 },
+    //        new() { Hour = now.AddHours(2), WattPerHour = 1000 },
+    //    });
+    //    _powerPriceService.GetPrices(Arg.Any<PriceArea>(), Arg.Any<PriceArea>(), Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<PriceItem>()
+    //    {
+    //        new() { Hour = now.AddHours(0), Price = 2 },
+    //        new() { Hour = now.AddHours(1), Price = 3 },
+    //        new() { Hour = now.AddHours(2), Price = 1 },
+    //    });
+
+    //    cut.Execute(now);
+
+    //    _houseBatteryService.Received(1).SetMode(BatteryMode.ChargeFromGrid, now);
+    //}
+
     private SmartPowerService CreateTestObject()
     {
         return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository, _logger, _predictConsumptionService, _predictProductionService, _weatherService);

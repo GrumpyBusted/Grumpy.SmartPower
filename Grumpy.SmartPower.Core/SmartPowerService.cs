@@ -51,7 +51,7 @@ public class SmartPowerService : ISmartPowerService
 
             var powerFlow = PowerFlow(from, to);
 
-            mode = GetBatteryMode(powerFlow.ToList());
+            mode = GetBatteryMode(powerFlow.ToList(), from);
         }
         catch (Exception exception)
         {
@@ -64,9 +64,12 @@ public class SmartPowerService : ISmartPowerService
         }
     }
 
-    private BatteryMode GetBatteryMode(List<Item> powerFlow)
+    private static BatteryMode GetBatteryMode(List<Item> powerFlow, DateTime hour)
     {
         var mode = BatteryMode.Default;
+
+        if (CurrentPrice(powerFlow, hour) < powerFlow.Where(i => i.Hour > hour).OrderBy(o => o.Hour).First().Price)
+            return BatteryMode.ChargeFromGrid;
 
         //if (!batteryFull && priceLowerNow && NeedToBuyPower())
         //    mode = BatteryMode.ChargeFromGrid;
@@ -83,6 +86,16 @@ public class SmartPowerService : ISmartPowerService
         //}
 
         return mode;
+    }
+
+    private static double LowestPriceAfterHour(List<Item> powerFlow, DateTime hour)
+    {
+        return powerFlow.Where(p => p.Hour > hour).Min(i => i.Price);
+    }
+
+    private static double CurrentPrice(List<Item> powerFlow, DateTime hour)
+    {
+        return powerFlow.First(i => i.Hour == hour).Price;
     }
 
     private IEnumerable<Item> PowerFlow(DateTime from, DateTime to)

@@ -2,7 +2,7 @@
 
 namespace Grumpy.SmartPower.Core.Infrastructure;
 
-public interface IPredictProductionService
+public interface IPredictProductionService : IDisposable
 {
     int? Predict(ProductionData data);
     void FitModel(ProductionData data, int actualWattPerHour);

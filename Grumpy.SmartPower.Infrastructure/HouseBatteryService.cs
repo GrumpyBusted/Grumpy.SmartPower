@@ -75,7 +75,7 @@ public class HouseBatteryService : IHouseBatteryService
         var timeOfUseEvent = new TimeOfUseEvent
         {
             Start = hour.ToString("HH:00"),
-            End = hour.AddHours(1).ToString("HH:00")
+            End = hour.AddHours(2).ToString("HH:00")
         };
 
         switch (batteryMode)
