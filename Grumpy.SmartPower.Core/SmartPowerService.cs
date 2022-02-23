@@ -42,15 +42,26 @@ public class SmartPowerService : ISmartPowerService
 
         var from = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
         var to = from.AddDays(1).AddSeconds(-1);
+        var currentMode = BatteryMode.Default;
+        var mode = BatteryMode.Default;
 
-        _houseBatteryService.SetMode(Model.BatteryMode.Default, from);
+        try
+        {
+            currentMode = _houseBatteryService.GetBatteryMode();
 
-        var powerFlow = PowerFlow(from, to);
+            var powerFlow = PowerFlow(from, to);
 
-        var mode = GetBatteryMode(powerFlow.ToList());
-
-        if (mode != BatteryMode.Default)
-            _houseBatteryService.SetMode(mode, from);
+            mode = GetBatteryMode(powerFlow.ToList());
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning("Exception optimizing battery setting {exception}", exception);
+        }
+        finally
+        {
+            if (currentMode != mode)
+                _houseBatteryService.SetMode(mode, from);
+        }
     }
 
     private BatteryMode GetBatteryMode(List<Item> powerFlow)
@@ -111,10 +122,17 @@ public class SmartPowerService : ISmartPowerService
     {
         _logger.LogInformation("Updating real time reading repository");
 
-        var production = _houseBatteryService.GetProduction();
-        var consumption = _houseBatteryService.GetConsumption();
+        try
+        {
+            var production = _houseBatteryService.GetProduction();
+            var consumption = _houseBatteryService.GetConsumption();
 
-        _realTimeReadingRepository.Save(now, consumption, production);
+            _realTimeReadingRepository.Save(now, consumption, production);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Exception updating real time reading repository {exception}", ex);
+        }
     }
 
     public void UpdateModel(DateTime now)
@@ -123,27 +141,34 @@ public class SmartPowerService : ISmartPowerService
 
         _logger.LogInformation("Updating machine learning models {hour}", hour);
 
-        var weather = _weatherService.GetHistory(hour, hour.AddHours(1).AddMilliseconds(-1)).FirstOrDefault();
-
-        if (weather != null)
+        try
         {
-            var consumption = _realTimeReadingRepository.GetConsumption(hour);
+            var weather = _weatherService.GetHistory(hour, hour.AddHours(1).AddMilliseconds(-1)).FirstOrDefault();
 
-            if (consumption != null)
+            if (weather != null)
             {
-                var consumptionData = _consumptionService.GetData(weather);
+                var consumption = _realTimeReadingRepository.GetConsumption(hour);
 
-                _predictConsumptionService.FitModel(consumptionData, (int)consumption);
+                if (consumption != null)
+                {
+                    var consumptionData = _consumptionService.GetData(weather);
+
+                    _predictConsumptionService.FitModel(consumptionData, (int)consumption);
+                }
+
+                var production = _realTimeReadingRepository.GetProduction(hour);
+
+                if (production != null)
+                {
+                    var productionData = _productionService.GetData(weather);
+
+                    _predictProductionService.FitModel(productionData, (int)production);
+                }
             }
-
-            var production = _realTimeReadingRepository.GetProduction(hour);
-
-            if (production != null)
-            {
-                var productionData = _productionService.GetData(weather);
-
-                _predictProductionService.FitModel(productionData, (int)production);
-            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Updating machine learning models {exception}", ex);
         }
     }
 }

@@ -10,4 +10,5 @@ public interface IHouseBatteryService
     public int GetProduction();
     public int GetConsumption();
     public void SetMode(BatteryMode batteryMode, DateTime hour);
+    public BatteryMode GetBatteryMode();
 }

@@ -19,6 +19,31 @@ public class HouseBatteryService : IHouseBatteryService
         _memoryCache = cacheFactory.MemoryCacheInstance(GetType().FullName ?? nameof(HouseBatteryService));
     }
 
+    public BatteryMode GetBatteryMode()
+    {
+        return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatteryMode", TimeSpan.FromMinutes(1), GetBatteryModeInt);
+    }
+
+    private BatteryMode GetBatteryModeInt()
+    {
+        var operatingMode = _sonnenBatteryClient.GetOperatingMode();
+
+        if (operatingMode == OperatingMode.SelfConsumption)
+            return BatteryMode.Default;
+
+        var schedule = _sonnenBatteryClient.GetSchedule().ToList();
+
+        if (schedule.Count == 1)
+        {
+            if ((schedule.FirstOrDefault()?.Watt ?? 0) == 0)
+                return BatteryMode.StoreForLater;
+
+            return BatteryMode.ChargeFromGrid;
+        }
+
+        return BatteryMode.Manual;
+    }
+
     public bool IsBatteryFull()
     {
         return GetBatteryLevel() > 99;

@@ -4,5 +4,6 @@ public enum BatteryMode
 {
     StoreForLater,
     ChargeFromGrid,
-    Default
+    Default,
+    Manual
 }
