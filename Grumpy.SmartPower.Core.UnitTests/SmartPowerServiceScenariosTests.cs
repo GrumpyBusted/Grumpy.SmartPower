@@ -98,7 +98,7 @@ public class SmartPowerServiceScenariosTests
 
         cut.Execute(now);
 
-        _houseBatteryService.Received(1).SetMode(BatteryMode.StoreForLater, now);
+        _houseBatteryService.Received(1).SetMode(BatteryMode.Default, now);
     }
 
     [Fact]

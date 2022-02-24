@@ -69,13 +69,6 @@ public class SmartPowerService : ISmartPowerService
         var inverterLimit = _houseBatteryService.InverterLimit();
         var batterySize = _houseBatteryService.GetBatterySize();
 
-        //var batteryLevel = _houseBatteryService.GetBatteryCurrent();
-        //var batterySize = _houseBatteryService.GetBatterySize();
-
-        //var powerNeed = Math.Max(consumption.Value - batteryLevel - production.Value, 0);
-        //batteryLevel = Math.Max(Math.Min(batteryLevel + production.Value - consumption.Value, batterySize), 0);
-
-
         var flow = powerFlow.OrderBy(i => i.Hour).ToList();
 
         var current = flow.FirstOrDefault();
@@ -83,43 +76,105 @@ public class SmartPowerService : ISmartPowerService
         if (current == null)
             return BatteryMode.Default;
 
-        foreach (var item in flow.OrderByDescending(i => i.Price))
+        foreach (var target in flow.Where(i => i.MissingPower > 0).OrderByDescending(i => i.Price))
         {
-            var powerNeed = item.PowerNeed;
+            if (target.Hour == current.Hour || target.GridCharge > inverterLimit / 3)
+                break;
 
-            foreach (var batteryHour in flow.Where(i => i.Hour > item.Hour).OrderBy(i => i.Hour))
-            {
-                if (powerNeed <= 0)
-                    break;
-
-                var useFromThisHour = powerNeed > batteryHour.BatteryLevel ? batteryHour.BatteryLevel : powerNeed;
-                batteryHour.BatteryLevel -= useFromThisHour;
-                powerNeed -= useFromThisHour;
-            }
-
-            if (powerNeed <= 0)
+            if (target.MissingPower <= 0)
                 continue;
 
-            foreach (var chargingHour in flow.Where(i => i.Hour < item.Hour && i.Price < item.Price && i.GridCharge < inverterLimit).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
-            {
-                if (powerNeed <= 0)
-                    break;
+            var startBatteryLevel = flow.Min(i => i.StartBatteryLevel);
+            var use = Math.Min(startBatteryLevel, target.MissingPower);
+            target.MissingPower -= use;
 
-                var chargeThisHour = powerNeed > inverterLimit - chargingHour.GridCharge ? inverterLimit - chargingHour.GridCharge : powerNeed;
-                chargingHour.GridCharge += chargeThisHour - Math.Max(chargingHour.Production - chargingHour.Consumption, 0);
-                powerNeed -= chargeThisHour;
+            foreach (var item in flow.Where(i => i.Hour >= target.Hour))
+                item.StartBatteryLevel -= use;
+
+            if (target.MissingPower <= 0)
+                continue;
+
+            foreach (var source in flow.Where(i => i.Hour < target.Hour && i.ExtraPower > 0).OrderByDescending(i => i.Hour))
+            {
+                var move = Math.Min(target.MissingPower, source.ExtraPower);
+
+                var level = flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour).Max(i => i.BatteryLevel + i.StartBatteryLevel);
+
+                if (move + level > batterySize)
+                    move = batterySize - level;
+
+                target.MissingPower -= move;
+                source.ExtraPower -= move;
+                source.SolarCharge += move;
+
+                foreach (var item in flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour))
+                    item.BatteryLevel += move;
+
+                if (target.MissingPower <= 0 || move + level >= batterySize)
+                    break;
+            }
+
+            if (target.MissingPower <= 0)
+                continue;
+
+            foreach (var source in flow.Where(i => i.Hour < target.Hour && i.Price < target.Price && i.GridCharge + i.SolarCharge < inverterLimit).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
+            {
+                var charge = target.MissingPower > inverterLimit - source.GridCharge + source.GridCharge ? inverterLimit - source.GridCharge + source.SolarCharge : target.MissingPower;
+
+                var level = flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour).Max(i => i.BatteryLevel + i.StartBatteryLevel);
+
+                if (charge + level > batterySize)
+                    charge = batterySize - level;
+
+                target.MissingPower -= charge;
+                source.GridCharge += charge;
+
+                foreach (var item in flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour))
+                    item.BatteryLevel += charge;
+
+                if (target.MissingPower <= 0)
+                    break;
             }
         }
 
-        if (flow.Any(i => i.Hour == hour && i.GridCharge > inverterLimit / 3))
+        if (current.GridCharge > inverterLimit / 3)
             return BatteryMode.ChargeFromGrid;
 
         if (current.Consumption < current.Production)
             return BatteryMode.Default;
 
-        var expensiveNeed = flow.Skip(1).TakeWhile(i => i.Price > current.Price).Sum(i => i.PowerNeed);
+        return current.MissingPower > 0 && current.StartBatteryLevel + current.BatteryLevel > 0 ? BatteryMode.StoreForLater : BatteryMode.Default;
 
-        return expensiveNeed > 0 ? BatteryMode.StoreForLater : BatteryMode.Default;
+        //var batteryLevel = _houseBatteryService.GetBatteryCurrent();
+        //var batterySize = _houseBatteryService.GetBatterySize();
+
+        //var powerNeed = Math.Max(consumption.Value - batteryLevel - production.Value, 0);
+        //batteryLevel = Math.Max(Math.Min(batteryLevel + production.Value - consumption.Value, batterySize), 0);
+
+        //foreach (var batteryHour in flow.Where(i => i.Hour > item.Hour).OrderBy(i => i.Hour))
+        //{
+        //    if (powerNeed <= 0)
+        //        break;
+
+        //    var useFromThisHour = powerNeed > batteryHour.BatteryLevel ? batteryHour.BatteryLevel : powerNeed;
+        //    batteryHour.BatteryLevel -= useFromThisHour;
+        //    powerNeed -= useFromThisHour;
+        //}
+
+        //if (powerNeed <= 0)
+        //    continue;
+
+        //foreach (var chargingHour in flow.Where(i => i.Hour < item.Hour && i.Price < item.Price && i.GridCharge < inverterLimit).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
+        //{
+        //    if (powerNeed <= 0)
+        //        break;
+
+        //    var chargeThisHour = powerNeed > inverterLimit - chargingHour.GridCharge ? inverterLimit - chargingHour.GridCharge : powerNeed;
+        //    chargingHour.GridCharge += chargeThisHour - Math.Max(chargingHour.Production - chargingHour.Consumption, 0);
+        //    powerNeed -= chargeThisHour;
+        //}
+
+
     }
 
     private IEnumerable<Item> PowerFlow(DateTime from, DateTime to)
@@ -142,6 +197,9 @@ public class SmartPowerService : ISmartPowerService
                 Hour = hour,
                 Production = production.Value,
                 Consumption = consumption.Value,
+                MissingPower = consumption.Value > production.Value ? consumption.Value - production.Value : 0,
+                ExtraPower = production.Value > consumption.Value ? production.Value - consumption.Value : 0,
+                StartBatteryLevel = _houseBatteryService.GetBatteryCurrent(),
                 Price = price.Value
             };
         }
@@ -154,8 +212,11 @@ public class SmartPowerService : ISmartPowerService
         public int Consumption { get; set; }
         public double Price { get; set; }
         public int BatteryLevel { get; set; }
-        public int PowerNeed { get; set; }
+        public int MissingPower { get; set; }
+        public int ExtraPower { get; set; }
         public int GridCharge { get; set; }
+        public int SolarCharge { get; internal set; }
+        public int StartBatteryLevel { get; internal set; }
     }
 
     public void SaveData(DateTime now)
