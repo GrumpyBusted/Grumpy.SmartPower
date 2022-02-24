@@ -32,7 +32,7 @@ public class Worker : BackgroundService
                 _smartPowerService.UpdateModel(now);
             }
 
-            if (now.ToString("yyyy-MM-ddTHH") != lastCalibrate.ToString("yyyy-MM-ddTHH"))
+            if (now.ToString("yyyy-MM-ddTHH") != lastCalibrate.ToString("yyyy-MM-ddTHH") || now - lastCalibrate > TimeSpan.FromMinutes(15))
             {
                 lastCalibrate = now;
                 _smartPowerService.Execute(now);

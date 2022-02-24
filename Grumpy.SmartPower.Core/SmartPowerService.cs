@@ -51,7 +51,7 @@ public class SmartPowerService : ISmartPowerService
 
             var powerFlow = PowerFlow(from, to);
 
-            mode = GetBatteryMode(powerFlow, from);
+            mode = GetBatteryMode(powerFlow);
         }
         catch (Exception exception)
         {
@@ -60,11 +60,16 @@ public class SmartPowerService : ISmartPowerService
         finally
         {
             if (currentMode != mode)
+            {
+                // TODO: Remove
+                File.AppendAllText("bin\\Trace.csv", $"{DateTime.Now:O};{mode}" + Environment.NewLine);
+
                 _houseBatteryService.SetMode(mode, from);
+            }
         }
     }
 
-    private BatteryMode GetBatteryMode(IEnumerable<Item> powerFlow, DateTime hour)
+    private BatteryMode GetBatteryMode(IEnumerable<Item> powerFlow)
     {
         var inverterLimit = _houseBatteryService.InverterLimit();
         var batterySize = _houseBatteryService.GetBatterySize();
@@ -76,23 +81,24 @@ public class SmartPowerService : ISmartPowerService
         if (current == null)
             return BatteryMode.Default;
 
-        foreach (var target in flow.Where(i => i.MissingPower > 0).OrderByDescending(i => i.Price))
+        foreach (var target in flow.Where(i => i.MissingPower > 0).OrderBy(i => i.Hour))
         {
-            if (target.Hour == current.Hour || target.GridCharge > inverterLimit / 3)
+            var startBatteryLevel = flow.Min(i => i.StartBatteryLevel);
+
+            if (startBatteryLevel <= 0)
                 break;
 
-            if (target.MissingPower <= 0)
-                continue;
-
-            var startBatteryLevel = flow.Min(i => i.StartBatteryLevel);
             var use = Math.Min(startBatteryLevel, target.MissingPower);
             target.MissingPower -= use;
 
             foreach (var item in flow.Where(i => i.Hour >= target.Hour))
                 item.StartBatteryLevel -= use;
+        }
 
-            if (target.MissingPower <= 0)
-                continue;
+        foreach (var target in flow.Where(i => i.MissingPower > 0).OrderByDescending(i => i.Price))
+        {
+            if (target.Hour == current.Hour || target.GridCharge > inverterLimit / 3)
+                break;
 
             foreach (var source in flow.Where(i => i.Hour < target.Hour && i.ExtraPower > 0).OrderByDescending(i => i.Hour))
             {
@@ -140,41 +146,13 @@ public class SmartPowerService : ISmartPowerService
         if (current.GridCharge > inverterLimit / 3)
             return BatteryMode.ChargeFromGrid;
 
+        if (current.GridCharge > 0)
+            return BatteryMode.StoreForLater;
+
         if (current.Consumption < current.Production)
             return BatteryMode.Default;
 
-        return current.MissingPower > 0 && current.StartBatteryLevel + current.BatteryLevel > 0 ? BatteryMode.StoreForLater : BatteryMode.Default;
-
-        //var batteryLevel = _houseBatteryService.GetBatteryCurrent();
-        //var batterySize = _houseBatteryService.GetBatterySize();
-
-        //var powerNeed = Math.Max(consumption.Value - batteryLevel - production.Value, 0);
-        //batteryLevel = Math.Max(Math.Min(batteryLevel + production.Value - consumption.Value, batterySize), 0);
-
-        //foreach (var batteryHour in flow.Where(i => i.Hour > item.Hour).OrderBy(i => i.Hour))
-        //{
-        //    if (powerNeed <= 0)
-        //        break;
-
-        //    var useFromThisHour = powerNeed > batteryHour.BatteryLevel ? batteryHour.BatteryLevel : powerNeed;
-        //    batteryHour.BatteryLevel -= useFromThisHour;
-        //    powerNeed -= useFromThisHour;
-        //}
-
-        //if (powerNeed <= 0)
-        //    continue;
-
-        //foreach (var chargingHour in flow.Where(i => i.Hour < item.Hour && i.Price < item.Price && i.GridCharge < inverterLimit).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
-        //{
-        //    if (powerNeed <= 0)
-        //        break;
-
-        //    var chargeThisHour = powerNeed > inverterLimit - chargingHour.GridCharge ? inverterLimit - chargingHour.GridCharge : powerNeed;
-        //    chargingHour.GridCharge += chargeThisHour - Math.Max(chargingHour.Production - chargingHour.Consumption, 0);
-        //    powerNeed -= chargeThisHour;
-        //}
-
-
+        return current.StartBatteryLevel + current.BatteryLevel > 0 ? BatteryMode.StoreForLater : BatteryMode.Default;
     }
 
     private IEnumerable<Item> PowerFlow(DateTime from, DateTime to)
