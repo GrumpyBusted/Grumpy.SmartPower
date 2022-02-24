@@ -4,6 +4,7 @@ using Grumpy.SmartPower.Core.Production;
 using Grumpy.SmartPower.Infrastructure.PredictProductionModel;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
+using System.Linq;
 
 namespace Grumpy.SmartPower.Infrastructure;
 
@@ -33,6 +34,9 @@ public class PredictProductionService : IPredictProductionService
 
     public int? Predict(ProductionData data)
     {
+        if (File.ReadAllLines(_options.DataPath).Length < 200)
+            return null;
+
         _predictionEngine ??= GetPredictionEngine();
 
         var input = MapToModelInput(data);
@@ -62,7 +66,7 @@ public class PredictProductionService : IPredictProductionService
         File.AppendAllText(_options.DataPath, input.CsvRecord(';') + Environment.NewLine);
 
         var dataView = _context.Data.LoadFromTextFile<Input>(_options.DataPath, ';', true);
-
+        
         var pipeline = _context.Transforms.Conversion.ConvertType(nameof(Input.WattPerHour))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.Hour)))
             .Append(_context.Transforms.Conversion.ConvertType(nameof(Input.Month)))
