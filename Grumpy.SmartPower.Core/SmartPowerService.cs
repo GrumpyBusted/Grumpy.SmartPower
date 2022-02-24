@@ -1,4 +1,5 @@
 ﻿using System.Security.Principal;
+using Grumpy.Json;
 using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Interface;
@@ -60,12 +61,7 @@ public class SmartPowerService : ISmartPowerService
         finally
         {
             if (currentMode != mode)
-            {
-                // TODO: Remove
-                File.AppendAllText("bin\\Trace.csv", $"{DateTime.Now:O};{mode}" + Environment.NewLine);
-
                 _houseBatteryService.SetMode(mode, from);
-            }
         }
     }
 
@@ -143,16 +139,21 @@ public class SmartPowerService : ISmartPowerService
             }
         }
 
+        var mode = BatteryMode.Default;
+
         if (current.GridCharge > inverterLimit / 3)
-            return BatteryMode.ChargeFromGrid;
+            mode = BatteryMode.ChargeFromGrid;
+        else if (current.GridCharge > 0)
+            mode = BatteryMode.StoreForLater;
+        else if (current.Consumption < current.Production)
+            mode = BatteryMode.Default;
+        else
+            mode = current.StartBatteryLevel + current.BatteryLevel > 0 ? BatteryMode.StoreForLater : BatteryMode.Default;
 
-        if (current.GridCharge > 0)
-            return BatteryMode.StoreForLater;
+        // TODO: Remove
+        File.WriteAllText($"bin\\Trace-{DateTime.Now:yyyy-MM-dd HH-mm-ss}-{mode}.json", flow.SerializeToJson());
 
-        if (current.Consumption < current.Production)
-            return BatteryMode.Default;
-
-        return current.StartBatteryLevel + current.BatteryLevel > 0 ? BatteryMode.StoreForLater : BatteryMode.Default;
+        return mode;
     }
 
     private IEnumerable<Item> PowerFlow(DateTime from, DateTime to)
