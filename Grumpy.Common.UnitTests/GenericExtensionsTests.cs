@@ -34,7 +34,7 @@ public class GenericExtensionsTests
 
         var res = value.CsvRecord(';');
 
-        res.Should().Be("Anders;1973;1973-10-25T09:14:00;123.45");
+        res.Should().Be("Anders;1973;1973-10-25T09:14:00.0000000;123.45");
     }
 
     [Fact]

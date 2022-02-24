@@ -33,15 +33,10 @@ public class HouseBatteryService : IHouseBatteryService
 
         var schedule = _sonnenBatteryClient.GetSchedule().ToList();
 
-        if (schedule.Count == 1)
-        {
-            if ((schedule.FirstOrDefault()?.Watt ?? 0) == 0)
-                return BatteryMode.StoreForLater;
+        if (schedule.Count != 1) 
+            return BatteryMode.Manual;
 
-            return BatteryMode.ChargeFromGrid;
-        }
-
-        return BatteryMode.Manual;
+        return schedule.FirstOrDefault()?.Watt == 0 ? BatteryMode.StoreForLater : BatteryMode.ChargeFromGrid;
     }
 
     public bool IsBatteryFull()
@@ -87,6 +82,7 @@ public class HouseBatteryService : IHouseBatteryService
                 timeOfUseEvent.Watt = _chargeFromGridWatt.Value;
                 break;
             case BatteryMode.Default:
+            case BatteryMode.Manual:
             default:
                 timeOfUseEvent = null;
                 break;

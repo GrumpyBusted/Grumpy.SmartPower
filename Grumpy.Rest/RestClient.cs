@@ -35,7 +35,7 @@ public class RestClient : IRestClient
         if (response.Result.StatusCode != System.Net.HttpStatusCode.OK)
             throw new RestClientExecuteException(request, response.Result);
 
-        return response.Result.Data ?? throw new RestClientExecuteException(request, response.Result);
+        return response.Result.Data != null ? response.Result.Data : throw new RestClientExecuteException(request, response.Result);
     }
 
     public void Execute(RestRequest request)

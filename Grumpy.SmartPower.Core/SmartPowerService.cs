@@ -1,5 +1,4 @@
-﻿using Grumpy.Json;
-using Grumpy.SmartPower.Core.Consumption;
+﻿using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Interface;
 using Grumpy.SmartPower.Core.Model;
@@ -51,7 +50,7 @@ public class SmartPowerService : ISmartPowerService
 
             var powerFlow = PowerFlow(from, to);
 
-            mode = GetBatteryMode(powerFlow.ToList(), from);
+            mode = GetBatteryMode(powerFlow, from);
         }
         catch (Exception exception)
         {
@@ -64,12 +63,13 @@ public class SmartPowerService : ISmartPowerService
         }
     }
 
-    private static BatteryMode GetBatteryMode(List<Item> powerFlow, DateTime hour)
+    private static BatteryMode GetBatteryMode(IEnumerable<Item> powerFlow, DateTime hour)
     {
-        var mode = BatteryMode.Default;
+        const BatteryMode mode = BatteryMode.Default;
 
-        if (CurrentPrice(powerFlow, hour) < powerFlow.Where(i => i.Hour > hour).OrderBy(o => o.Hour).First().Price)
-            return BatteryMode.ChargeFromGrid;
+        var flow = powerFlow.ToList();
+
+        return CurrentPrice(flow, hour) < flow.Where(i => i.Hour > hour).OrderBy(o => o.Hour).First().Price ? BatteryMode.ChargeFromGrid : mode;
 
         //if (!batteryFull && priceLowerNow && NeedToBuyPower())
         //    mode = BatteryMode.ChargeFromGrid;
@@ -84,16 +84,9 @@ public class SmartPowerService : ISmartPowerService
         //{
 
         //}
-
-        return mode;
     }
 
-    private static double LowestPriceAfterHour(List<Item> powerFlow, DateTime hour)
-    {
-        return powerFlow.Where(p => p.Hour > hour).Min(i => i.Price);
-    }
-
-    private static double CurrentPrice(List<Item> powerFlow, DateTime hour)
+    private static double CurrentPrice(IEnumerable<Item> powerFlow, DateTime hour)
     {
         return powerFlow.First(i => i.Hour == hour).Price;
     }
@@ -116,9 +109,9 @@ public class SmartPowerService : ISmartPowerService
             yield return new Item
             {
                 Hour = hour,
-                Production = production ?? 0,
-                Consumption = consumption ?? 0,
-                Price = price ?? 0
+                Production = production.Value,
+                Consumption = consumption.Value,
+                Price = price.Value
             };
         }
     }
@@ -158,26 +151,26 @@ public class SmartPowerService : ISmartPowerService
         {
             var weather = _weatherService.GetHistory(hour, hour.AddHours(1).AddMilliseconds(-1)).FirstOrDefault();
 
-            if (weather != null)
+            if (weather == null) 
+                return;
+
+            var consumption = _realTimeReadingRepository.GetConsumption(hour);
+
+            if (consumption != null)
             {
-                var consumption = _realTimeReadingRepository.GetConsumption(hour);
+                var consumptionData = _consumptionService.GetData(weather);
 
-                if (consumption != null)
-                {
-                    var consumptionData = _consumptionService.GetData(weather);
-
-                    _predictConsumptionService.FitModel(consumptionData, (int)consumption);
-                }
-
-                var production = _realTimeReadingRepository.GetProduction(hour);
-
-                if (production != null)
-                {
-                    var productionData = _productionService.GetData(weather);
-
-                    _predictProductionService.FitModel(productionData, (int)production);
-                }
+                _predictConsumptionService.FitModel(consumptionData, (int)consumption);
             }
+
+            var production = _realTimeReadingRepository.GetProduction(hour);
+
+            if (production == null) 
+                return;
+
+            var productionData = _productionService.GetData(weather);
+
+            _predictProductionService.FitModel(productionData, (int)production);
         }
         catch (Exception ex)
         {

@@ -14,7 +14,7 @@ public class FileCache : Cache
 
     protected override ObjectCache CreateCache()
     {
-        var cacheRoot = (Options.Root ?? "") == "" ? Path.Combine(Directory.GetCurrentDirectory(), "FileCache") : Options.Root;
+        var cacheRoot = Options.Root == "" ? Path.Combine(Directory.GetCurrentDirectory(), "FileCache") : Options.Root;
 
         return new System.Runtime.Caching.FileCache(FileCacheManagers.Hashed, cacheRoot + $"\\{_name.ValidFileName()}", new FileCacheBinder());
     }

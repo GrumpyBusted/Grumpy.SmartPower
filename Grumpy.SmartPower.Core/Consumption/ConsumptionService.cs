@@ -24,7 +24,7 @@ public class ConsumptionService : IConsumptionService
 
         foreach (var item in forecast)
         {
-            ConsumptionData data = GetData(item);
+            var data = GetData(item);
 
             var wattPerHour = _predictConsumptionService.Predict(data) ?? data.Consumption.LastWeek;
 
@@ -57,7 +57,7 @@ public class ConsumptionService : IConsumptionService
             {
                 Yesterday = _realTimeReadingRepository.GetConsumption(yesterday) ?? _powerMeterService.GetWattPerHour(yesterday),
                 LastWeek = _realTimeReadingRepository.GetConsumption(lastWeek) ?? _powerMeterService.GetWattPerHour(lastWeek),
-                LastWeekFromYesterday = _realTimeReadingRepository.GetConsumption(lastWeekFromYesterday) ?? _powerMeterService.GetWattPerHour(lastWeekFromYesterday),
+                LastWeekFromYesterday = _realTimeReadingRepository.GetConsumption(lastWeekFromYesterday) ?? _powerMeterService.GetWattPerHour(lastWeekFromYesterday)
             }
         };
 

@@ -44,7 +44,7 @@ public class RealTimeReadingRepositoryTests
 
         cut.Save(DateTime.Parse("2022-02-21T09:00:00"), 1, 2);
 
-        File.ReadAllLines(fileName).Skip(1).First().Should().Be("2022-02-21T09:00:00;1;2");
+        File.ReadAllLines(fileName).Skip(1).First().Should().Be("2022-02-21T09:00:00.0000000;1;2");
     }
 
     [Fact]

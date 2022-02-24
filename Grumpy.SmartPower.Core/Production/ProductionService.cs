@@ -53,7 +53,7 @@ public class ProductionService : IProductionService
             {
                 Sunlight = sunlight,
                 Altitude = altitude,
-                Direction = direction,
+                Direction = direction
             },
             Weather = item
         };

@@ -135,7 +135,7 @@ public class ConsumptionServiceTests
 
         var cut = CreateTestObject();
 
-        var weatherItem = new WeatherItem()
+        var weatherItem = new WeatherItem
         {
             Hour = hour,
             Temperature = 1,

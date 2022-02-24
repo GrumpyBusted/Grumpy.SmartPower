@@ -1,10 +1,8 @@
 ﻿using FluentAssertions;
-using Grumpy.SmartPower.Core.Consumption;
 using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using Grumpy.SmartPower.Core.Infrastructure;
-using Grumpy.SmartPower.Core.Model;
 using Xunit;
 using Grumpy.SmartPower.Core.Production;
 
@@ -27,12 +25,12 @@ public class PredictProductionServiceTests
         {
             Hour = DateTime.Parse("2022-02-21T09:00:00"),
             Calculated = 1,
-            Sun = new ProductionDataSun()
+            Sun = new ProductionDataSun
             {
                Sunlight = TimeSpan.FromHours(0.5),
                Altitude = 3,
                Direction = 4
-            },
+            }
         };
 
         cut.FitModel(data, 100);
@@ -56,12 +54,12 @@ public class PredictProductionServiceTests
         {
             Hour = DateTime.Parse("2022-02-21T09:00:00"),
             Calculated = 1,
-            Sun = new ProductionDataSun()
+            Sun = new ProductionDataSun
             {
                 Sunlight = TimeSpan.FromHours(0.5),
                 Altitude = 3,
                 Direction = 4
-            },
+            }
         };
 
         for(var i = 1; i <= 40; i++)

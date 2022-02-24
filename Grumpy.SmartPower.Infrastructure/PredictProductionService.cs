@@ -12,7 +12,7 @@ public class PredictProductionService : IPredictProductionService
     private readonly PredictProductionServiceOptions _options;
     private readonly MLContext _context;
     private PredictionEngine<Input, Output>? _predictionEngine;
-    private bool disposed;
+    private bool _disposed;
 
     public PredictProductionService(IOptions<PredictProductionServiceOptions> options)
     {
@@ -33,8 +33,7 @@ public class PredictProductionService : IPredictProductionService
 
     public int? Predict(ProductionData data)
     {
-        if (_predictionEngine == null)
-            _predictionEngine = GetPredictionEngine();
+        _predictionEngine ??= GetPredictionEngine();
 
         var input = MapToModelInput(data);
 
@@ -43,7 +42,7 @@ public class PredictProductionService : IPredictProductionService
         if (float.IsNaN(output?.Score ?? float.NaN))
             return null;
 
-        return output?.Score == null ? null : (int)Math.Round(output.Score, 0);
+        return (int)Math.Round(output?.Score ?? 0, 0);
     }
 
     public void FitModel(ProductionData data, int actualWattPerHour)
@@ -127,18 +126,18 @@ public class PredictProductionService : IPredictProductionService
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposed)
-        {
-            if (disposing)
-                _predictionEngine?.Dispose();
+        if (_disposed) 
+            return;
 
-            disposed = true;
-        }
+        if (disposing)
+            _predictionEngine?.Dispose();
+
+        _disposed = true;
     }
 
     public void Dispose()
     {
-        Dispose(disposing: true);
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 }

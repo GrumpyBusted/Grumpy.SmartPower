@@ -253,7 +253,7 @@ public class ProductionServiceTests
     {
         var hour = DateTime.Parse("2022-02-21T09:00:00");
 
-        var weatherItem = new WeatherItem()
+        var weatherItem = new WeatherItem
         {
             Hour = hour,
             Temperature = 1,

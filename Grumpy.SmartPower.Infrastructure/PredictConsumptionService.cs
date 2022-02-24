@@ -1,5 +1,4 @@
-﻿using Grumpy.Common;
-using Grumpy.Common.Extensions;
+﻿using Grumpy.Common.Extensions;
 using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Infrastructure.PredictConsumptionModel;
@@ -13,7 +12,7 @@ public class PredictConsumptionService : IPredictConsumptionService
     private readonly PredictConsumptionServiceOptions _options;
     private readonly MLContext _context;
     private PredictionEngine<Input, Output>? _predictionEngine;
-    private bool disposed;
+    private bool _disposed;
 
     public PredictConsumptionService(IOptions<PredictConsumptionServiceOptions> options)
     {
@@ -34,8 +33,7 @@ public class PredictConsumptionService : IPredictConsumptionService
 
     public int? Predict(ConsumptionData data)
     {
-        if (_predictionEngine == null)
-            _predictionEngine = GetPredictionEngine();
+        _predictionEngine ??= GetPredictionEngine();
 
         var input = MapToModelInput(data);
 
@@ -44,7 +42,7 @@ public class PredictConsumptionService : IPredictConsumptionService
         if (float.IsNaN(output?.Score ?? float.NaN))
             return null;
 
-        return output?.Score == null ? null : (int)Math.Round(output.Score, 0);
+        return (int)Math.Round(output?.Score ?? 0, 0);
     }
 
     public void FitModel(ConsumptionData data, int actualWattPerHour)
@@ -138,18 +136,18 @@ public class PredictConsumptionService : IPredictConsumptionService
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposed)
-        {
-            if (disposing)
-                _predictionEngine?.Dispose();
+        if (_disposed) 
+            return;
 
-            disposed = true;
-        }
+        if (disposing)
+            _predictionEngine?.Dispose();
+
+        _disposed = true;
     }
 
     public void Dispose()
     {
-        Dispose(disposing: true);
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 }

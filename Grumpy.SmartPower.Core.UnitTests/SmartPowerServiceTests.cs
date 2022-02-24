@@ -65,7 +65,7 @@ public class SmartPowerServiceTests
     {
         var now = DateTime.Parse("2022-02-21T09:00:00");
         var hour = now.AddHours(-1);
-        _weatherService.GetHistory(Arg.Is(hour), Arg.Any<DateTime>()).Returns(new List<WeatherItem>() { new () });
+        _weatherService.GetHistory(Arg.Is(hour), Arg.Any<DateTime>()).Returns(new List<WeatherItem> { new () });
         _realTimeReadingRepository.GetConsumption(Arg.Is(hour)).Returns(1);
         _realTimeReadingRepository.GetProduction(Arg.Is(hour)).Returns(2);
         var cut = CreateTestObject();
@@ -106,23 +106,23 @@ public class SmartPowerServiceTests
         var now = DateTime.Parse("2022-02-13T12:00:00");
         var cut = CreateTestObject();
         _houseBatteryService.GetBatteryMode().Returns(BatteryMode.Default);
-        _productionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ProductionItem>()
+        _productionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ProductionItem>
         {
             new() { Hour = now.AddHours(0), WattPerHour = 0 },
             new() { Hour = now.AddHours(1), WattPerHour = 0 },
-            new() { Hour = now.AddHours(2), WattPerHour = 0 },
+            new() { Hour = now.AddHours(2), WattPerHour = 0 }
         });
-        _consumptionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ConsumptionItem>()
+        _consumptionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ConsumptionItem>
         {
             new() { Hour = now.AddHours(0), WattPerHour = 1000 },
             new() { Hour = now.AddHours(1), WattPerHour = 1000 },
-            new() { Hour = now.AddHours(2), WattPerHour = 1000 },
+            new() { Hour = now.AddHours(2), WattPerHour = 1000 }
         });
-        _powerPriceService.GetPrices(Arg.Any<PriceArea>(), Arg.Any<PriceArea>(), Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<PriceItem>()
+        _powerPriceService.GetPrices(Arg.Any<PriceArea>(), Arg.Any<PriceArea>(), Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<PriceItem>
         {
             new() { Hour = now.AddHours(0), Price = 1 },
             new() { Hour = now.AddHours(1), Price = 2 },
-            new() { Hour = now.AddHours(2), Price = 3 },
+            new() { Hour = now.AddHours(2), Price = 3 }
         });
 
         cut.Execute(now);
@@ -136,23 +136,23 @@ public class SmartPowerServiceTests
         var now = DateTime.Parse("2022-02-13T12:00:00");
         var cut = CreateTestObject();
         _houseBatteryService.GetBatteryMode().Returns(BatteryMode.Default);
-        _productionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ProductionItem>()
+        _productionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ProductionItem>
         {
             new() { Hour = now.AddHours(0), WattPerHour = 0 },
             new() { Hour = now.AddHours(1), WattPerHour = 0 },
-            new() { Hour = now.AddHours(2), WattPerHour = 0 },
+            new() { Hour = now.AddHours(2), WattPerHour = 0 }
         });
-        _consumptionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ConsumptionItem>()
+        _consumptionService.Predict(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<ConsumptionItem>
         {
             new() { Hour = now.AddHours(0), WattPerHour = 1000 },
             new() { Hour = now.AddHours(1), WattPerHour = 1000 },
-            new() { Hour = now.AddHours(2), WattPerHour = 1000 },
+            new() { Hour = now.AddHours(2), WattPerHour = 1000 }
         });
-        _powerPriceService.GetPrices(Arg.Any<PriceArea>(), Arg.Any<PriceArea>(), Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<PriceItem>()
+        _powerPriceService.GetPrices(Arg.Any<PriceArea>(), Arg.Any<PriceArea>(), Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<PriceItem>
         {
             new() { Hour = now.AddHours(0), Price = 2 },
             new() { Hour = now.AddHours(1), Price = 3 },
-            new() { Hour = now.AddHours(2), Price = 1 },
+            new() { Hour = now.AddHours(2), Price = 1 }
         });
 
         cut.Execute(now);

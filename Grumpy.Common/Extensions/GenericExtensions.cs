@@ -27,18 +27,22 @@ public static class GenericExtensions
 
         foreach (var prop in properties)
         {
-            string? item;
+            string item;
 
-            if (prop.PropertyType == typeof(DateTime))
-                item = ((DateTime?)prop.GetValue(value))?.ToString("s");
+            var obj = prop.GetValue(value);
+
+            if (obj == null)
+                item = "";
+            else if (prop.PropertyType == typeof(DateTime))
+                item = ((DateTime)obj).ToString("O");
             else if (prop.PropertyType == typeof(double))
-                item = ((double?)prop.GetValue(value))?.ToString(CultureInfo.InvariantCulture);
+                item = ((double)obj).ToString(CultureInfo.InvariantCulture);
             else if (prop.PropertyType == typeof(float))
-                item = ((float?)prop.GetValue(value))?.ToString(CultureInfo.InvariantCulture);
+                item = ((float)obj).ToString(CultureInfo.InvariantCulture);
             else
-                item = prop.GetValue(value)?.ToString();
+                item = obj.ToString() ?? "";
 
-            list.Add(CsvField(item ?? "", separator));
+            list.Add(CsvField(item, separator));
         }
 
         return string.Join(separator, list);

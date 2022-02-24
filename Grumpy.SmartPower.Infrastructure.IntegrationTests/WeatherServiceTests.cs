@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using System;
-using Grumpy.Caching.Interface;
 using Xunit;
 using Grumpy.Caching.TestMocks;
 

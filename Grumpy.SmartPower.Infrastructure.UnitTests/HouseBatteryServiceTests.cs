@@ -31,7 +31,7 @@ public class HouseBatteryServiceTests
     {
         var client = Substitute.For<ISonnenBatteryClient>();
         client.GetOperatingMode().Returns(OperatingMode.TimeOfUse);
-        client.GetSchedule().Returns(new List<TimeOfUseEvent>() { new() { Watt = 0 } });
+        client.GetSchedule().Returns(new List<TimeOfUseEvent> { new() { Watt = 0 } });
 
         var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
 
@@ -45,7 +45,7 @@ public class HouseBatteryServiceTests
     {
         var client = Substitute.For<ISonnenBatteryClient>();
         client.GetOperatingMode().Returns(OperatingMode.TimeOfUse);
-        client.GetSchedule().Returns(new List<TimeOfUseEvent>() { new() { Watt = 1 } });
+        client.GetSchedule().Returns(new List<TimeOfUseEvent> { new() { Watt = 1 } });
 
         var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
 
