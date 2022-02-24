@@ -24,6 +24,11 @@ public class HouseBatteryService : IHouseBatteryService
         return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatteryMode", TimeSpan.FromMinutes(1), GetBatteryModeInt);
     }
 
+    public int InverterLimit()
+    {
+        return _sonnenBatteryClient.InverterLimit();
+    }
+
     private BatteryMode GetBatteryModeInt()
     {
         var operatingMode = _sonnenBatteryClient.GetOperatingMode();
@@ -97,7 +102,7 @@ public class HouseBatteryService : IHouseBatteryService
         }
     }
 
-    private int GetBatteryLevel()
+    public int GetBatteryLevel()
     {
         return _memoryCache.TryGetIfNotSet($"{GetType().FullName}:BatteryLevel", TimeSpan.FromMinutes(1),
             () => _sonnenBatteryClient.GetBatteryLevel());

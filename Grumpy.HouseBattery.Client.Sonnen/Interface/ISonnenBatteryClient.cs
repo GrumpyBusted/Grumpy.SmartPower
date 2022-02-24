@@ -38,4 +38,5 @@ public interface ISonnenBatteryClient
     IEnumerable<TimeOfUseEvent> GetSchedule();
     void SetOperatingMode(OperatingMode operatingMode);
     void SetSchedule(IEnumerable<TimeOfUseEvent> schedule);
+    int InverterLimit();
 }

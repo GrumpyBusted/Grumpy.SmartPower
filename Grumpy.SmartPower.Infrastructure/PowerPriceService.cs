@@ -49,7 +49,7 @@ public class PowerPriceService : IPowerPriceService
             if (fallBackPrices != null)
                 item = fallBackPrices.Value.FirstOrDefault(p => p.Hour == hour);
 
-            item ??= powerPrices.Where(i => i.Hour < hour).OrderByDescending(h => h.Hour).FirstOrDefault() != null ? powerPrices.Where(i => i.Hour < hour).OrderByDescending(h => h.Hour).FirstOrDefault() : powerPrices.Where(i => i.Hour > hour).OrderBy(h => h.Hour).FirstOrDefault();
+            item ??= powerPrices.Where(i => i.Hour < hour).OrderByDescending(h => h.Hour).FirstOrDefault();
 
             if (fallBackPrices != null && item == null)
                 item = fallBackPrices.Value.Where(p => p.Hour < hour).OrderByDescending(h => h.Hour)

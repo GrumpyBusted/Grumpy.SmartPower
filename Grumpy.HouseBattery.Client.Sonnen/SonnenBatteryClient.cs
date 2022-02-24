@@ -39,7 +39,8 @@ public class SonnenBatteryClient : ISonnenBatteryClient
 
     public int GetBatterySize()
     {
-        return GetLatestData().FullChargeCapacity;
+        // Data from battery API not correct
+        return _options.BatterySize > 0 ? _options.BatterySize : GetLatestData().FullChargeCapacity;
     }
 
     public int GetBatteryCapacity()
@@ -103,6 +104,11 @@ public class SonnenBatteryClient : ISonnenBatteryClient
             .AddBody(body);
 
         client.Execute(request);
+    }
+
+    public int InverterLimit()
+    {
+        return _options.InverterLimit;
     }
 
     private StatusRoot GetStatus()

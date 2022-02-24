@@ -26,11 +26,11 @@ public class RestClient : IRestClient
 
     public T Execute<T>(RestRequest request)
     {
-        _logger.LogInformation("Executing REST Web Service {0}", request);
+        _logger.LogInformation("Executing REST Web Service {request}", request);
 
         var response = _client.ExecuteAsync<T>(request);
 
-        _logger.LogInformation("Response from REST Web Service {0}", response.Result);
+        _logger.LogInformation("Response from REST Web Service {response}", response.Result);
 
         if (response.Result.StatusCode != System.Net.HttpStatusCode.OK)
             throw new RestClientExecuteException(request, response.Result);
@@ -40,11 +40,11 @@ public class RestClient : IRestClient
 
     public void Execute(RestRequest request)
     {
-        _logger.LogInformation("Executing REST Web Service {0}", request);
+        _logger.LogInformation("Executing REST Web Service {request}", request);
 
         var response = _client.ExecuteAsync(request);
 
-        _logger.LogInformation("Response from REST Web Service {0}", response.Result);
+        _logger.LogInformation("Response from REST Web Service {response}", response.Result);
 
         if (response.Result.StatusCode != System.Net.HttpStatusCode.OK)
             throw new RestClientExecuteException(request, response.Result);

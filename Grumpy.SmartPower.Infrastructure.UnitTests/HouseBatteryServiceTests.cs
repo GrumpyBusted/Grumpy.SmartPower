@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grumpy.Caching.TestMocks;
 using Grumpy.HouseBattery.Client.Sonnen.Dto;
+using Grumpy.SmartPower.Core.Infrastructure;
 using Xunit;
 
 namespace Grumpy.SmartPower.Infrastructure.UnitTests;
@@ -19,7 +20,7 @@ public class HouseBatteryServiceTests
         var client = Substitute.For<ISonnenBatteryClient>();
         client.GetOperatingMode().Returns(OperatingMode.SelfConsumption);
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         var res = cut.GetBatteryMode();
 
@@ -33,7 +34,7 @@ public class HouseBatteryServiceTests
         client.GetOperatingMode().Returns(OperatingMode.TimeOfUse);
         client.GetSchedule().Returns(new List<TimeOfUseEvent> { new() { Watt = 0 } });
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         var res = cut.GetBatteryMode();
 
@@ -47,7 +48,7 @@ public class HouseBatteryServiceTests
         client.GetOperatingMode().Returns(OperatingMode.TimeOfUse);
         client.GetSchedule().Returns(new List<TimeOfUseEvent> { new() { Watt = 1 } });
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         var res = cut.GetBatteryMode();
 
@@ -60,7 +61,7 @@ public class HouseBatteryServiceTests
         var client = Substitute.For<ISonnenBatteryClient>();
         client.GetBatteryLevel().Returns(100);
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         var res = cut.IsBatteryFull();
 
@@ -73,7 +74,7 @@ public class HouseBatteryServiceTests
         var client = Substitute.For<ISonnenBatteryClient>();
         client.GetBatteryLevel().Returns(94);
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         var res = cut.IsBatteryFull();
 
@@ -87,7 +88,7 @@ public class HouseBatteryServiceTests
         client.GetBatteryCapacity().Returns(100);
         client.GetBatteryLevel().Returns(40);
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         var res = cut.GetBatterySize();
 
@@ -100,11 +101,24 @@ public class HouseBatteryServiceTests
         var client = Substitute.For<ISonnenBatteryClient>();
         client.GetBatteryCapacity().Returns(123);
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         var res = cut.GetBatteryCurrent();
 
         res.Should().Be(123);
+    }
+
+    [Fact]
+    public void GetBatteryLevelShouldReturnFromClient()
+    {
+        var client = Substitute.For<ISonnenBatteryClient>();
+        client.GetBatteryLevel().Returns(23);
+
+        var cut = CreateTestObject(client);
+
+        var res = cut.GetBatteryLevel();
+
+        res.Should().Be(23);
     }
 
     [Fact]
@@ -113,7 +127,7 @@ public class HouseBatteryServiceTests
         var client = Substitute.For<ISonnenBatteryClient>();
         client.GetConsumption().Returns(123);
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         var res = cut.GetConsumption();
 
@@ -126,7 +140,7 @@ public class HouseBatteryServiceTests
         var client = Substitute.For<ISonnenBatteryClient>();
         client.GetProduction().Returns(123);
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         var res = cut.GetProduction();
 
@@ -138,7 +152,7 @@ public class HouseBatteryServiceTests
     {
         var client = Substitute.For<ISonnenBatteryClient>();
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         cut.SetMode(BatteryMode.Default, DateTime.Now);
 
@@ -150,7 +164,7 @@ public class HouseBatteryServiceTests
     {
         var client = Substitute.For<ISonnenBatteryClient>();
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         cut.SetMode(BatteryMode.StoreForLater, DateTime.Parse("2022-02-15T12:00:00"));
 
@@ -164,7 +178,7 @@ public class HouseBatteryServiceTests
     {
         var client = Substitute.For<ISonnenBatteryClient>();
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         cut.SetMode(BatteryMode.StoreForLater, DateTime.Parse("2022-02-15T12:00:00"));
 
@@ -179,12 +193,17 @@ public class HouseBatteryServiceTests
         client.GetBatteryCapacity().Returns(100);
         client.GetBatteryLevel().Returns(40);
 
-        var cut = new HouseBatteryService(client, TestCacheFactory.Instance);
+        var cut = CreateTestObject(client);
 
         cut.SetMode(BatteryMode.ChargeFromGrid, DateTime.Parse("2022-02-15T12:00:00"));
 
         client.Received(1).SetOperatingMode(Arg.Is(OperatingMode.TimeOfUse));
         client.Received(1).SetSchedule(Arg.Is<IEnumerable<TimeOfUseEvent>>(x => x.All(i => i.Watt > 0)));
         client.Received(1).SetSchedule(Arg.Is<IEnumerable<TimeOfUseEvent>>(x => x.Count() == 1));
+    }
+
+    private static IHouseBatteryService CreateTestObject(ISonnenBatteryClient client)
+    {
+        return new HouseBatteryService(client, TestCacheFactory.Instance);
     }
 }

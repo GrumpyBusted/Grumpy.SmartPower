@@ -15,6 +15,7 @@ public class SonnenBatteryClientTests
 {
     private readonly IRestClientFactory _restClientFactory = Substitute.For<IRestClientFactory>();
     private readonly IRestClient _restClient = Substitute.For<IRestClient>();
+    private readonly SonnenBatteryClientOptions _options = new();
 
     public SonnenBatteryClientTests()
     {
@@ -116,8 +117,19 @@ public class SonnenBatteryClientTests
         _restClient.Received().Execute(Arg.Any<RestRequest>());
     }
 
+    [Fact]
+    public void InverterLimitShouldGetFromOptions()
+    {
+        _options.InverterLimit = 3000;
+        var cut = CreateTestObject();
+
+        var res = cut.InverterLimit();
+
+        res.Should().Be(3000);
+    }
+
     private ISonnenBatteryClient CreateTestObject()
     {
-        return new SonnenBatteryClient(Options.Create(new SonnenBatteryClientOptions()), _restClientFactory);
+        return new SonnenBatteryClient(Options.Create(_options), _restClientFactory);
     }
 }

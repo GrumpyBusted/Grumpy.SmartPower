@@ -1,4 +1,5 @@
-﻿using Grumpy.SmartPower.Core.Consumption;
+﻿using System.Security.Principal;
+using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Interface;
 using Grumpy.SmartPower.Core.Model;
@@ -63,32 +64,62 @@ public class SmartPowerService : ISmartPowerService
         }
     }
 
-    private static BatteryMode GetBatteryMode(IEnumerable<Item> powerFlow, DateTime hour)
+    private BatteryMode GetBatteryMode(IEnumerable<Item> powerFlow, DateTime hour)
     {
-        const BatteryMode mode = BatteryMode.Default;
+        var inverterLimit = _houseBatteryService.InverterLimit();
+        var batterySize = _houseBatteryService.GetBatterySize();
 
-        var flow = powerFlow.ToList();
+        //var batteryLevel = _houseBatteryService.GetBatteryCurrent();
+        //var batterySize = _houseBatteryService.GetBatterySize();
 
-        return CurrentPrice(flow, hour) < flow.Where(i => i.Hour > hour).OrderBy(o => o.Hour).First().Price ? BatteryMode.ChargeFromGrid : mode;
-
-        //if (!batteryFull && priceLowerNow && NeedToBuyPower())
-        //    mode = BatteryMode.ChargeFromGrid;
+        //var powerNeed = Math.Max(consumption.Value - batteryLevel - production.Value, 0);
+        //batteryLevel = Math.Max(Math.Min(batteryLevel + production.Value - consumption.Value, batterySize), 0);
 
 
-        //if ()
-        //{
-        //    if (false)
-        //        mode = BatteryMode.StoreForLater;
-        //}
-        //else
-        //{
+        var flow = powerFlow.OrderBy(i => i.Hour).ToList();
 
-        //}
-    }
+        var current = flow.FirstOrDefault();
 
-    private static double CurrentPrice(IEnumerable<Item> powerFlow, DateTime hour)
-    {
-        return powerFlow.First(i => i.Hour == hour).Price;
+        if (current == null)
+            return BatteryMode.Default;
+
+        foreach (var item in flow.OrderByDescending(i => i.Price))
+        {
+            var powerNeed = item.PowerNeed;
+
+            foreach (var batteryHour in flow.Where(i => i.Hour > item.Hour).OrderBy(i => i.Hour))
+            {
+                if (powerNeed <= 0)
+                    break;
+
+                var useFromThisHour = powerNeed > batteryHour.BatteryLevel ? batteryHour.BatteryLevel : powerNeed;
+                batteryHour.BatteryLevel -= useFromThisHour;
+                powerNeed -= useFromThisHour;
+            }
+
+            if (powerNeed <= 0)
+                continue;
+
+            foreach (var chargingHour in flow.Where(i => i.Hour < item.Hour && i.Price < item.Price && i.GridCharge < inverterLimit).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
+            {
+                if (powerNeed <= 0)
+                    break;
+
+                var chargeThisHour = powerNeed > inverterLimit - chargingHour.GridCharge ? inverterLimit - chargingHour.GridCharge : powerNeed;
+                chargingHour.GridCharge += chargeThisHour - Math.Max(chargingHour.Production - chargingHour.Consumption, 0);
+                powerNeed -= chargeThisHour;
+            }
+        }
+
+        if (flow.Any(i => i.Hour == hour && i.GridCharge > inverterLimit / 3))
+            return BatteryMode.ChargeFromGrid;
+
+        if (current.Consumption < current.Production)
+            return BatteryMode.Default;
+
+        var expensiveNeed = flow.Skip(1).TakeWhile(i => i.Price > current.Price).Sum(i => i.PowerNeed);
+
+        return expensiveNeed > 0 ? BatteryMode.StoreForLater : BatteryMode.Default;
     }
 
     private IEnumerable<Item> PowerFlow(DateTime from, DateTime to)
@@ -122,6 +153,9 @@ public class SmartPowerService : ISmartPowerService
         public int Production { get; set; }
         public int Consumption { get; set; }
         public double Price { get; set; }
+        public int BatteryLevel { get; set; }
+        public int PowerNeed { get; set; }
+        public int GridCharge { get; set; }
     }
 
     public void SaveData(DateTime now)
@@ -151,7 +185,7 @@ public class SmartPowerService : ISmartPowerService
         {
             var weather = _weatherService.GetHistory(hour, hour.AddHours(1).AddMilliseconds(-1)).FirstOrDefault();
 
-            if (weather == null) 
+            if (weather == null)
                 return;
 
             var consumption = _realTimeReadingRepository.GetConsumption(hour);
@@ -165,7 +199,7 @@ public class SmartPowerService : ISmartPowerService
 
             var production = _realTimeReadingRepository.GetProduction(hour);
 
-            if (production == null) 
+            if (production == null)
                 return;
 
             var productionData = _productionService.GetData(weather);
