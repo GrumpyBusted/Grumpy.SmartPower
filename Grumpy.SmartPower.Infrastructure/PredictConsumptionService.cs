@@ -33,6 +33,9 @@ public class PredictConsumptionService : IPredictConsumptionService
 
     public int? Predict(ConsumptionData data)
     {
+        if (File.ReadAllLines(_options.DataPath).Length < 168)
+            return null;
+
         _predictionEngine ??= GetPredictionEngine();
 
         var input = MapToModelInput(data);

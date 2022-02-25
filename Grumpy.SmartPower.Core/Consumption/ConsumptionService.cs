@@ -55,13 +55,16 @@ public class ConsumptionService : IConsumptionService
             },
             Consumption = new ConsumptionDataConsumption
             {
-                Yesterday = _realTimeReadingRepository.GetConsumption(yesterday) ?? _powerMeterService.GetWattPerHour(yesterday),
-                LastWeek = _realTimeReadingRepository.GetConsumption(lastWeek) ?? _powerMeterService.GetWattPerHour(lastWeek),
-                LastWeekFromYesterday = _realTimeReadingRepository.GetConsumption(lastWeekFromYesterday) ?? _powerMeterService.GetWattPerHour(lastWeekFromYesterday)
+                Yesterday = _realTimeReadingRepository.GetConsumption(yesterday),
+                LastWeek = _realTimeReadingRepository.GetConsumption(lastWeek) ?? _realTimeReadingRepository.GetConsumption(yesterday),
+                LastWeekFromYesterday = _realTimeReadingRepository.GetConsumption(lastWeekFromYesterday) ?? _realTimeReadingRepository.GetConsumption(yesterday)
             }
         };
 
-        res.Consumption.WeekFactor = res.Consumption.LastWeekFromYesterday == 0 || res.Consumption.LastWeek == 0 ? 0 : (double)res.Consumption.Yesterday / res.Consumption.LastWeekFromYesterday;
+        if ((res.Consumption.LastWeekFromYesterday ?? 0) == 0 || (res.Consumption.Yesterday ?? 0) == 0)
+            res.Consumption.WeekFactor = 1;
+        else
+            res.Consumption.WeekFactor = ((double)(res.Consumption.Yesterday ?? 0)) / (res.Consumption.LastWeekFromYesterday ?? 0);
 
         return res;
     }

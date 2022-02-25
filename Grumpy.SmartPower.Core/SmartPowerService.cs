@@ -147,7 +147,7 @@ public class SmartPowerService : ISmartPowerService
             mode = BatteryMode.StoreForLater;
         else if (current.Consumption < current.Production)
             mode = BatteryMode.Default;
-        else
+        else // Måske kig på denne og næste
             mode = current.StartBatteryLevel + current.BatteryLevel > 0 ? BatteryMode.StoreForLater : BatteryMode.Default;
 
         // TODO: Remove

@@ -34,7 +34,7 @@ public class PredictProductionService : IPredictProductionService
 
     public int? Predict(ProductionData data)
     {
-        if (File.ReadAllLines(_options.DataPath).Length < 200)
+        if (File.ReadAllLines(_options.DataPath).Length < 168)
             return null;
 
         _predictionEngine ??= GetPredictionEngine();
