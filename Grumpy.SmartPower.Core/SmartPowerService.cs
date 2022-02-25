@@ -50,7 +50,7 @@ public class SmartPowerService : ISmartPowerService
         {
             currentMode = _houseBatteryService.GetBatteryMode();
 
-            var powerFlow = PowerFlow(from, to);
+            var powerFlow = GetPowerFlow(from, to);
 
             mode = GetBatteryMode(powerFlow);
         }
@@ -69,6 +69,7 @@ public class SmartPowerService : ISmartPowerService
     {
         var inverterLimit = _houseBatteryService.InverterLimit();
         var batterySize = _houseBatteryService.GetBatterySize();
+        var startBatteryLevel = _houseBatteryService.GetBatteryCurrent();
 
         var flow = powerFlow.OrderBy(i => i.Hour).ToList();
 
@@ -84,7 +85,7 @@ public class SmartPowerService : ISmartPowerService
             if (target.MissingPower <= 0)
                 continue;
 
-            UseInitialBattery(flow, target);
+            UseInitialBattery(flow, target, ref startBatteryLevel);
 
             if (target.MissingPower <= 0)
                 continue;
@@ -100,7 +101,10 @@ public class SmartPowerService : ISmartPowerService
         if (current.GridCharge > 0)
             mode = BatteryMode.ChargeFromGrid;
         else
-            mode = current.BatteryLevel > Math.Max(current.Production - current.Consumption, 0) || current.StartBatteryLevel > 0 && current.StartBatteryLevel == _houseBatteryService.GetBatteryCurrent() ? BatteryMode.StoreForLater : BatteryMode.Default;
+        {
+            var batteryLevelAtBeginning = _houseBatteryService.GetBatteryCurrent();
+            mode = current.BatteryLevel - batteryLevelAtBeginning > Math.Max(current.Production - current.Consumption, 0) || current.BatteryLevel > 0 && current.BatteryLevel == batteryLevelAtBeginning ? BatteryMode.StoreForLater : BatteryMode.Default;
+        }
 
         // TODO: Remove
         if (!Directory.Exists("bin"))
@@ -111,10 +115,8 @@ public class SmartPowerService : ISmartPowerService
         return mode;
     }
 
-    private static void UseInitialBattery(IReadOnlyCollection<Item> flow, Item target)
+    private static void UseInitialBattery(IEnumerable<Item> flow, Item target, ref int startBatteryLevel)
     {
-        var startBatteryLevel = flow.Min(i => i.StartBatteryLevel);
-
         if (startBatteryLevel <= 0)
             return;
 
@@ -124,9 +126,10 @@ public class SmartPowerService : ISmartPowerService
             return;
 
         target.MissingPower -= use;
+        startBatteryLevel -= use;
 
-        foreach (var item in flow.Where(i => i.Hour >= target.Hour))
-            item.StartBatteryLevel -= use;
+        foreach (var item in flow.Where(i => i.Hour < target.Hour))
+            item.BatteryLevel += use;
     }
 
     private static void UseExtraSolarPower(IReadOnlyCollection<Item> flow, Item target, int inverterLimit, int batterySize)
@@ -137,7 +140,7 @@ public class SmartPowerService : ISmartPowerService
                 inverterLimit - source.SolarCharge - source.GridCharge);
 
             var level = flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour)
-                .Max(i => i.BatteryLevel + i.StartBatteryLevel);
+                .Max(i => i.BatteryLevel);
 
             if (move + level > batterySize)
                 move = batterySize - level;
@@ -167,7 +170,7 @@ public class SmartPowerService : ISmartPowerService
             var charge = Math.Min(target.MissingPower, inverterLimit - source.GridCharge - source.SolarCharge);
 
             var level = flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour)
-                .Max(i => i.BatteryLevel + i.StartBatteryLevel);
+                .Max(i => i.BatteryLevel);
 
             if (charge + level > _options.ChargeFromGridLimit * batterySize)
                 charge = (int)Math.Round(_options.ChargeFromGridLimit * batterySize - level);
@@ -186,7 +189,7 @@ public class SmartPowerService : ISmartPowerService
         }
     }
 
-    private IEnumerable<Item> PowerFlow(DateTime from, DateTime to)
+    private IEnumerable<Item> GetPowerFlow(DateTime from, DateTime to)
     {
         var productionList = _productionService.Predict(from, to).ToList();
         var consumptionList = _consumptionService.Predict(from, to).ToList();
@@ -208,7 +211,6 @@ public class SmartPowerService : ISmartPowerService
                 Consumption = consumption.Value,
                 MissingPower = consumption.Value > production.Value ? consumption.Value - production.Value : 0,
                 ExtraPower = production.Value > consumption.Value ? production.Value - consumption.Value : 0,
-                StartBatteryLevel = _houseBatteryService.GetBatteryCurrent(),
                 Price = price.Value
             };
         }
