@@ -1,8 +1,8 @@
-﻿using System.Security.Principal;
-using Grumpy.Json;
+﻿using Grumpy.Json;
 using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Interface;
+using Grumpy.SmartPower.Core.Internal;
 using Grumpy.SmartPower.Core.Model;
 using Grumpy.SmartPower.Core.Production;
 using Microsoft.Extensions.Logging;
@@ -77,83 +77,113 @@ public class SmartPowerService : ISmartPowerService
         if (current == null)
             return BatteryMode.Default;
 
-        foreach (var target in flow.Where(i => i.MissingPower > 0).OrderBy(i => i.Hour))
+        foreach (var target in flow.OrderByDescending(i => i.Price * i.MissingPower).ThenByDescending(i => i.Price).ThenBy(i => i.Hour))
         {
-            var startBatteryLevel = flow.Min(i => i.StartBatteryLevel);
-
-            if (startBatteryLevel <= 0)
-                break;
-
-            var use = Math.Min(startBatteryLevel, target.MissingPower);
-            target.MissingPower -= use;
-
-            foreach (var item in flow.Where(i => i.Hour >= target.Hour))
-                item.StartBatteryLevel -= use;
-        }
-
-        foreach (var target in flow.Where(i => i.MissingPower > 0).OrderByDescending(i => i.Price))
-        {
-            if (target.Hour == current.Hour || target.GridCharge > inverterLimit / 3)
-                break;
-
-            foreach (var source in flow.Where(i => i.Hour < target.Hour && i.ExtraPower > 0).OrderByDescending(i => i.Hour))
-            {
-                var move = Math.Min(target.MissingPower, source.ExtraPower);
-
-                var level = flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour).Max(i => i.BatteryLevel + i.StartBatteryLevel);
-
-                if (move + level > batterySize)
-                    move = batterySize - level;
-
-                target.MissingPower -= move;
-                source.ExtraPower -= move;
-                source.SolarCharge += move;
-
-                foreach (var item in flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour))
-                    item.BatteryLevel += move;
-
-                if (target.MissingPower <= 0 || move + level >= batterySize)
-                    break;
-            }
+            UseExtraSolarPower(flow, target, inverterLimit, batterySize);
 
             if (target.MissingPower <= 0)
                 continue;
 
-            foreach (var source in flow.Where(i => i.Hour < target.Hour && i.Price < target.Price && i.GridCharge + i.SolarCharge < inverterLimit).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
-            {
-                var charge = target.MissingPower > inverterLimit - source.GridCharge + source.GridCharge ? inverterLimit - source.GridCharge + source.SolarCharge : target.MissingPower;
+            UseInitialBattery(flow, target);
 
-                var level = flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour).Max(i => i.BatteryLevel + i.StartBatteryLevel);
+            if (target.MissingPower <= 0)
+                continue;
 
-                if (charge + level > batterySize)
-                    charge = batterySize - level;
+            ChargeFromGrid(flow, target, inverterLimit, batterySize);
 
-                target.MissingPower -= charge;
-                source.GridCharge += charge;
-
-                foreach (var item in flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour))
-                    item.BatteryLevel += charge;
-
-                if (target.MissingPower <= 0)
-                    break;
-            }
+            if (target.Hour == current.Hour)
+                break;
         }
 
-        var mode = BatteryMode.Default;
+        BatteryMode mode;
 
-        if (current.GridCharge > inverterLimit / 3)
+        if (current.GridCharge > 0)
             mode = BatteryMode.ChargeFromGrid;
-        else if (current.GridCharge > 0)
-            mode = BatteryMode.StoreForLater;
-        else if (current.Consumption < current.Production)
-            mode = BatteryMode.Default;
-        else // Måske kig på denne og næste
-            mode = current.StartBatteryLevel + current.BatteryLevel > 0 ? BatteryMode.StoreForLater : BatteryMode.Default;
+        else
+            mode = current.BatteryLevel > Math.Max(current.Production - current.Consumption, 0) || current.StartBatteryLevel > 0 && current.StartBatteryLevel == _houseBatteryService.GetBatteryCurrent() ? BatteryMode.StoreForLater : BatteryMode.Default;
 
         // TODO: Remove
+        if (!Directory.Exists("bin"))
+            Directory.CreateDirectory("bin");
+
         File.WriteAllText($"bin\\Trace-{DateTime.Now:yyyy-MM-dd HH-mm-ss}-{mode}.json", flow.SerializeToJson());
 
         return mode;
+    }
+
+    private static void UseInitialBattery(IReadOnlyCollection<Item> flow, Item target)
+    {
+        var startBatteryLevel = flow.Min(i => i.StartBatteryLevel);
+
+        if (startBatteryLevel <= 0)
+            return;
+
+        var use = Math.Min(startBatteryLevel, target.MissingPower);
+
+        if (use <= 0)
+            return;
+
+        target.MissingPower -= use;
+
+        foreach (var item in flow.Where(i => i.Hour >= target.Hour))
+            item.StartBatteryLevel -= use;
+    }
+
+    private static void UseExtraSolarPower(IReadOnlyCollection<Item> flow, Item target, int inverterLimit, int batterySize)
+    {
+        foreach (var source in flow.Where(i => i.Hour < target.Hour && i.ExtraPower > 0).OrderByDescending(i => i.Hour))
+        {
+            var move = Math.Min(Math.Min(target.MissingPower, source.ExtraPower),
+                inverterLimit - source.SolarCharge - source.GridCharge);
+
+            var level = flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour)
+                .Max(i => i.BatteryLevel + i.StartBatteryLevel);
+
+            if (move + level > batterySize)
+                move = batterySize - level;
+
+            if (move <= 0)
+                continue;
+
+            target.MissingPower -= move;
+            source.ExtraPower -= move;
+            source.SolarCharge += move;
+
+            foreach (var item in flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour))
+                item.BatteryLevel += move;
+
+            if (target.MissingPower <= 0 || move + level >= batterySize)
+                break;
+        }
+    }
+
+    private void ChargeFromGrid(IReadOnlyCollection<Item> flow, Item target, int inverterLimit, int batterySize)
+    {
+        foreach (var source in flow
+                     .Where(i => i.Hour < target.Hour && i.Price < target.Price &&
+                                 i.GridCharge + i.SolarCharge < inverterLimit).OrderBy(i => i.Price)
+                     .ThenByDescending(i => i.Hour))
+        {
+            var charge = Math.Min(target.MissingPower, inverterLimit - source.GridCharge - source.SolarCharge);
+
+            var level = flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour)
+                .Max(i => i.BatteryLevel + i.StartBatteryLevel);
+
+            if (charge + level > _options.ChargeFromGridLimit * batterySize)
+                charge = (int)Math.Round(_options.ChargeFromGridLimit * batterySize - level);
+
+            if (charge <= 0)
+                continue;
+
+            target.MissingPower -= charge;
+            source.GridCharge += charge;
+
+            foreach (var item in flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour))
+                item.BatteryLevel += charge;
+
+            if (target.MissingPower <= 0)
+                break;
+        }
     }
 
     private IEnumerable<Item> PowerFlow(DateTime from, DateTime to)
@@ -182,20 +212,6 @@ public class SmartPowerService : ISmartPowerService
                 Price = price.Value
             };
         }
-    }
-
-    internal class Item
-    {
-        public DateTime Hour { get; set; }
-        public int Production { get; set; }
-        public int Consumption { get; set; }
-        public double Price { get; set; }
-        public int BatteryLevel { get; set; }
-        public int MissingPower { get; set; }
-        public int ExtraPower { get; set; }
-        public int GridCharge { get; set; }
-        public int SolarCharge { get; internal set; }
-        public int StartBatteryLevel { get; internal set; }
     }
 
     public void SaveData(DateTime now)

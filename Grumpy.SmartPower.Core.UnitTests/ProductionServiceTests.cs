@@ -266,9 +266,9 @@ public class ProductionServiceTests
         var res = cut.GetData(weatherItem);
 
         res.Hour.Should().Be(DateTime.Parse("2022-02-21T09:00:00"));
-        res.Weather.Temperature.Should().Be(1);
-        res.Weather.CloudCover.Should().Be(2);
-        res.Weather.WindSpeed.Should().Be(3);
+        res.Weather?.Temperature.Should().Be(1);
+        res.Weather?.CloudCover.Should().Be(2);
+        res.Weather?.WindSpeed.Should().Be(3);
         res.Sun.Sunlight.Should().Be(TimeSpan.FromHours(0.5));
         res.Sun.Altitude.Should().Be(55);
         res.Sun.Direction.Should().Be(150);

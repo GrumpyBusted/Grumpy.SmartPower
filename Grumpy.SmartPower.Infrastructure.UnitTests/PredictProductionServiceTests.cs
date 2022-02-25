@@ -62,7 +62,7 @@ public class PredictProductionServiceTests
             }
         };
 
-        for(var i = 1; i <= 40; i++)
+        for(var i = 1; i <= 200; i++)
         {
             data.Calculated = i;
             cut.FitModel(data, 100 + i);

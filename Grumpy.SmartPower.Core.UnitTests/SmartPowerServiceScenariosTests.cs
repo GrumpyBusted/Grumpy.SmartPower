@@ -9,6 +9,7 @@ using Xunit;
 using Microsoft.Extensions.Logging;
 using Grumpy.SmartPower.Core.Model;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Grumpy.SmartPower.Core.UnitTests;
 
@@ -98,7 +99,7 @@ public class SmartPowerServiceScenariosTests
 
         cut.Execute(now);
 
-        _houseBatteryService.Received(1).SetMode(BatteryMode.StoreForLater, now);
+        _houseBatteryService.Received(1).SetMode(BatteryMode.ChargeFromGrid, now);
     }
 
     [Fact]
@@ -220,7 +221,27 @@ public class SmartPowerServiceScenariosTests
             new() { Production = 0, Consumption = 1000, Price = 1 },
             new() { Production = 0, Consumption = 500, Price = 2 },
             new() { Production = 0, Consumption = 1000, Price = 1 },
-            new() { Production = 0, Consumption = 1000, Price = 2 },
+            new() { Production = 0, Consumption = 1000, Price = 2 }
+        };
+        UseTestData(now, testData);
+        var cut = CreateTestObject(10000, 0, 500);
+
+        cut.Execute(now);
+
+        _houseBatteryService.Received(1).SetMode(BatteryMode.ChargeFromGrid, now);
+    }
+
+    [Fact]
+    public void PriceScenarioJ2()
+    {
+        var now = DateTime.Parse("2022-02-13T12:00:00");
+        var testData = new List<TestDataFlow>
+        {
+            new() { Production = 0, Consumption = 1000, Price = 1 },
+            new() { Production = 0, Consumption = 1000, Price = 1 },
+            new() { Production = 0, Consumption = 1500, Price = 2 },
+            new() { Production = 0, Consumption = 1000, Price = 1 },
+            new() { Production = 0, Consumption = 1000, Price = 2 }
         };
         UseTestData(now, testData);
         var cut = CreateTestObject(10000, 0, 500);
@@ -241,7 +262,7 @@ public class SmartPowerServiceScenariosTests
             new() { Production = 0, Consumption = 500, Price = 2 },
             new() { Production = 0, Consumption = 1000, Price = 1 },
             new() { Production = 0, Consumption = 1000, Price = 1 },
-            new() { Production = 0, Consumption = 1000, Price = 2 },
+            new() { Production = 0, Consumption = 1000, Price = 2 }
         };
         UseTestData(now, testData);
         var cut = CreateTestObject(10000, 0, 500);
@@ -255,7 +276,7 @@ public class SmartPowerServiceScenariosTests
     public void PriceScenarioL()
     {
         var now = DateTime.Parse("2022-02-13T12:00:00");
-        var testData = new List<TestDataFlow>();
+        var testData = Enumerable.Empty<TestDataFlow>();
         UseTestData(now, testData);
         var cut = CreateTestObject(10000, 0, 500);
 
@@ -296,7 +317,24 @@ public class SmartPowerServiceScenariosTests
 
         cut.Execute(now);
 
-        _houseBatteryService.Received(1).SetMode(BatteryMode.ChargeFromGrid, now);
+        _houseBatteryService.Received(1).SetMode(BatteryMode.StoreForLater, now);
+    }
+
+    [Fact]
+    public void PriceScenarioN2()
+    {
+        var now = DateTime.Parse("2022-02-13T12:00:00");
+        var testData = new List<TestDataFlow>
+        {
+            new() { Production = 0, Consumption = 1000, Price = 1 },
+            new() { Production = 0, Consumption = 1000, Price = 2 } 
+        };
+        UseTestData(now, testData);
+        var cut = CreateTestObject(10000, 2000, 1000);
+
+        cut.Execute(now);
+
+        _houseBatteryService.Received(1).SetMode(BatteryMode.Default, now);
     }
 
     [Fact]
@@ -331,7 +369,7 @@ public class SmartPowerServiceScenariosTests
 
         cut.Execute(now);
 
-        _houseBatteryService.Received(1).SetMode(BatteryMode.Default, now);
+        _houseBatteryService.Received(1).SetMode(BatteryMode.StoreForLater, now);
     }
 
     [Fact]
@@ -362,11 +400,29 @@ public class SmartPowerServiceScenariosTests
             new() { Production = 0, Consumption = 7000, Price = 3 }
         };
         UseTestData(now, testData);
-        var cut = CreateTestObject(5000, 0, 1000);
+        var cut = CreateTestObject(5000, 0, 10000);
 
         cut.Execute(now);
 
         _houseBatteryService.Received(1).SetMode(BatteryMode.Default, now);
+    }
+
+    [Fact]
+    public void PriceScenarioR2()
+    {
+        var now = DateTime.Parse("2022-02-13T12:00:00");
+        var testData = new List<TestDataFlow>
+        {
+            new() { Production = 0, Consumption = 1000, Price = 1 },
+            new() { Production = 6000, Consumption = 1000, Price = 3 },
+            new() { Production = 0, Consumption = 7000, Price = 3 }
+        };
+        UseTestData(now, testData);
+        var cut = CreateTestObject(5000, 0, 1000);
+
+        cut.Execute(now);
+
+        _houseBatteryService.Received(1).SetMode(BatteryMode.ChargeFromGrid, now);
     }
 
     [Fact]
@@ -381,6 +437,24 @@ public class SmartPowerServiceScenariosTests
         };
         UseTestData(now, testData);
         var cut = CreateTestObject(1500, 1000, 1000);
+
+        cut.Execute(now);
+
+        _houseBatteryService.Received(1).SetMode(BatteryMode.Default, now);
+    }
+
+    [Fact]
+    public void PriceScenarioT()
+    {
+        var now = DateTime.Parse("2022-02-13T12:00:00");
+        var testData = new List<TestDataFlow>
+        {
+            new() { Production = 3000, Consumption = 1000, Price = 3 },
+            new() { Production = 0, Consumption = 2000, Price = 3 },
+            new() { Production = 0, Consumption = 1000, Price = 3 }
+        };
+        UseTestData(now, testData);
+        var cut = CreateTestObject(1500, 0, 1000);
 
         cut.Execute(now);
 

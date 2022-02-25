@@ -4,7 +4,6 @@ using Grumpy.SmartPower.Core.Production;
 using Grumpy.SmartPower.Infrastructure.PredictProductionModel;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
-using System.Linq;
 
 namespace Grumpy.SmartPower.Infrastructure;
 
@@ -37,9 +36,12 @@ public class PredictProductionService : IPredictProductionService
         if (File.ReadAllLines(_options.DataPath).Length < 168)
             return null;
 
-        _predictionEngine ??= GetPredictionEngine();
-
         var input = MapToModelInput(data);
+
+        if (input == null)
+            return null;
+
+        _predictionEngine ??= GetPredictionEngine();
 
         var output = _predictionEngine?.Predict(input);
 
@@ -52,6 +54,9 @@ public class PredictProductionService : IPredictProductionService
     public void FitModel(ProductionData data, int actualWattPerHour)
     {
         var input = MapToModelInput(data, actualWattPerHour);
+
+        if (input == null)
+            return;
 
         if (!File.Exists(_options.DataPath))
         {
@@ -107,9 +112,12 @@ public class PredictProductionService : IPredictProductionService
         _predictionEngine = null;
     }
 
-    private static Input MapToModelInput(ProductionData data, int wattPerHour = 0)
+    private static Input? MapToModelInput(ProductionData data, int wattPerHour = 0)
     {
         var utc = data.Hour.ToUniversalTime();
+
+        if (data.Weather == null)
+            return null;
 
         return new Input
         {

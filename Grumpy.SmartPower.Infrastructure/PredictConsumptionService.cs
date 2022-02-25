@@ -36,9 +36,12 @@ public class PredictConsumptionService : IPredictConsumptionService
         if (File.ReadAllLines(_options.DataPath).Length < 168)
             return null;
 
-        _predictionEngine ??= GetPredictionEngine();
-
         var input = MapToModelInput(data);
+
+        if (input == null)
+            return null;
+
+        _predictionEngine ??= GetPredictionEngine();
 
         var output = _predictionEngine?.Predict(input);
 
@@ -51,6 +54,9 @@ public class PredictConsumptionService : IPredictConsumptionService
     public void FitModel(ConsumptionData data, int actualWattPerHour)
     {
         var input = MapToModelInput(data, actualWattPerHour);
+
+        if (input == null)
+            return;
 
         if (!File.Exists(_options.DataPath))
         {
@@ -114,16 +120,25 @@ public class PredictConsumptionService : IPredictConsumptionService
         _predictionEngine = null;
     }
 
-    private static Input MapToModelInput(ConsumptionData data, int wattPerHour = 0)
+    private static Input? MapToModelInput(ConsumptionData data, int wattPerHour = 0)
     {
+        if (data.Weather.Forecast == null ||
+            data.Weather.Yesterday == null ||
+            data.Weather.LastWeek == null ||
+            data.Weather.LastWeekFromYesterday == null ||
+            data.Consumption.Yesterday == null ||
+            data.Consumption.LastWeek == null ||
+            data.Consumption.LastWeekFromYesterday == null)
+            return null;
+
         return new Input
         {
             Weekday = data.Hour.DayOfWeek.ToString(),
             Hour = data.Hour.Hour,
             Month = data.Hour.Month,
-            WattPerHourYesterday = data.Consumption.Yesterday,
-            WattPerHourLastWeek = data.Consumption.LastWeek,
-            WattPerHourLastWeekFromYesterday = data.Consumption.LastWeekFromYesterday,
+            WattPerHourYesterday = data.Consumption.Yesterday.Value,
+            WattPerHourLastWeek = data.Consumption.LastWeek.Value,
+            WattPerHourLastWeekFromYesterday = data.Consumption.LastWeekFromYesterday.Value,
             WattPerHourWeekFactor = data.Consumption.WeekFactor,
             TemperatureForecast = data.Weather.Forecast.Temperature,
             WindSpeedForecast = data.Weather.Forecast.WindSpeed,

@@ -34,7 +34,7 @@ public static class GenericExtensions
             if (obj == null)
                 item = "";
             else if (prop.PropertyType == typeof(DateTime))
-                item = ((DateTime)obj).ToString("O");
+                item = ((DateTime)obj).ToUniversalTime().ToString("O");
             else if (prop.PropertyType == typeof(double))
                 item = ((double)obj).ToString(CultureInfo.InvariantCulture);
             else if (prop.PropertyType == typeof(float))

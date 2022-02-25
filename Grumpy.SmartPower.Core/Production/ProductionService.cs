@@ -30,12 +30,12 @@ public class ProductionService : IProductionService
         {
             var data = GetData(item);
 
-            var wattPerHour = _predictProductionService.Predict(data) ?? data.Calculated;
+            var wattPerHour = _predictProductionService.Predict(data);
 
             yield return new ProductionItem
             {
                 Hour = item.Hour,
-                WattPerHour = wattPerHour
+                WattPerHour = wattPerHour ?? data.Calculated
             };
         }
     }

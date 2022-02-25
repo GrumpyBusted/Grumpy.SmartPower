@@ -26,12 +26,17 @@ public class ConsumptionService : IConsumptionService
         {
             var data = GetData(item);
 
-            var wattPerHour = _predictConsumptionService.Predict(data) ?? data.Consumption.LastWeek;
+            var wattPerHour = _predictConsumptionService.Predict(data);
+
+            wattPerHour ??= data.Consumption.Yesterday;
+            wattPerHour ??= data.Consumption.LastWeek;
+            wattPerHour ??= _realTimeReadingRepository.GetConsumption(from.AddHours(-1));
+            wattPerHour ??= _powerMeterService.GetWattPerHour(from.AddDays(-7));
 
             yield return new ConsumptionItem
             {
                 Hour = item.Hour,
-                WattPerHour = wattPerHour
+                WattPerHour = wattPerHour.Value 
             };
         }
     }
@@ -49,22 +54,22 @@ public class ConsumptionService : IConsumptionService
             Weather = new ConsumptionDataWeather
             {
                 Forecast = item,
-                Yesterday = history.FirstOrDefault(i => i.Hour == yesterday) ?? item,
-                LastWeek = history.FirstOrDefault(i => i.Hour == lastWeek) ?? item,
-                LastWeekFromYesterday = history.FirstOrDefault(i => i.Hour == lastWeekFromYesterday) ?? item
+                Yesterday = history.FirstOrDefault(i => i.Hour == yesterday),
+                LastWeek = history.FirstOrDefault(i => i.Hour == lastWeek),
+                LastWeekFromYesterday = history.FirstOrDefault(i => i.Hour == lastWeekFromYesterday)
             },
             Consumption = new ConsumptionDataConsumption
             {
                 Yesterday = _realTimeReadingRepository.GetConsumption(yesterday),
-                LastWeek = _realTimeReadingRepository.GetConsumption(lastWeek) ?? _realTimeReadingRepository.GetConsumption(yesterday),
-                LastWeekFromYesterday = _realTimeReadingRepository.GetConsumption(lastWeekFromYesterday) ?? _realTimeReadingRepository.GetConsumption(yesterday)
+                LastWeek = _realTimeReadingRepository.GetConsumption(lastWeek),
+                LastWeekFromYesterday = _realTimeReadingRepository.GetConsumption(lastWeekFromYesterday)
             }
         };
 
         if ((res.Consumption.LastWeekFromYesterday ?? 0) == 0 || (res.Consumption.Yesterday ?? 0) == 0)
             res.Consumption.WeekFactor = 1;
         else
-            res.Consumption.WeekFactor = ((double)(res.Consumption.Yesterday ?? 0)) / (res.Consumption.LastWeekFromYesterday ?? 0);
+            res.Consumption.WeekFactor = (double)(res.Consumption.Yesterday ?? 0) / (res.Consumption.LastWeekFromYesterday ?? 0);
 
         return res;
     }

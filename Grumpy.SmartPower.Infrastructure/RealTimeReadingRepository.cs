@@ -20,7 +20,7 @@ public class RealTimeReadingRepository : IRealTimeReadingRepository
     {
         var record = new RealTimeReading
         {
-            DateTime = dateTime,
+            DateTime = new DateTime(dateTime.Ticks, dateTime.Kind == DateTimeKind.Unspecified ? DateTimeKind.Local : dateTime.Kind),
             Consumption = consumption,
             Production = production
         };
@@ -53,7 +53,7 @@ public class RealTimeReadingRepository : IRealTimeReadingRepository
         var from = new DateTime(hour.Year, hour.Month, hour.Day, hour.Hour, 0, 0, hour.Kind);
         var to = from.AddHours(1).AddMilliseconds(-1);
 
-        if (to > DateTime.Now)
+        if (to > DateTime.Now.ToUniversalTime())
             throw new ArgumentException("Only ask for passed readings", nameof(hour));
 
         var list = ReadFrom(_options.RepositoryPath).Where(r => r.DateTime >= from && r.DateTime <= to).ToList();

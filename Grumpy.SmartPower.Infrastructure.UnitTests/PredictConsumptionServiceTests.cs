@@ -115,7 +115,7 @@ public class PredictConsumptionServiceTests
             }
         };
 
-        for(var i = 1; i <= 40; i++)
+        for(var i = 1; i <= 200; i++)
         {
             data.Consumption.Yesterday = i;
             cut.FitModel(data, 100 + i);

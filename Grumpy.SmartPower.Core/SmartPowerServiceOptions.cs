@@ -6,4 +6,5 @@ public class SmartPowerServiceOptions
 {
     public PriceArea PriceArea { get; set; } = PriceArea.DK1;
     public PriceArea FallBackPriceArea { get; set; } = PriceArea.DK;
+    public double ChargeFromGridLimit { get; set; } = 1;
 }

@@ -28,13 +28,13 @@ public class GenericExtensionsTests
         {
             Name = "Anders",
             Year = 1973,
-            Birthday = DateTime.Parse("1973-10-25T09:14:00"),
+            Birthday = new DateTime(1973, 10, 25, 9, 14, 0, DateTimeKind.Local),
             Salary = 123.45
         };
 
         var res = value.CsvRecord(';');
 
-        res.Should().Be("Anders;1973;1973-10-25T09:14:00.0000000;123.45");
+        res.Should().Be("Anders;1973;1973-10-25T07:14:00.0000000Z;123.45");
     }
 
     [Fact]

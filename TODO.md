@@ -1,4 +1,4 @@
 # To-Do's
 
 - Check Test classes, are all classes covered by both Unit and Integration
-- In repo in UTC time
+- Difiner vægte
