@@ -188,4 +188,9 @@ public class SonnenBatteryClient : ISonnenBatteryClient
             };
         }
     }
+
+    public int GetGridFeedIn()
+    {
+        return GetStatus().GridFeedIn;
+    }
 }

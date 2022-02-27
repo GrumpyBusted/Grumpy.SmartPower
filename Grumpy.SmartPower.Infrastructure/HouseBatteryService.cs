@@ -117,4 +117,9 @@ public class HouseBatteryService : IHouseBatteryService
     {
         return _sonnenBatteryClient.GetConsumption();
     }
+
+    public int GetGridFeedIn()
+    {
+        return _sonnenBatteryClient.GetGridFeedIn();
+    }
 }

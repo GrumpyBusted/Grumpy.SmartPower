@@ -70,12 +70,12 @@ public class PowerPriceService : IPowerPriceService
 
     private void AddToList(ref List<PriceItem> list, PowerPrice.Client.EnergyDataService.Dto.PowerPrice item, PriceArea priceArea, DateTime hour)
     {
-        var price = item.SpotPriceDKK ?? item.SpotPriceEUR * _energyDataServiceClient.GetExchangeRate(priceArea, hour) / 100;
+        var price = item.SpotPriceDKK ?? Math.Round(item.SpotPriceEUR * _energyDataServiceClient.GetExchangeRate(priceArea, hour) / 100, 2);
 
         list.Add(new PriceItem
         {
             Hour = hour,
-            Price = price
+            Price = Math.Round(price / 1000, 4)
         });
     }
 }

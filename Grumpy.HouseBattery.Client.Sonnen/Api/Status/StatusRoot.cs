@@ -3,7 +3,6 @@ using System.Text.Json.Serialization;
 
 namespace Grumpy.HouseBattery.Client.Sonnen.Api.Status;
 
-[SuppressMessage("ReSharper", "StringLiteralTypo")]
 internal class StatusRoot
 {
     [JsonPropertyName("Production_W")]
@@ -14,4 +13,6 @@ internal class StatusRoot
     public int RemainingCapacity { get; set; } = 0;
     [JsonPropertyName("USOC")]
     public int UserStateOfCharge { get; set; } = 0;
+    [JsonPropertyName("GridFeedIn_W")]
+    public int GridFeedIn { get; set; } = 0;
 }

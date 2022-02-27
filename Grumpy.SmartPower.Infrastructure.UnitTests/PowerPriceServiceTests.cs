@@ -49,7 +49,7 @@ public class PowerPriceServiceTests
 
         var res = cut.GetPrices(PriceArea.DK2, PriceArea.DK, DateTime.Parse("2022-03-01T00:00:00"), DateTime.Parse("2022-03-01T00:59:59"));
 
-        res.First().Price.Should().Be(1500);
+        res.First().Price.Should().Be(1.500);
     }
 
     [Fact]
@@ -75,8 +75,8 @@ public class PowerPriceServiceTests
 
         var res = cut.GetPrices(PriceArea.DK2, PriceArea.DK, DateTime.Parse("2022-03-01T00:00:00"), DateTime.Parse("2022-03-01T01:59:59")).ToList();
 
-        res.First(p => p.Hour == DateTime.Parse("2022-03-01T00:00:00")).Price.Should().Be(600);
-        res.First(p => p.Hour == DateTime.Parse("2022-03-01T01:00:00")).Price.Should().Be(700);
+        res.First(p => p.Hour == DateTime.Parse("2022-03-01T00:00:00")).Price.Should().Be(0.6);
+        res.First(p => p.Hour == DateTime.Parse("2022-03-01T01:00:00")).Price.Should().Be(0.7);
     }
 
     [Fact]
@@ -96,9 +96,9 @@ public class PowerPriceServiceTests
 
         var res = cut.GetPrices(PriceArea.DK2, PriceArea.DK, DateTime.Parse("2022-03-01T00:00:00"), DateTime.Parse("2022-03-01T02:59:59")).ToList();
 
-        res.First(p => p.Hour == DateTime.Parse("2022-03-01T00:00:00")).Price.Should().Be(700);
-        res.First(p => p.Hour == DateTime.Parse("2022-03-01T01:00:00")).Price.Should().Be(700);
-        res.First(p => p.Hour == DateTime.Parse("2022-03-01T02:00:00")).Price.Should().Be(700);
+        res.First(p => p.Hour == DateTime.Parse("2022-03-01T00:00:00")).Price.Should().Be(0.700);
+        res.First(p => p.Hour == DateTime.Parse("2022-03-01T01:00:00")).Price.Should().Be(0.700);
+        res.First(p => p.Hour == DateTime.Parse("2022-03-01T02:00:00")).Price.Should().Be(0.700);
     }
 
     [Fact]
@@ -117,7 +117,7 @@ public class PowerPriceServiceTests
 
         var res = cut.GetPrices(PriceArea.DK2, PriceArea.DK, DateTime.Parse("2022-03-01T00:00:00"), DateTime.Parse("2022-03-01T01:59:59")).ToList();
 
-        res.First(p => p.Hour == DateTime.Parse("2022-03-01T00:00:00")).Price.Should().Be(600);
-        res.First(p => p.Hour == DateTime.Parse("2022-03-01T01:00:00")).Price.Should().Be(600);
+        res.First(p => p.Hour == DateTime.Parse("2022-03-01T00:00:00")).Price.Should().Be(0.600);
+        res.First(p => p.Hour == DateTime.Parse("2022-03-01T01:00:00")).Price.Should().Be(0.600);
     }
 }

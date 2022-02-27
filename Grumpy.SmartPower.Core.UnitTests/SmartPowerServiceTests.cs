@@ -29,6 +29,8 @@ public class SmartPowerServiceTests
     private readonly IPredictConsumptionService _predictConsumptionService = Substitute.For<IPredictConsumptionService>();
     private readonly IPredictProductionService _predictProductionService = Substitute.For<IPredictProductionService>();
     private readonly IWeatherService _weatherService = Substitute.For<IWeatherService>();
+    private readonly IPowerUsageRepository _powerUsageRepository = Substitute.For<IPowerUsageRepository>();
+    private readonly IPowerMeterService _powerMeterService = Substitute.For<IPowerMeterService>();
 
     [Fact]
     public void CanCreateObject()
@@ -54,10 +56,11 @@ public class SmartPowerServiceTests
         var cut = CreateTestObject();
         _houseBatteryService.GetConsumption().Returns(1);
         _houseBatteryService.GetProduction().Returns(2);
+        _houseBatteryService.GetGridFeedIn().Returns(3);
 
         cut.SaveData(DateTime.Now);
 
-        _realTimeReadingRepository.Received(1).Save(Arg.Any<DateTime>(), 1, 2);
+        _realTimeReadingRepository.Received(1).Save(Arg.Any<DateTime>(), 1, 2, 3);
     }
 
     [Fact]
@@ -89,7 +92,7 @@ public class SmartPowerServiceTests
     }
 
     [Fact]
-    public void ExecuteWithSameModeShouldNotSetBatteryMode()
+    public void ExecuteWithSameModeShouldSetBatteryMode()
     {
         var now = DateTime.Parse("2022-02-13T12:00:00");
         var cut = CreateTestObject();
@@ -97,11 +100,11 @@ public class SmartPowerServiceTests
 
         cut.Execute(now);
 
-        _houseBatteryService.Received(0).SetMode(Arg.Any<BatteryMode>(), Arg.Any<DateTime>());
+        _houseBatteryService.Received(1).SetMode(Arg.Any<BatteryMode>(), Arg.Any<DateTime>());
     }
 
     private SmartPowerService CreateTestObject()
     {
-        return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository, _logger, _predictConsumptionService, _predictProductionService, _weatherService);
+        return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository, _logger, _predictConsumptionService, _predictProductionService, _weatherService, _powerUsageRepository, _powerMeterService);
     }
 }

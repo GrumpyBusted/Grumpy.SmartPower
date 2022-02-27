@@ -1,14 +1,17 @@
 using Grumpy.SmartPower.Core.Interface;
+using Microsoft.Extensions.Options;
 
 namespace Grumpy.SmartPower;
 
 public class Worker : BackgroundService
 {
+    private readonly WorkerOptions _options;
     private readonly ILogger<Worker> _logger;
     private readonly ISmartPowerService _smartPowerService;
 
-    public Worker(ILogger<Worker> logger, ISmartPowerService smartPowerService)
+    public Worker(IOptions<WorkerOptions> options, ILogger<Worker> logger, ISmartPowerService smartPowerService)
     {
+        _options = options.Value;
         _logger = logger;
         _smartPowerService = smartPowerService;
     }
@@ -28,17 +31,19 @@ public class Worker : BackgroundService
 
             if (now.ToString("yyyy-MM-ddTHH") != lastModelUpdate.ToString("yyyy-MM-ddTHH"))
             {
+                _smartPowerService.SavePowerUsage(now);
+
                 lastModelUpdate = now;
                 _smartPowerService.UpdateModel(now);
             }
 
-            if (now.ToString("yyyy-MM-ddTHH") != lastCalibrate.ToString("yyyy-MM-ddTHH") || now - lastCalibrate > TimeSpan.FromMinutes(15))
+            if (now.ToString("yyyy-MM-ddTHH") != lastCalibrate.ToString("yyyy-MM-ddTHH") || now - lastCalibrate > TimeSpan.FromMilliseconds(_options.OptimizeInterval))
             {
                 lastCalibrate = now;
                 _smartPowerService.Execute(now);
             }
 
-            await Task.Delay(60000, stoppingToken);
+            await Task.Delay(_options.Speed, stoppingToken);
         }
     }
 }

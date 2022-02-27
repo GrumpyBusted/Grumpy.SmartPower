@@ -48,6 +48,7 @@ var host = Host.CreateDefaultBuilder(args)
             .AddSingleton<IRealTimeReadingRepository, RealTimeReadingRepository>()
             .AddSingleton<IDateTimeProvider, DateTimeProvider>()
             .AddSingleton<ICacheFactory, CacheFactory>()
+            .AddSingleton<IPowerUsageRepository, PowerUsageRepository>()
             .Configure<SmartPowerServiceOptions>(context.Configuration.GetSection("SmartPower"))
             .Configure<SolarServiceOptions>(context.Configuration.GetSection("SmartPower:Location"))
             .Configure<SonnenBatteryClientOptions>(context.Configuration.GetSection("SonnenBattery"))
@@ -60,7 +61,9 @@ var host = Host.CreateDefaultBuilder(args)
             .Configure<PredictConsumptionServiceOptions>(context.Configuration.GetSection("SmartPower:Consumption"))
             .Configure<PredictProductionServiceOptions>(context.Configuration.GetSection("SmartPower:Production"))
             .Configure<CacheOptions>(context.Configuration.GetSection("SmartPower:Cache"))
-            .Configure<RealTimeReadingRepositoryOptions>(context.Configuration.GetSection("SmartPower"));
+            .Configure<RealTimeReadingRepositoryOptions>(context.Configuration.GetSection("SmartPower:RealTimeReading"))
+            .Configure<WorkerOptions>(context.Configuration.GetSection("SmartPower"))
+            .Configure<PowerUsageRepositoryOptions>(context.Configuration.GetSection("SmartPower:PowerUsage"));
     })
     .Build();
 

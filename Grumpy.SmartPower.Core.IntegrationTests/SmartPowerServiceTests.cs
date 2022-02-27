@@ -33,6 +33,7 @@ public class SmartPowerServiceTests
     private readonly PredictProductionServiceOptions _predictProductionServiceOptions = new();
     private readonly RealTimeReadingRepositoryOptions _realTimeReadingRepositoryOptions = new();
     private readonly CacheOptions _cacheOptions = new();
+    private readonly PowerUsageRepositoryOptions _powerUsageRepositoryOptions = new();
 
     [Fact]
     public void SaveDataShouldSaveToFile()
@@ -70,7 +71,8 @@ public class SmartPowerServiceTests
         var realTimeReadingRepository = new RealTimeReadingRepository(Options.Create(_realTimeReadingRepositoryOptions), cacheFactory);
         var consumptionService = new ConsumptionService(powerMeterService, weatherService, predictConsumptionService, realTimeReadingRepository);
         var logger = Substitute.For<ILogger<SmartPowerService>>();
+        var powerUsageRepository = new PowerUsageRepository(Options.Create(_powerUsageRepositoryOptions));
 
-        return new SmartPowerService(Options.Create(_smartPowerServiceOptions), powerPriceService, houseBatteryService, productionService, consumptionService, realTimeReadingRepository, logger, predictConsumptionService, predictProductionService, weatherService);
+        return new SmartPowerService(Options.Create(_smartPowerServiceOptions), powerPriceService, houseBatteryService, productionService, consumptionService, realTimeReadingRepository, logger, predictConsumptionService, predictProductionService, weatherService, powerUsageRepository, powerMeterService);
     }
 }

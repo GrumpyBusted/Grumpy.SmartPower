@@ -11,5 +11,7 @@ internal class Item
     public int ExtraPower { get; set; }
     public int GridCharge { get; set; }
     public int SolarCharge { get; set; }
-//    public int StartBatteryLevel { get; set; }
+    public int UseFromBattery { get; internal set; }
+    public int GridFeedOut { get; internal set; }
+    public int SaveForLater { get; internal set; }
 }

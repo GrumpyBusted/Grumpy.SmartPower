@@ -18,7 +18,7 @@ public class RealTimeReadingRepositoryTests
 
         var cut = CreateTestObject(fileName);
 
-        cut.Save(DateTime.Now, 1, 2);
+        cut.Save(DateTime.Now, 1, 2, 3);
 
         File.Exists(fileName).Should().BeTrue();
     }
@@ -30,9 +30,9 @@ public class RealTimeReadingRepositoryTests
 
         var cut = CreateTestObject(fileName);
 
-        cut.Save(DateTime.Now, 1, 2);
+        cut.Save(DateTime.Now, 1, 2, 3);
 
-        File.ReadAllLines(fileName).First().Should().Be("DateTime;Consumption;Production");
+        File.ReadAllLines(fileName).First().Should().Be("DateTime;Consumption;Production;GridFeedIn;GridFeedOut");
     }
 
     [Fact]
@@ -42,9 +42,9 @@ public class RealTimeReadingRepositoryTests
 
         var cut = CreateTestObject(fileName);
 
-        cut.Save(DateTime.Parse("2022-02-21T09:00:00"), 1, 2);
+        cut.Save(DateTime.Parse("2022-02-21T09:00:00"), 1, 2, 3);
 
-        File.ReadAllLines(fileName).Skip(1).First().Should().Be("2022-02-21T08:00:00.0000000Z;1;2");
+        File.ReadAllLines(fileName).Skip(1).First().Should().Be("2022-02-21T08:00:00.0000000Z;1;2;0;3");
     }
 
     [Fact]
@@ -54,8 +54,8 @@ public class RealTimeReadingRepositoryTests
 
         var cut = CreateTestObject(fileName);
 
-        cut.Save(DateTime.Now, 1, 1);
-        cut.Save(DateTime.Now, 2, 2);
+        cut.Save(DateTime.Now, 1, 1, 1);
+        cut.Save(DateTime.Now, 2, 2, 3);
 
         File.ReadAllLines(fileName).Should().HaveCount(3);
     }
@@ -78,7 +78,7 @@ public class RealTimeReadingRepositoryTests
         var fileName = $"Repository\\{Guid.NewGuid()}.csv";
 
         var cut = CreateTestObject(fileName);
-        cut.Save(DateTime.Parse("2022-02-20T09:00:00"), 1, 2);
+        cut.Save(DateTime.Parse("2022-02-20T09:00:00"), 1, 2, 3);
 
         var res = cut.GetConsumption(DateTime.Parse("2022-02-20T09:00:00"));
 
@@ -91,9 +91,9 @@ public class RealTimeReadingRepositoryTests
         var fileName = $"Repository\\{Guid.NewGuid()}.csv";
 
         var cut = CreateTestObject(fileName);
-        cut.Save(DateTime.Parse("2022-02-21T09:00:00"), 1, 11);
-        cut.Save(DateTime.Parse("2022-02-21T09:10:00"), 3, 13);
-        cut.Save(DateTime.Parse("2022-02-21T10:00:00"), 5, 15);
+        cut.Save(DateTime.Parse("2022-02-21T09:00:00"), 1, 11, 21);
+        cut.Save(DateTime.Parse("2022-02-21T09:10:00"), 3, 13, 23);
+        cut.Save(DateTime.Parse("2022-02-21T10:00:00"), 5, 15, 25);
 
         var res = cut.GetConsumption(DateTime.Parse("2022-02-21T09:00:00"));
 
@@ -106,9 +106,9 @@ public class RealTimeReadingRepositoryTests
         var fileName = $"Repository\\{Guid.NewGuid()}.csv";
 
         var cut = CreateTestObject(fileName);
-        cut.Save(DateTime.Parse("2022-02-21T09:00:00"), 1, 11);
-        cut.Save(DateTime.Parse("2022-02-21T09:10:00"), 3, 13);
-        cut.Save(DateTime.Parse("2022-02-21T10:00:00"), 5, 15);
+        cut.Save(DateTime.Parse("2022-02-21T09:00:00"), 1, 11, 21);
+        cut.Save(DateTime.Parse("2022-02-21T09:10:00"), 3, 13, 23);
+        cut.Save(DateTime.Parse("2022-02-21T10:00:00"), 5, 15, 25);
 
         var res = cut.GetProduction(DateTime.Parse("2022-02-21T09:00:00"));
 

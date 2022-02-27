@@ -17,7 +17,8 @@ public class SmartPowerServiceScenariosTests
 {
     private readonly SmartPowerServiceOptions _options = new()
     {
-        PriceArea = PriceArea.DK2
+        PriceArea = PriceArea.DK2,
+        TraceFilePath = "bin"
     };
 
     private readonly IPowerPriceService _powerPriceService = Substitute.For<IPowerPriceService>();
@@ -29,6 +30,8 @@ public class SmartPowerServiceScenariosTests
     private readonly IPredictConsumptionService _predictConsumptionService = Substitute.For<IPredictConsumptionService>();
     private readonly IPredictProductionService _predictProductionService = Substitute.For<IPredictProductionService>();
     private readonly IWeatherService _weatherService = Substitute.For<IWeatherService>();
+    private readonly IPowerUsageRepository _powerUsageRepository = Substitute.For<IPowerUsageRepository>();
+    private readonly IPowerMeterService _powerMeterService = Substitute.For<IPowerMeterService>();  
 
     [Fact]
     public void PriceScenarioA()
@@ -461,6 +464,70 @@ public class SmartPowerServiceScenariosTests
         _houseBatteryService.Received(1).SetMode(BatteryMode.Default, now);
     }
 
+    [Fact]
+    public void PriceScenarioU()
+    {
+        var now = DateTime.Parse("2022-02-13T05:00:00");
+        var testData = new List<TestDataFlow>
+        {
+            new() { Production = 0, Consumption = 2222, Price = 1505 },
+            new() { Production = 0, Consumption = 2222, Price = 1860 },
+            new() { Production = 388, Consumption = 2222, Price = 1960 },
+            new() { Production = 1865, Consumption = 2222, Price = 2050 },
+            new() { Production = 3593, Consumption = 2222, Price = 1989 },
+            new() { Production = 5008, Consumption = 2222, Price = 1828 },
+            new() { Production = 3292, Consumption = 2222, Price = 1585 },
+            new() { Production = 174, Consumption = 2222, Price = 1463 },
+            new() { Production = 0, Consumption = 2222, Price = 1331 },
+            new() { Production = 0, Consumption = 2222, Price = 1317 },
+            new() { Production = 0, Consumption = 2222, Price = 1469 },
+            new() { Production = 0, Consumption = 2222, Price = 1674 },
+            new() { Production = 0, Consumption = 2222, Price = 1934 },
+            new() { Production = 0, Consumption = 2222, Price = 2225 },
+            new() { Production = 0, Consumption = 2222, Price = 2237 },
+            new() { Production = 0, Consumption = 2222, Price = 2068 },
+            new() { Production = 0, Consumption = 2222, Price = 1754 },
+            new() { Production = 0, Consumption = 2222, Price = 1801 },
+            new() { Production = 0, Consumption = 2222, Price = 1801 }
+        };
+        UseTestData(now, testData);
+        var cut = CreateTestObject(10000, 8713, 3300);
+
+        cut.Execute(now);
+
+        _houseBatteryService.Received(1).SetMode(BatteryMode.Default, now);
+    }
+
+
+    [Fact]
+    public void PriceScenarioV()
+    {
+        var now = DateTime.Parse("2022-02-13T05:00:00");
+        var testData = new List<TestDataFlow>
+        {
+            new() { Production = 0, Consumption = 945, Price = 1934 },
+            new() { Production = 0, Consumption = 945, Price = 2225 },
+            new() { Production = 0, Consumption = 945, Price = 2237 },
+            new() { Production = 0, Consumption = 945, Price = 2068 },
+            new() { Production = 0, Consumption = 945, Price = 1754 },
+            new() { Production = 0, Consumption = 2184, Price = 1801 },
+            new() { Production = 0, Consumption = 2040, Price = 1578 },
+            new() { Production = 0, Consumption = 1822, Price = 1455 },
+            new() { Production = 0, Consumption = 1389, Price = 1344 },
+            new() { Production = 0, Consumption = 1831, Price = 1298 },
+            new() { Production = 0, Consumption = 1885, Price = 1282 },
+            new() { Production = 0, Consumption = 2222, Price = 1298 },
+            new() { Production = 0, Consumption = 2255, Price = 1317 },
+            new() { Production = 0, Consumption = 2195, Price = 1384 }
+        };
+        UseTestData(now, testData);
+        var cut = CreateTestObject(10000, 8713, 3300);
+
+        cut.Execute(now);
+
+        _houseBatteryService.Received(1).SetMode(BatteryMode.ChargeFromGrid, now);
+    }
+
     private void UseTestData(DateTime now, IEnumerable<TestDataFlow> list)
     {
         var productionList = new List<ProductionItem>();
@@ -489,6 +556,6 @@ public class SmartPowerServiceScenariosTests
         _houseBatteryService.InverterLimit().Returns(inverterLimit);
         _houseBatteryService.GetBatteryMode().Returns(BatteryMode.Manual);
 
-        return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository, _logger, _predictConsumptionService, _predictProductionService, _weatherService);
+        return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository, _logger, _predictConsumptionService, _predictProductionService, _weatherService, _powerUsageRepository, _powerMeterService);
     }
 }

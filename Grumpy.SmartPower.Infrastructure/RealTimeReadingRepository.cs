@@ -16,13 +16,15 @@ public class RealTimeReadingRepository : IRealTimeReadingRepository
         _fileCache = cacheFactory.FileCacheInstance(GetType().FullName ?? nameof(RealTimeReadingRepository));
     }
 
-    public void Save(DateTime dateTime, int consumption, int production)
+    public void Save(DateTime dateTime, int consumption, int production, int gridFeedIn)
     {
         var record = new RealTimeReading
         {
             DateTime = new DateTime(dateTime.Ticks, dateTime.Kind == DateTimeKind.Unspecified ? DateTimeKind.Local : dateTime.Kind),
             Consumption = consumption,
-            Production = production
+            Production = production,
+            GridFeedIn = gridFeedIn < 0 ? Math.Abs(gridFeedIn) : 0,
+            GridFeedOut = gridFeedIn > 0 ? gridFeedIn : 0
         };
 
         var folder = Path.GetDirectoryName(_options.RepositoryPath) ?? ".";
@@ -48,12 +50,24 @@ public class RealTimeReadingRepository : IRealTimeReadingRepository
             () => GetValues(hour).Production);
     }
 
+    public int? GetGridFeedIn(DateTime hour)
+    {
+        return _fileCache.TryGetIfNotSet($"{GetType().FullName}:GridFeedIn:{hour}", TimeSpan.FromDays(365),
+            () => GetValues(hour).GridFeedIn);
+    }
+
+    public int? GetGridFeedOut(DateTime hour)
+    {
+        return _fileCache.TryGetIfNotSet($"{GetType().FullName}:GridFeedOut:{hour}", TimeSpan.FromDays(365),
+            () => GetValues(hour).GridFeedOut);
+    }
+
     private RealTimeReading GetValues(DateTime hour)
     {
         var from = new DateTime(hour.Year, hour.Month, hour.Day, hour.Hour, 0, 0, hour.Kind);
         var to = from.AddHours(1).AddMilliseconds(-1);
 
-        if (to > DateTime.Now.ToUniversalTime())
+        if (to > DateTime.Now)
             throw new ArgumentException("Only ask for passed readings", nameof(hour));
 
         var list = ReadFrom(_options.RepositoryPath).Where(r => r.DateTime >= from && r.DateTime <= to).ToList();
@@ -62,7 +76,9 @@ public class RealTimeReadingRepository : IRealTimeReadingRepository
         {
             DateTime = hour,
             Consumption = list.Count == 0 ? null : list.Sum(r => r.Consumption) / list.Count,
-            Production = list.Count == 0 ? null : list.Sum(r => r.Production) / list.Count
+            Production = list.Count == 0 ? null : list.Sum(r => r.Production) / list.Count,
+            GridFeedIn = list.Count == 0 ? null : list.Sum(r => r.GridFeedIn) / list.Count,
+            GridFeedOut = list.Count == 0 ? null : list.Sum(r => r.GridFeedOut) / list.Count
         };
     }
 

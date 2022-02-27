@@ -34,6 +34,7 @@ public interface ISonnenBatteryClient
     /// <returns>Total battery capacity in watt/hours (Wh)</returns>
     int GetBatterySize();
 
+    int GetGridFeedIn();
     OperatingMode GetOperatingMode();
     IEnumerable<TimeOfUseEvent> GetSchedule();
     void SetOperatingMode(OperatingMode operatingMode);

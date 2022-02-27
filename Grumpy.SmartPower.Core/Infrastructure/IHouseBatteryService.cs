@@ -13,4 +13,5 @@ public interface IHouseBatteryService
     public void SetMode(BatteryMode batteryMode, DateTime hour);
     public BatteryMode GetBatteryMode();
     public int InverterLimit();
+    public int GetGridFeedIn();
 }
