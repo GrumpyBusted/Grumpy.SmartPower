@@ -2,13 +2,15 @@
 {
     public interface IPowerFlow
     {
-        public PowerItem? Get(DateTime hour);
-        public PowerItem? First();
-        public IEnumerable<PowerItem> All();
-        public int ChargeBattery(DateTime hour, int value);
-        public int DischargeBattery(DateTime hour, int value);
-        public int MovePower(DateTime from, DateTime to, int value);
-        public void DistributeExtraSolarPower();
+        PowerItem? Get(DateTime hour);
+        PowerItem? First();
+        IEnumerable<PowerItem> All();
+        int ChargeBattery(DateTime hour, int value);
+        int DischargeBattery(DateTime hour, int value);
+        int MovePower(DateTime from, DateTime to, int value);
+        void DistributeExtraSolarPower();
         void DistributeInitialBatteryPower();
+        void ChargeFromGrid();
+        void DistributeBatteryPower();
     }
 }

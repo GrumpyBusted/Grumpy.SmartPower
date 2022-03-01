@@ -55,9 +55,9 @@ public class SmartPowerService : ISmartPowerService
         {
             mode = OptimizeBattery(from, to);
 
-            var powerFlow = GetPowerFlow(from, to);
+            //var powerFlow = GetPowerFlow(from, to);
 
-            mode = GetBatteryMode(powerFlow);
+            //mode = GetBatteryMode(powerFlow);
         }
         catch (Exception exception)
         {
@@ -79,6 +79,8 @@ public class SmartPowerService : ISmartPowerService
 
         flow.DistributeExtraSolarPower();
         flow.DistributeInitialBatteryPower();
+        flow.ChargeFromGrid();
+        flow.DistributeBatteryPower();
 
         return BatteryMode.Default;
     }

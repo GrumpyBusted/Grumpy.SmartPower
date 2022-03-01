@@ -821,18 +821,97 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 3);
             testPowerFlow.Add(0, 100, 5);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 100);
+            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 200);
 
             cut.DistributeInitialBatteryPower();
 
             var flow = cut.All();
 
             flow.Skip(0).First().Charge.Should().Be(-100);
+            flow.Skip(1).First().Charge.Should().Be(0);
+            flow.Skip(2).First().Charge.Should().Be(-100);
+            flow.Skip(3).First().Charge.Should().Be(0);
+            flow.Skip(4).First().Charge.Should().Be(0);
+        }
+
+        [Fact]
+        public void ChargeFromGridMoveFromOneTotheNextShouldReturnFlow()
+        {
+            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
+            testPowerFlow.Add(0, 100, 2);
+            testPowerFlow.Add(0, 100, 1);
+            testPowerFlow.Add(0, 100, 2);
+
+            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 0);
+
+            cut.ChargeFromGrid();
+
+            var flow = cut.All();
+
+            flow.Skip(0).First().Charge.Should().Be(0);
             flow.Skip(1).First().Charge.Should().Be(100);
             flow.Skip(2).First().Charge.Should().Be(-100);
-            flow.Skip(3).First().Charge.Should().Be(100);
-            flow.Skip(4).First().Charge.Should().Be(-100);
         }
+
+        [Fact]
+        public void ChargeFromGridMoveButLimitToInverterLimitShouldReturnFlow()
+        {
+            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
+            testPowerFlow.Add(0, 100, 2);
+            testPowerFlow.Add(0, 100, 1);
+            testPowerFlow.Add(0, 100, 2);
+
+            var cut = CreateTestObject(testPowerFlow, 1000, 50, 0);
+
+            cut.ChargeFromGrid();
+
+            var flow = cut.All();
+
+            flow.Skip(0).First().Charge.Should().Be(0);
+            flow.Skip(1).First().Charge.Should().Be(50);
+            flow.Skip(2).First().Charge.Should().Be(-50);
+        }
+
+        [Fact]
+        public void ChargeFromGridMoveFromTwoToTwoShouldReturnFlow()
+        {
+            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
+            testPowerFlow.Add(0, 100, 1);
+            testPowerFlow.Add(0, 100, 1);
+            testPowerFlow.Add(0, 100, 2);
+            testPowerFlow.Add(0, 50, 3);
+
+            var cut = CreateTestObject(testPowerFlow, 1000, 100, 0);
+
+            cut.ChargeFromGrid();
+
+            var flow = cut.All();
+
+            flow.Skip(0).First().Charge.Should().Be(50);
+            flow.Skip(1).First().Charge.Should().Be(100);
+            flow.Skip(2).First().Charge.Should().Be(-100);
+            flow.Skip(3).First().Charge.Should().Be(-50);
+        }
+
+        [Fact]
+        public void ChargeFromGridMoveFromOneToTwoShouldReturnFlow()
+        {
+            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
+            testPowerFlow.Add(0, 100, 1);
+            testPowerFlow.Add(0, 100, 2);
+            testPowerFlow.Add(0, 100, 2);
+
+            var cut = CreateTestObject(testPowerFlow, 1000, 200, 0);
+
+            cut.ChargeFromGrid();
+
+            var flow = cut.All();
+
+            flow.Skip(0).First().Charge.Should().Be(200);
+            flow.Skip(1).First().Charge.Should().Be(-100);
+            flow.Skip(2).First().Charge.Should().Be(-100);
+        }
+
 
         private IPowerFlow CreateTestObject(TestPowerFlow testPowerFlow, int batterySize, int inverterLimit, int batteryLevel)
         {

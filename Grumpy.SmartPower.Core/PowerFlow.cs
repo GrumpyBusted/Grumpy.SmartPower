@@ -11,6 +11,7 @@ namespace Grumpy.SmartPower.Core
     {
         private readonly IList<PowerItem> _flow;
         private readonly IHouseBatteryService _houseBatteryService;
+        private readonly double _chargeEfficiency = 0.80;
 
         internal PowerFlow(IHouseBatteryService houseBatteryService, IEnumerable<ProductionItem> productions, IEnumerable<ConsumptionItem> consumptions, IEnumerable<PriceItem> prices, DateTime from, DateTime to)
         {
@@ -129,46 +130,54 @@ namespace Grumpy.SmartPower.Core
 
         public void DistributeInitialBatteryPower()
         {
-            var chargeEfficient = 1;
-            var inverterLimit = _houseBatteryService.InverterLimit();
+            var index = _flow.Where(i => i.Power < 0 && i.BatteryLevel > 0).FirstOrDefault();
 
-            var h = First();
-
-            while (h != null)
+            while (index != null)
             {
-                foreach (var t in _flow.Where(i => i.Power < 0 && i.BatteryLevel > 0 && i.Hour > h.Hour).OrderByDescending(i => i.Price).ThenBy(i => i.Hour));
+                var rechargeOption = _flow.Where(i => i.Hour > index.Hour && i.Price < index.Price * _chargeEfficiency).OrderBy(i => i.Hour).FirstOrDefault();
 
-                h = Get(h.Hour.AddHours(1));
+                if (rechargeOption == null)
+                {
+                    index = _flow.Where(i => i.Power < 0 && i.BatteryLevel > 0 && i.Hour > index.Hour).FirstOrDefault();
+
+                    continue;
+                }
+
+                var discharge = _flow.Where(i => i.Hour >= index.Hour && i.Hour < rechargeOption.Hour && i.Power < 0).OrderByDescending(i => i.Price).FirstOrDefault();
+
+                if (discharge != null)
+                    discharge.Power += DischargeBattery(discharge.Hour, discharge.Power * -1);
+
+                index = _flow.Where(i => i.Power < 0 && i.BatteryLevel > 0 && i.Hour >= index.Hour).FirstOrDefault();
             }
-
-            //foreach (var target in _flow.Where(i => i.Power < 0 && i.BatteryLevel > 0).OrderBy(i => i.Hour))
-            //{
-            //    var
-            //    }
-
-            //while (_flow.Min(i => i.BatteryLevel) > 0 && _flow.Min(i => i.Power) > 0)
-            //{
-            //    var target = _flow.Where(i => i.Power < 0 && i.BatteryLevel > 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour).FirstOrDefault();
-
-            //    if (target == null)
-            //        break;
-
-            //    var lower = _flow.Where(i => i.Hour < target.Hour && i.Price < target.Price * chargeEfficient).OrderByDescending(i => i.Hour);
-
-
-            //}
-            //foreach (var potential in _flow.Where(i => i.Power < 0 && i.BatteryLevel > 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour))
-            //{
-            //    if (potential.BatteryLevel <= 0)
-            //        continue;
-
-            //    if (_flow.Any(i => i.Hour < potential.Hour && i.Price < current.Price * chargeEfficient))
-            //        continue;
-
-            //    potential.Power += DischargeBattery(potential.Hour, potential.BatteryLevel);
-            //}
         }
 
+        public void DistributeBatteryPower()
+        {
+            foreach (var target in _flow.Where(i => i.Power < 0 && i.BatteryLevel > 0).OrderByDescending(i => i.Price))
+            {
+                target.Power += DischargeBattery(target.Hour, target.Power * -1);
+
+                var minBatteryLevel = _flow.Where(i => i.Power < 0 && i.BatteryLevel > 0).Min(i => i.BatteryLevel);
+
+                if (minBatteryLevel <= 0)
+                    break;
+            }
+        }
+
+        public void ChargeFromGrid()
+        {
+            foreach (var target in _flow.Where(i => i.Power < 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour))
+            {
+                foreach (var source in _flow.Where(i => i.Hour < target.Hour && i.Price < target.Price * _chargeEfficiency).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
+                {
+                    target.Power += MovePower(source.Hour, target.Hour, target.Power * -1);
+
+                    if (target.Power >= 0)
+                        break;
+                }
+            }
+        }
 
         private PowerItem GetCurrent(DateTime hour)
         {
