@@ -24,8 +24,9 @@ public class SmartPowerService : ISmartPowerService
     private readonly IWeatherService _weatherService;
     private readonly IPowerUsageRepository _powerUsageRepository;
     private readonly IPowerMeterService _powerMeterService;
+    private readonly IPowerFlowFactory _powerFlowFactory;
 
-    public SmartPowerService(IOptions<SmartPowerServiceOptions> options, IPowerPriceService powerPriceService, IHouseBatteryService houseBatteryService, IProductionService productionService, IConsumptionService consumptionService, IRealTimeReadingRepository realTimeReadingRepository, ILogger<SmartPowerService> logger, IPredictConsumptionService predictConsumptionService, IPredictProductionService predictProductionService, IWeatherService weatherService, IPowerUsageRepository powerUsageRepository, IPowerMeterService powerMeterService)
+    public SmartPowerService(IOptions<SmartPowerServiceOptions> options, IPowerPriceService powerPriceService, IHouseBatteryService houseBatteryService, IProductionService productionService, IConsumptionService consumptionService, IRealTimeReadingRepository realTimeReadingRepository, ILogger<SmartPowerService> logger, IPredictConsumptionService predictConsumptionService, IPredictProductionService predictProductionService, IWeatherService weatherService, IPowerUsageRepository powerUsageRepository, IPowerMeterService powerMeterService, IPowerFlowFactory powerFlowFactory)
     {
         _options = options.Value;
         _powerPriceService = powerPriceService;
@@ -39,6 +40,7 @@ public class SmartPowerService : ISmartPowerService
         _weatherService = weatherService;
         _powerUsageRepository = powerUsageRepository;
         _powerMeterService = powerMeterService;
+        _powerFlowFactory = powerFlowFactory;
     }
 
     public void Execute(DateTime now)
@@ -51,6 +53,8 @@ public class SmartPowerService : ISmartPowerService
 
         try
         {
+            mode = OptimizeBattery(from, to);
+
             var powerFlow = GetPowerFlow(from, to);
 
             mode = GetBatteryMode(powerFlow);
@@ -63,6 +67,20 @@ public class SmartPowerService : ISmartPowerService
         {
             _houseBatteryService.SetMode(mode, from);
         }
+    }
+
+    private BatteryMode OptimizeBattery(DateTime from, DateTime to)
+    {
+        var productions = _productionService.Predict(from, to);
+        var consumptions = _consumptionService.Predict(from, to);
+        var prices = _powerPriceService.GetPrices(_options.PriceArea, _options.FallBackPriceArea, from, to);
+
+        var flow = _powerFlowFactory.Instance(productions, consumptions, prices, from, to);
+
+        flow.DistributeExtraSolarPower();
+        flow.DistributeInitialBatteryPower();
+
+        return BatteryMode.Default;
     }
 
     private BatteryMode GetBatteryMode(IEnumerable<Item> powerFlow)
@@ -81,66 +99,47 @@ public class SmartPowerService : ISmartPowerService
 
         foreach (var source in flow.Where(i => i.ExtraPower > 0).OrderBy(i => i.Hour))
         {
-            var charge = Math.Min(chargeCapacity, source.ExtraPower);
-            var move = Math.Max(source.BatteryLevel + charge - batterySize, 0);
+            source.ExtraPower -= ChargeBattery(flow, source, source.ExtraPower);
 
-            foreach (var hour in flow.Where(i => i.Hour >= source.Hour))
-                hour.BatteryLevel += charge;
-
-            source.ExtraPower -= charge;
-            source.SolarCharge += charge;
-            source.GridFeedOut += source.ExtraPower;
-            source.ExtraPower -= source.ExtraPower;
-
-            if (move <= 0)
+            if (source.ExtraPower <= 0)
                 continue;
 
-            foreach (var target in flow.Where(i => i.Hour < source.Hour && i.MissingPower > 0).OrderByDescending(i => i.Price * i.MissingPower).ThenByDescending(i => i.Price).ThenBy(i => i.Hour))
+            foreach (var target in flow.Where(i => i.Hour < source.Hour && i.MissingPower > 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour))
             {
-                var use = Math.Min(move, target.MissingPower);
+                source.ExtraPower -= DischargeBattery(flow, target, source.ExtraPower);
 
-                target.MissingPower -= use;
-                target.UseFromBattery += use;
-
-                foreach (var hour in flow.Where(i => i.Hour >= target.Hour))
-                    hour.BatteryLevel = Math.Max(0, hour.BatteryLevel - use);
-
-                foreach (var hour in flow.Where(i => i.Hour < target.Hour))
-                    hour.SaveForLater += use;
-
-                move -= use;
-                if (move <= 0)
+                if (source.ExtraPower <= 0)
                     break;
             }
-
-            if (move > 0)
-                source.GridFeedOut += move;
         }
 
-        foreach (var target in flow.Where(i => i.MissingPower > 0).OrderByDescending(i => i.Price * i.MissingPower).ThenByDescending(i => i.Price).ThenBy(i => i.Hour))
+        foreach (var target in flow.Where(i => i.MissingPower > 0).OrderByDescending(i => i.Price).ThenByDescending(i => i.Price).ThenBy(i => i.Hour))
         {
             if (target.BatteryLevel - target.SaveForLater > 0)
             {
-                var maxBatteryLevel = flow.Where(i => i.Hour >= target.Hour).Min(i => i.BatteryLevel);
-                var maxUse = Math.Min(inverterLimit, maxBatteryLevel);
-                var use = Math.Min(maxUse, target.MissingPower);
+                if (!flow.Any(i => i.Hour < target.Hour && i.Price < current.Price * _options.ChargeEfficient))
+                {
+                    var maxBatteryLevel = flow.Where(i => i.Hour >= target.Hour).Min(i => i.BatteryLevel);
+                    var maxUse = Math.Min(inverterLimit, maxBatteryLevel);
+                    var use = Math.Min(maxUse, target.MissingPower);
 
-                foreach (var hour in flow.Where(i => i.Hour >= target.Hour))
-                    hour.BatteryLevel -= use;
+                    foreach (var hour in flow.Where(i => i.Hour >= target.Hour))
+                        hour.BatteryLevel -= use;
 
-                foreach (var hour in flow.Where(i => i.Hour < target.Hour))
-                    hour.SaveForLater += use;
+                    foreach (var hour in flow.Where(i => i.Hour < target.Hour))
+                        hour.SaveForLater += use;
 
-                target.MissingPower -= use;
-                target.UseFromBattery += use;
+                    target.MissingPower -= use;
+                    target.Discharge += use;
+                }
             }
         }
 
-        foreach (var target in flow.Where(i => i.MissingPower > 0).OrderByDescending(i => i.Price * i.MissingPower).ThenByDescending(i => i.Price).ThenBy(i => i.Hour))
+        foreach (var target in flow.Where(i => i.MissingPower > 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour))
         {
-            foreach (var source in flow.Where(i => i.Hour < target.Hour && i.Price < target.Price * _options.ChargeEfficient && i.GridCharge + i.SolarCharge < chargeCapacity && i.UseFromBattery <= 0).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
+            foreach (var source in flow.Where(i => i.Hour < target.Hour && i.Price < target.Price * _options.ChargeEfficient && i.GridCharge + i.Charge < chargeCapacity && i.Discharge <= 0).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
             {
-                int maxCharge = chargeCapacity - source.GridCharge - source.SolarCharge;
+                int maxCharge = chargeCapacity - source.GridCharge - source.Charge;
                 var maxBatteryLevel = flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour).Max(i => i.BatteryLevel);
                 var maxChargeTo = (int)Math.Round(_options.ChargeFromGridLimit * batterySize);
                 var charge = Math.Min(target.MissingPower, maxCharge);
@@ -150,7 +149,7 @@ public class SmartPowerService : ISmartPowerService
                     continue;
 
                 target.MissingPower -= charge;
-                target.UseFromBattery += charge;
+                target.Discharge += charge;
                 source.GridCharge += charge;
 
                 foreach (var item in flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour))
@@ -168,7 +167,7 @@ public class SmartPowerService : ISmartPowerService
 
         if (current.GridCharge > 0)
             mode = BatteryMode.ChargeFromGrid;
-        else if (current.UseFromBattery > 0)
+        else if (current.Discharge > 0)
             mode = BatteryMode.Default;
         else
         {
@@ -183,6 +182,41 @@ public class SmartPowerService : ISmartPowerService
         File.WriteAllText($"{_options.TraceFilePath}\\{DateTime.Now:yyyy-MM-dd HH-mm-ss}-{mode}.json", flow.SerializeToJson());
 
         return mode;
+    }
+
+    private int ChargeBattery(List<Item> flow, Item source, int charge)
+    {
+        var inverterLimit = _houseBatteryService.InverterLimit();
+        var batterySize = _houseBatteryService.GetBatterySize();
+        var batteryLevel = flow.Where(i => i.Hour >= source.Hour).Max(i => i.BatteryLevel);
+        var remainingCapacity = batterySize - batteryLevel;
+        int chargingCapacity = inverterLimit - source.Charge;
+        var maxCharge = Math.Min(chargingCapacity, remainingCapacity);
+        var res = Math.Min(maxCharge, charge);
+
+        source.Charge += res;
+
+        foreach (var hour in flow.Where(i => i.Hour >= source.Hour))
+            hour.BatteryLevel += res;
+
+        return res;
+    }
+
+    private int DischargeBattery(List<Item> flow, Item target, int use)
+    {
+        var inverterLimit = _houseBatteryService.InverterLimit();
+        var batterySize = _houseBatteryService.GetBatterySize();
+        int dischargingCapacity = inverterLimit - target.Discharge;
+        var maxUse = Math.Min(dischargingCapacity, Math.Min(target.BatteryLevel, target.MissingPower));
+        var res = Math.Min(maxUse, use);
+
+        target.MissingPower -= res;
+        target.Discharge += res;
+
+        foreach (var hour in flow.Where(i => i.Hour >= target.Hour))
+            hour.BatteryLevel -= Math.Min(hour.BatteryLevel, res);
+
+        return res;
     }
 
     private IEnumerable<Item> GetPowerFlow(DateTime from, DateTime to)

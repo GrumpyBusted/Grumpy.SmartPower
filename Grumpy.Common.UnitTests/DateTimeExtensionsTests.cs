@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Grumpy.Common.Extensions;
+using Grumpy.TestTools.Extensions;
 using System;
 using Xunit;
 
@@ -15,6 +16,16 @@ public class DateTimeExtensionsTests
         var res = value.ToDateOnly();
 
         res.Should().Be(new DateOnly(2022, 1, 2));
+    }
+
+    [Fact]
+    public void ToHourFromTimestampShouldGetDateAndHour()
+    {
+        var value = DateTime.Parse("2022-01-02T03:04:05");
+
+        var res = value.ToHour();
+
+        res.Should().Be("2022-01-02T03:00:00");
     }
 
     [Fact]

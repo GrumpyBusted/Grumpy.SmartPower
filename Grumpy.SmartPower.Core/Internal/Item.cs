@@ -10,8 +10,8 @@ internal class Item
     public int MissingPower { get; set; }
     public int ExtraPower { get; set; }
     public int GridCharge { get; set; }
-    public int SolarCharge { get; set; }
-    public int UseFromBattery { get; internal set; }
+    public int Charge { get; set; }
+    public int Discharge { get; internal set; }
     public int GridFeedOut { get; internal set; }
     public int SaveForLater { get; internal set; }
 }

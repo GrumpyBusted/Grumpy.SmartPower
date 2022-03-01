@@ -31,6 +31,7 @@ public class SmartPowerServiceTests
     private readonly IWeatherService _weatherService = Substitute.For<IWeatherService>();
     private readonly IPowerUsageRepository _powerUsageRepository = Substitute.For<IPowerUsageRepository>();
     private readonly IPowerMeterService _powerMeterService = Substitute.For<IPowerMeterService>();
+    private readonly IPowerFlowFactory _powerFlowFactory = Substitute.For<IPowerFlowFactory>();
 
     [Fact]
     public void CanCreateObject()
@@ -105,6 +106,6 @@ public class SmartPowerServiceTests
 
     private SmartPowerService CreateTestObject()
     {
-        return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository, _logger, _predictConsumptionService, _predictProductionService, _weatherService, _powerUsageRepository, _powerMeterService);
+        return new SmartPowerService(Options.Create(_options), _powerPriceService, _houseBatteryService, _productionService, _consumptionService, _realTimeReadingRepository, _logger, _predictConsumptionService, _predictProductionService, _weatherService, _powerUsageRepository, _powerMeterService, _powerFlowFactory);
     }
 }
