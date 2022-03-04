@@ -721,7 +721,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var cut = CreateTestObject(testPowerFlow, 2000, 1000, 1000);
 
-            cut.DistributeExtraSolarPower();
+            cut.ChargeExtraPower();
 
             var flow = cut.All();
 
@@ -746,7 +746,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var cut = CreateTestObject(testPowerFlow, 1000, 1000, 1000);
 
-            cut.DistributeExtraSolarPower();
+            cut.ChargeExtraPower();
 
             var flow = cut.All();
 
@@ -771,7 +771,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var cut = CreateTestObject(testPowerFlow, 1000, 1000, 1000);
 
-            cut.DistributeExtraSolarPower();
+            cut.ChargeExtraPower();
 
             var flow = cut.All();
 

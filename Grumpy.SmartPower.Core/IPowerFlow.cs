@@ -8,9 +8,10 @@
         int ChargeBattery(DateTime hour, int value);
         int DischargeBattery(DateTime hour, int value);
         int MovePower(DateTime from, DateTime to, int value);
-        void DistributeExtraSolarPower();
+        void ChargeExtraPower();
         void DistributeInitialBatteryPower();
         void ChargeFromGrid();
         void DistributeBatteryPower();
+        double Price();
     }
 }
