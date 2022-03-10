@@ -1,50 +1,43 @@
 ﻿using Grumpy.Common.Extensions;
-using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Infrastructure;
-using Grumpy.SmartPower.Core.Model;
-using Grumpy.SmartPower.Core.Production;
 
 namespace Grumpy.SmartPower.Core
 {
-
     public class PowerFlow : IPowerFlow
     {
         private readonly IList<PowerHour> _flow;
         private readonly IHouseBatteryService _houseBatteryService;
-        private readonly double _chargeEfficiency = 0.80;
 
-        internal PowerFlow(IHouseBatteryService houseBatteryService, IEnumerable<ProductionItem> productions, IEnumerable<ConsumptionItem> consumptions, IEnumerable<PriceItem> prices, DateTime from, DateTime to)
+        public PowerFlow(IHouseBatteryService houseBatteryService)
         {
-            if (from.Minute > 0 || from.Second > 0 || from.Millisecond > 0)
-                throw new ArgumentException("DateTime must be whole hour", nameof(from));
-
-            _houseBatteryService = houseBatteryService;
             _flow = new List<PowerHour>();
-
-            var batteryLevel = houseBatteryService.GetBatteryCurrent();
-
-            for (var hour = from; hour < to; hour = hour.AddHours(1))
-            {
-                var production = productions?.FirstOrDefault(p => p.Hour == hour)?.WattPerHour;
-                var consumption = consumptions?.FirstOrDefault(p => p.Hour == hour)?.WattPerHour;
-                var price = prices?.FirstOrDefault(p => p.Hour == hour)?.Price;
-
-                if (production == null || consumption == null || price == null)
-                    break;
-
-                _flow.Add(new PowerHour(_houseBatteryService)
-                {
-                    Hour = hour,
-                    Production = production.Value,
-                    Consumption = consumption.Value,
-                    Price = price.Value,
-                    BatteryLevel = batteryLevel,
-                    Power = production.Value - consumption.Value
-                });
-            }
+            _houseBatteryService = houseBatteryService;
         }
 
-        public IEnumerable<PowerHour> All() => _flow;
+        public void Add(DateTime hour, int consumption, int production, double price)
+        {
+            var h = hour.ToHour();
+
+            if (_flow.Any(i => i.Hour == h))
+                throw new ArgumentException("Adding doublicate PowerHour", nameof(hour));
+
+            var last = Last();
+
+            if (last?.Hour > hour)
+                throw new ArgumentException("Adding PowerHour in invalid order", nameof(hour));
+
+            var batteryLevel = last?.BatteryLevel ?? _houseBatteryService.GetBatteryCurrent();
+
+            _flow.Add(new PowerHour(_houseBatteryService)
+            {
+                Hour = h,
+                Production = production,
+                Consumption = consumption,
+                Price = price,
+                BatteryLevel = batteryLevel,
+                Power = production - consumption
+            });
+        }
 
         public PowerHour? Get(DateTime hour)
         {
@@ -56,65 +49,88 @@ namespace Grumpy.SmartPower.Core
             return _flow.OrderBy(i => i.Hour).FirstOrDefault();
         }
 
-        public int ChargeBattery(DateTime hour, int value)
+        public PowerHour? Last()
         {
-            var current = GetCurrent(hour);
-
-            return ChargeBattery(current, value);
+            return _flow.OrderByDescending(i => i.Hour).FirstOrDefault();
         }
 
-        public int ChargeBattery(PowerHour current, int value)
+        public IEnumerable<PowerHour> All() => _flow;
+
+        public int Charge(DateTime hour, int value)
         {
-            int max = MaxCharge(current);
+            var item = GetItem(hour);
+
+            return Charge(item, value);
+        }
+
+        public int Charge(PowerHour item, int value)
+        {
+            if (value < 0)
+                throw new ArgumentException("Invalid value to charge", nameof(value));
+
+            var batterySize = _houseBatteryService.GetBatterySize();
+            var batteryLevel = _flow.Where(h => h.Hour > item.Hour).Max(h => h.BatteryLevel);
+            int max = Math.Min(item.MaxCharge(), batterySize - batteryLevel);
             var charge = Math.Min(max, value);
 
-            current.Charge += charge;
+            ChargeInt(item, charge);
 
-            foreach (var item in _flow.Where(i => i.Hour >= current.Hour))
-                item.BatteryLevel += charge;
+            foreach (var hour in _flow.Where(h => h.Hour >= item.Hour))
+                hour.BatteryLevel += charge;
 
             return charge;
         }
 
-        public int DischargeBattery(DateTime hour, int value)
+        public int Discharge(DateTime hour, int value)
         {
-            var current = GetCurrent(hour);
+            var item = GetItem(hour);
 
-            return DischargeBattery(current, value);
+            return Discharge(item, value);
         }
 
-        public int DischargeBattery(PowerHour current, int value)
+        public int Discharge(PowerHour item, int value)
         {
-            //int max = MaxDischarge(current);
-            //var discharge = Math.Min(max, value);
+            if (value < 0)
+                throw new ArgumentException("Invalid value to discharge", nameof(value));
 
-            //current.Charge -= discharge;
+            var batteryLevel = _flow.Where(h => h.Hour > item.Hour).Min(h => h.BatteryLevel);
+            int max = Math.Min(item.MaxDischarge(), batteryLevel);
+            var discharge = Math.Min(max, value);
 
-            //foreach (var item in _flow.Where(i => i.Hour >= hour))
-            //    item.BatteryLevel -= discharge;
+            DischargeInt(item, discharge);
 
-            //return discharge;
-            return 0;
+            foreach (var hour in _flow.Where(h => h.Hour >= item.Hour))
+                item.BatteryLevel -= discharge;
+
+            return discharge;
         }
 
-        public int MovePower(DateTime from, DateTime to, int value)
+        public int Move(DateTime from, DateTime to, int value)
         {
-            var source = GetCurrent(from);
-            var target = GetCurrent(to);
+            var source = GetItem(from);
+            var target = GetItem(to);
 
-            return MovePower(source, target, value);
+            return Move(source, target, value);
         }
 
-        public int MovePower(PowerHour source, PowerHour target, int value)
+        public int Move(PowerHour source, PowerHour target, int value)
         {
+            if (value < 0)
+                throw new ArgumentException("Invalid value to move", nameof(value));
+
+            if (source.Hour >= target.Hour)
+                throw new ArgumentException("Source must be before target", nameof(source));
+
+            var batterySize = _houseBatteryService.GetBatterySize();
             var batteryLevel = _flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour).Max(i => i.BatteryLevel);
-            int maxCharge = MaxCharge(source, batteryLevel);
-            int maxDischage = MaxDischarge(target, maxCharge);
+            int maxCharge = Math.Min(source.MaxCharge(), batterySize - batteryLevel);
+            int maxDischage = target.MaxDischarge();
             int max = Math.Min(maxCharge, maxDischage);
             var move = Math.Min(max, value);
 
-            source.Charge += move;
-            target.Charge -= move;
+            ChargeInt(source, move);
+            DischargeInt(target, move);
+
 
             foreach (var item in _flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour))
                 item.BatteryLevel += move;
@@ -122,132 +138,30 @@ namespace Grumpy.SmartPower.Core
             return move;
         }
 
-        public void ChargeExtraPower()
+        private static void ChargeInt(PowerHour item, int charge)
         {
-            foreach (var source in _flow.Where(i => i.Power > 0).OrderBy(i => i.Price))
+            if (item.Power > charge)
+                item.Power -= charge;
+            else if (item.Power < 0)
+                item.Grid += charge;
+            else
             {
-                source.Power -= ChargeBattery(source, source.Power);
-            }
-        }
-
-        public void DistributeExtraPower()
-        {
-            foreach (var source in _flow.Where(i => i.Power > 0).OrderBy(i => i.Hour))
-            {
-                foreach (var target in _flow.Where(i => i.Hour < source.Hour && MaxDischarge(i) > 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour))
-                {
-                    var move = DischargeBattery(target, MaxCharge(source));
-
-                    target.Power += move;
-                    source.Power -= ChargeBattery(source, move);
-
-                    if (source.Power <= 0)
-                        break;
-                }
-            }
-        }
-
-        public void DistributeBatteryPower()
-        {
-            foreach (var target in _flow.Where(i => MaxDischarge(i) > 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour))
-            {
-                target.Power += DischargeBattery(target, target.Power * -1);
-            }
-        }
-
-        public void DistributeInitialBatteryPower()
-        {
-            //var index = _flow.Where(i => MaxDischarge(i) > 0).OrderBy(i => i.Hour).FirstOrDefault();
-
-            //while (index != null)
-            //{
-            //    var recharge = _flow.Where(i => i.Hour > index.Hour && i.Price < index.Price * _chargeEfficiency && MaxCharge(i) > i.OptionalRecharge).OrderBy(i => i.Hour).FirstOrDefault();
-
-            //    if (recharge == null)
-            //    {
-            //        index = _flow.Where(i => MaxDischarge(i) > 0 && i.Hour > index.Hour).OrderBy(i => i.Hour).FirstOrDefault();
-
-            //        continue;
-            //    }
-
-            //    var discharge = _flow.Where(i => i.Hour >= index.Hour && i.Hour < recharge.Hour && MaxDischarge(i) > 0).OrderByDescending(i => i.Price).FirstOrDefault();
-
-            //    if (discharge != null)
-            //    {
-            //        var move = DischargeBattery(discharge, discharge.Power * -1);
-            //        discharge.Power += move;
-            //        recharge.OptionalRecharge += move;
-            //    }
-
-            //    index = _flow.Where(i => MaxDischarge(i) > 0).OrderBy(i => i.Hour).FirstOrDefault();
-            //}
-        }
-
-        public double Price()
-        {
-            var res = (_flow.OrderBy(i => i.Hour).FirstOrDefault()?.Price ?? 0) * _houseBatteryService.GetBatteryCurrent() * -1;
-
-            foreach (var item in _flow.OrderBy(i => i.Hour))
-            {
-                res += item.Price * item.Power + item.Charge - Math.Max(0, item.Production - item.Consumption);
+                item.Grid += charge - item.Power;
+                item.Power = 0;
             }
 
-            res += _flow.OrderBy(i => i.Hour).LastOrDefault()?.Price ?? 0;
-
-            return res;
+            item.Charge += charge;
         }
 
-        public void ChargeFromGrid()
+        private static void DischargeInt(PowerHour item, int discharge)
         {
-            foreach (var target in _flow.Where(i => i.Power < 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour))
-            {
-                foreach (var source in _flow.Where(i => i.Hour < target.Hour && i.Price < target.Price * _chargeEfficiency).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
-                {
-                    target.Power += MovePower(source, target, target.Power * -1);
-
-                    if (target.Power >= 0)
-                        break;
-                }
-            }
+            item.Power += discharge;
+            item.Charge -= discharge;
         }
 
-        private PowerHour GetCurrent(DateTime hour)
+        private PowerHour GetItem(DateTime hour)
         {
-            return Get(hour) ?? throw new NullReferenceException("Item not found in flow");
-        }
-
-        private int MaxCharge(PowerHour hour)
-        {
-            var batteryLevel = _flow.Where(i => i.Hour >= hour.Hour).Max(i => i.BatteryLevel);
-
-            return MaxCharge(hour, batteryLevel);
-        }
-
-        private int MaxCharge(PowerHour hour, int batteryLevel)
-        {
-            var inverterLimit = _houseBatteryService.InverterLimit();
-            var batterySize = _houseBatteryService.GetBatterySize();
-            var remainingCapacity = batterySize - batteryLevel;
-            var chargingCapacity = inverterLimit - hour.Charge;
-
-            return Math.Min(chargingCapacity, remainingCapacity);
-        }
-
-        private int MaxDischarge(PowerHour hour)
-        {
-            var batteryLevel = _flow.Where(i => i.Hour >= hour.Hour).Min(i => i.BatteryLevel);
-
-            return MaxDischarge(hour, batteryLevel);
-        }
-
-        private int MaxDischarge(PowerHour hour, int batteryLevel)
-        {
-            var inverterLimit = _houseBatteryService.InverterLimit();
-            var dischargingCapacity = inverterLimit + hour.Charge;
-            var maxDischarge = Math.Min(dischargingCapacity, batteryLevel);
-            var possibleDischarge = Math.Max(hour.Power * -1, 0);
-
-            return Math.Min(maxDischarge, possibleDischarge);
+            return Get(hour) ?? throw new ArgumentException("Item not found in flow", nameof(hour));
         }
     }
 }

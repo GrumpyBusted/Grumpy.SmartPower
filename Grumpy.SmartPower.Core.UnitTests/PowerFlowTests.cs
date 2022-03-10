@@ -913,12 +913,12 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
 
-        private IPowerFlow CreateTestObject(TestPowerFlow testPowerFlow, int batterySize, int inverterLimit, int batteryLevel)
+        private IPowerFlow1 CreateTestObject(TestPowerFlow testPowerFlow, int batterySize, int inverterLimit, int batteryLevel)
         {
             return CreateTestObject(testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices, testPowerFlow.Start, testPowerFlow.End, batterySize, inverterLimit, batteryLevel);
         }
 
-        private IPowerFlow CreateTestObject(IEnumerable<ProductionItem> productions, IEnumerable<ConsumptionItem> consumptions, IEnumerable<PriceItem> prices, DateTime from, DateTime to, int batterySize, int inverterLimit, int batteryLevel)
+        private IPowerFlow1 CreateTestObject(IEnumerable<ProductionItem> productions, IEnumerable<ConsumptionItem> consumptions, IEnumerable<PriceItem> prices, DateTime from, DateTime to, int batterySize, int inverterLimit, int batteryLevel)
         {
             _houseBatteryService.GetBatterySize().Returns(batterySize);
             _houseBatteryService.InverterLimit().Returns(inverterLimit);

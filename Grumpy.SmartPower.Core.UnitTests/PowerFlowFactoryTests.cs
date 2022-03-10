@@ -21,7 +21,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
 
             var res = cut.Instance(Enumerable.Empty<ProductionItem>(), Enumerable.Empty<ConsumptionItem>(), Enumerable.Empty<PriceItem>(), DateTime.Parse("2022-02-13T11:00:00"), DateTime.Parse("2022-02-13T13:00:00"));
 
-            res.Should().BeOfType<PowerFlow>();
+            res.Should().BeOfType<PowerFlow1>();
         }
 
         private PowerFlowFactory CreateTestObject()
