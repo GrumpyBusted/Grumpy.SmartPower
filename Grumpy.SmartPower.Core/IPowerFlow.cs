@@ -2,9 +2,9 @@
 {
     public interface IPowerFlow
     {
-        PowerItem? Get(DateTime hour);
-        PowerItem? First();
-        IEnumerable<PowerItem> All();
+        PowerHour? Get(DateTime hour);
+        PowerHour? First();
+        IEnumerable<PowerHour> All();
         int ChargeBattery(DateTime hour, int value);
         int DischargeBattery(DateTime hour, int value);
         int MovePower(DateTime from, DateTime to, int value);
