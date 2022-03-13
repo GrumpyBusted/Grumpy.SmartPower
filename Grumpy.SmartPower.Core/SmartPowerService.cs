@@ -71,34 +71,34 @@ public class SmartPowerService : ISmartPowerService
 
     private BatteryMode OptimizeBattery(DateTime from, DateTime to)
     {
-        var productions = _productionService.Predict(from, to);
-        var consumptions = _consumptionService.Predict(from, to);
-        var prices = _powerPriceService.GetPrices(_options.PriceArea, _options.FallBackPriceArea, from, to);
+        //var productions = _productionService.Predict(from, to);
+        //var consumptions = _consumptionService.Predict(from, to);
+        //var prices = _powerPriceService.GetPrices(_options.PriceArea, _options.FallBackPriceArea, from, to);
 
-        var flow = _powerFlowFactory.Instance(productions, consumptions, prices, from, to);
+        //var flow = _powerFlowFactory.Instance1(productions, consumptions, prices, from, to);
 
-        var b = flow.Price();
+        //var b = flow.Price(flow);
 
-        flow.ChargeFromGrid();
-        flow.ChargeExtraPower();
-        flow.DistributeBatteryPower();
-        flow.DistributeInitialBatteryPower();
+        //flow.ChargeFromGrid();
+        //flow.ChargeExtraPower();
+        //flow.DistributeBatteryPower();
+        //flow.DistributeInitialBatteryPower();
 
-        var a = flow.Price();
+        //var a = flow.Price();
 
-        var current = flow.First();
+        //var current = flow.First();
 
-        if (current == null)
-            return BatteryMode.Default;
-        else if (current.Charge < 0)
-            return BatteryMode.Default;
-        else if (current.Charge > Math.Max(0, current.Production - current.Consumption))
-            return BatteryMode.ChargeFromGrid;
-        else if (current.Production > current.Consumption)
-            return BatteryMode.Default;
-        else if (current.BatteryLevel > 0)
-            return BatteryMode.StoreForLater;
-        else
+        //if (current == null)
+        //    return BatteryMode.Default;
+        //else if (current.Charge < 0)
+        //    return BatteryMode.Default;
+        //else if (current.Charge > Math.Max(0, current.Production - current.Consumption))
+        //    return BatteryMode.ChargeFromGrid;
+        //else if (current.Production > current.Consumption)
+        //    return BatteryMode.Default;
+        //else if (current.BatteryLevel > 0)
+        //    return BatteryMode.StoreForLater;
+        //else
             return BatteryMode.Default;
     }
 

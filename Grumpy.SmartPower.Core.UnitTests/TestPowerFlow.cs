@@ -14,10 +14,12 @@ namespace Grumpy.SmartPower.Core.UnitTests
         private readonly IList<ConsumptionItem> _consumptions = new List<ConsumptionItem>();
         private readonly IList<PriceItem> _prices = new List<PriceItem>();
         private DateTime _hour;
+        public DateTime Hour { get; }
 
         public TestPowerFlow(string hour)
         {
             _hour = DateTime.Parse(hour).ToHour();
+            Hour = _hour;
         }
 
         public void Add(int? production, int? consumption, double? price)

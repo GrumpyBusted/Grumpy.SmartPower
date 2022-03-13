@@ -1,12 +1,8 @@
 ﻿using FluentAssertions;
-using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Infrastructure;
-using Grumpy.SmartPower.Core.Model;
-using Grumpy.SmartPower.Core.Production;
 using Grumpy.TestTools.Extensions;
 using NSubstitute;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -23,87 +19,152 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void FirstOnEmptyShouldReturnNull()
+        public void AddListWithEmptyListShouldLeaveZeroItems()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
 
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices);
 
-            var res = cut.First();
-
-            res.Should().Be(null);
+            cut.All().Should().HaveCount(0);
         }
 
         [Fact]
-        public void FirstShouldReturnFirstItem()
+        public void AddListWithListShouldLeaveItems()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(1, 0, 0);
-            testPowerFlow.Add(2, 0, 0);
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
+            testPowerFlow.Add(1, 3, 5);
+            testPowerFlow.Add(2, 4, 6);
 
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices);
 
-            var res = cut.First();
-
-            res?.Production.Should().Be(1);
+            cut.All().Should().HaveCount(2);
         }
 
         [Fact]
-        public void GetOnEmptyShouldReturnNull()
+        public void AddListWithListShouldSetHourOfFirstItemToStart()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
+            testPowerFlow.Add(1, 3, 5);
+            testPowerFlow.Add(2, 4, 6);
 
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices);
 
-            var res = cut.Get(DateTime.Parse("2022-02-13T10:00:00"));
-
-            res?.Production.Should().Be(2);
+            cut.All().First().Hour.Should().Be("2022-02-13T10:00:00");
         }
 
         [Fact]
-        public void GetShouldReturnItem()
+        public void AddListWithListShouldSetHourOfSecondItemToPlusOneHour()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(1, 0, 0);
-            testPowerFlow.Add(2, 0, 0);
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
+            testPowerFlow.Add(1, 3, 5);
+            testPowerFlow.Add(2, 4, 6);
 
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices);
 
-            var res = cut.Get(DateTime.Parse("2022-02-13T10:00:00"));
-
-            res?.Production.Should().Be(2);
+            cut.All().Skip(1).First().Hour.Should().Be("2022-02-13T11:00:00");
         }
 
         [Fact]
-        public void GetNonExistingShouldReturnNull()
+        public void AddListWithListShouldSetProduction()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(1, 0, 0);
-            testPowerFlow.Add(2, 0, 0);
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
+            testPowerFlow.Add(1, 3, 5);
+            testPowerFlow.Add(2, 4, 6);
 
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices);
 
-            var res = cut.Get(DateTime.Parse("2022-02-13T11:00:00"));
-
-            res?.Production.Should().Be(null);
+            cut.All().First().Production.Should().Be(1);
         }
 
         [Fact]
-        public void InvalidFromWhenCreatingShouldThrow()
+        public void AddListWithListShouldSetConsumption()
         {
-            var act = () => CreateTestObject(Enumerable.Empty<ProductionItem>(), Enumerable.Empty<ConsumptionItem>(), Enumerable.Empty<PriceItem>(), DateTime.Parse("2022-02-13T09:01:00"), DateTime.Parse("2022-02-13T09:01:00"), 0, 0, 0);
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
+            testPowerFlow.Add(1, 3, 5);
+            testPowerFlow.Add(2, 4, 6);
 
-            act.Should().Throw<Exception>();
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices);
+
+            cut.All().First().Consumption.Should().Be(3);
         }
 
         [Fact]
-        public void CreateShouldSetBatteryLevelToAll()
+        public void AddListWithListShouldSetPrice()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 1, 0);
-            testPowerFlow.Add(0, 1, 0);
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
+            testPowerFlow.Add(1, 3, 5);
+            testPowerFlow.Add(2, 4, 6);
 
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 1000);
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices);
+
+            cut.All().First().Price.Should().Be(5);
+        }
+
+        [Fact]
+        public void AddListWithNullInProductionShouldStopList()
+        {
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
+            testPowerFlow.Add(1, 3, 5);
+            testPowerFlow.Add(null, 4, 6);
+
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices);
+
+            cut.All().Should().HaveCount(1);
+        }
+
+        [Fact]
+        public void AddListWithNullInConsumptionShouldStopList()
+        {
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
+            testPowerFlow.Add(1, 3, 5);
+            testPowerFlow.Add(2, null, 6);
+
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices);
+
+            cut.All().Should().HaveCount(1);
+        }
+
+        [Fact]
+        public void AddListWithNullInPriceShouldStopList()
+        {
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
+            testPowerFlow.Add(1, 3, 5);
+            testPowerFlow.Add(2, 4, null);
+
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices);
+
+            cut.All().Should().HaveCount(1);
+        }
+
+        [Fact]
+        public void AddListWithOffHourShouldThrow()
+        {
+            var cut = CreateTestObject();
+            var testPowerFlow = new TestPowerFlow("2022-02-13T10:00:00");
+            testPowerFlow.Add(1, 3, 5);
+
+            var act = new Action(() => cut.Add(DateTime.Parse("2022-02-13T10:00:01"), testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices));
+
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
+
+        [Fact]
+        public void AddListShouldSetBatteryLevelToAll()
+        {
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batteryLevel: 1000);
 
             var res = cut.All();
 
@@ -111,13 +172,12 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void CreateShouldSetChargeToAll()
+        public void AddListShouldSetChargeToAll()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(1, 2, 3);
-            testPowerFlow.Add(4, 5, 6);
-
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 1000);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(1, 2, 3);
+            testData.Add(4, 5, 6);
+            var cut = CreateTestObject(testData: testData);
 
             var res = cut.All();
 
@@ -125,14 +185,13 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void CreateShouldReturnListWithItemsAtEachHour()
+        public void AddListShouldReturnListWithItemsAtEachHour()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 1000);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData);
 
             var res = cut.All().OrderBy(i => i.Hour);
 
@@ -142,14 +201,13 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void CreateWithThreeShouldReturnThreeItemsInFlow()
+        public void AddListWithThreeShouldReturnThreeItemsInFlow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData);
 
             var res = cut.All();
 
@@ -157,14 +215,13 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void CreateWithMissingProductionValueShouldReturnFlowUntilFirstMissingValue()
+        public void AddListWithMissingProductionValueShouldReturnFlowUntilFirstMissingValue()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(null, 0, 0);
-
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(null, 0, 0);
+            var cut = CreateTestObject(testData: testData);
 
             var res = cut.All();
 
@@ -172,14 +229,13 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void CreateWithMissingConsumptionValueShouldReturnFlowUntilFirstMissingValue()
+        public void AddListWithMissingConsumptionValueShouldReturnFlowUntilFirstMissingValue()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, null, 0);
-            testPowerFlow.Add(0, 0, 0);
-
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, null, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData);
 
             var res = cut.All();
 
@@ -187,14 +243,13 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void CreateWithMissingPriceValueShouldReturnFlowUntilFirstMissingValue()
+        public void AddListWithMissingPriceValueShouldReturnFlowUntilFirstMissingValue()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, null);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, null);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData);
 
             var res = cut.All();
 
@@ -202,12 +257,11 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void CreateShouldSetDataOnFirstItem()
+        public void AddListShouldSetDataOnFirstItem()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(1, 2, 3);
-
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 1000);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(1, 2, 3);
+            var cut = CreateTestObject(testData: testData);
 
             var res = cut.All().OrderBy(i => i.Hour);
 
@@ -217,12 +271,11 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void CreateShouldSetPowerToMissing()
+        public void AddListShouldSetPowerToMissing()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(1, 4, 0);
-
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(1, 4, 0);
+            var cut = CreateTestObject(testData: testData);
 
             var res = cut.All().OrderBy(i => i.Hour);
 
@@ -230,12 +283,11 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void CreateShouldSetPowerToExtra()
+        public void AddListShouldSetPowerToExtra()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(4, 1, 0);
-
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(4, 1, 0);
+            var cut = CreateTestObject(testData: testData);
 
             var res = cut.All().OrderBy(i => i.Hour);
 
@@ -243,13 +295,207 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
+        public void AddItemWithOffHourShouldThrow()
+        {
+            var cut = CreateTestObject();
+
+            var act = new Action(() => cut.Add(DateTime.Parse("2022-02-13T10:00:01"), 0, 0, 0));
+
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
+
+        [Fact]
+        public void AddItemInWrongOrderShouldThrow()
+        {
+            var cut = CreateTestObject();
+
+            cut.Add(DateTime.Parse("2022-02-13T11:00:00"), 0, 0, 0);
+            var act = new Action(() => cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 0, 0, 0));
+
+            act.Should().Throw<ArgumentException>();
+        }
+
+        [Fact]
+        public void AddItemWithSameHourShouldThrow()
+        {
+            var cut = CreateTestObject();
+
+            cut.Add(DateTime.Parse("2022-02-13T11:00:00"), 0, 0, 0);
+            var act = new Action(() => cut.Add(DateTime.Parse("2022-02-13T11:00:00"), 0, 0, 0));
+
+            act.Should().Throw<ArgumentException>();
+        }
+
+        [Fact]
+        public void AddItemShouldSetBatteryLevelFromHouseBatteryService()
+        {
+            var cut = CreateTestObject(batteryLevel: 100);
+
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 0, 0, 0);
+
+            cut.First()?.BatteryLevel.Should().Be(100);
+        }
+
+        [Fact]
+        public void AddSecondItemShouldSetBatteryLevelFromPrevious()
+        {
+            var cut = CreateTestObject();
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 0, 0, 0);
+            cut.First()?.AdjustBatteryLevel(100);
+
+            cut.Add(DateTime.Parse("2022-02-13T11:00:00"), 0, 0, 0);
+
+            cut.Last()?.BatteryLevel.Should().Be(100);
+        }
+
+        [Fact]
+        public void AddShouldSetHour()
+        {
+            var cut = CreateTestObject();
+
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 1, 0, 0);
+
+            cut.First()?.Hour.Should().Be("2022-02-13T10:00:00");
+        }
+
+        [Fact]
+        public void AddShouldSetProduction()
+        {
+            var cut = CreateTestObject();
+
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 1, 0, 0);
+
+            cut.First()?.Production.Should().Be(1);
+        }
+
+        [Fact]
+        public void AddShouldSetConsumption()
+        {
+            var cut = CreateTestObject();
+
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 0, 1, 0);
+
+            cut.First()?.Consumption.Should().Be(1);
+        }
+
+        [Fact]
+        public void AddShouldSetPrice()
+        {
+            var cut = CreateTestObject();
+
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 0, 0, 1);
+
+            cut.First()?.Price.Should().Be(1);
+        }
+
+        [Fact]
+        public void AllOnEmptyShouldReturnEmpty()
+        {
+            var cut = CreateTestObject();
+
+            var res = cut.All();
+
+            res.Should().HaveCount(0);
+        }
+
+        [Fact]
+        public void AllShouldHaveCount()
+        {
+            var cut = CreateTestObject();
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 0, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T11:00:00"), 0, 0, 0);
+
+            var res = cut.All();
+
+            res.Should().HaveCount(2);
+        }
+
+        [Fact]
+        public void GetShouldReturnItem()
+        {
+            var cut = CreateTestObject();
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 0, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T11:00:00"), 1, 0, 0);
+
+            var res = cut.Get(DateTime.Parse("2022-02-13T11:00:00"));
+
+            res?.Production.Should().Be(1);
+        }
+
+        [Fact]
+        public void GetNonExitingItemShouldReturnNull()
+        {
+            var cut = CreateTestObject();
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 0, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T11:00:00"), 0, 0, 0);
+
+            var res = cut.Get(DateTime.Parse("2022-02-13T12:00:00"));
+
+            res.Should().BeNull();
+        }
+
+        [Fact]
+        public void GetWithInvalidHourShouldItemReturnCloseHour()
+        {
+            var cut = CreateTestObject();
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 0, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T11:00:00"), 1, 0, 0);
+
+            var res = cut.Get(DateTime.Parse("2022-02-13T11:00:01"));
+
+            res?.Production.Should().Be(1);
+        }
+
+        [Fact]
+        public void FirstOnEmptyShouldBeNull()
+        {
+            var cut = CreateTestObject();
+
+            var res = cut.First();
+
+            res.Should().BeNull();
+        }
+
+        [Fact]
+        public void FirstShouldBeFirst()
+        {
+            var cut = CreateTestObject();
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 1, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T11:00:00"), 0, 0, 0);
+
+            var res = cut.First();
+
+            res?.Production.Should().Be(1);
+        }
+
+        [Fact]
+        public void LastOnEmptyShouldBeNull()
+        {
+            var cut = CreateTestObject();
+
+            var res = cut.Last();
+
+            res.Should().BeNull();
+        }
+
+        [Fact]
+        public void LastShouldBeFirst()
+        {
+            var cut = CreateTestObject();
+            cut.Add(DateTime.Parse("2022-02-13T10:00:00"), 0, 0, 0);
+            cut.Add(DateTime.Parse("2022-02-13T11:00:00"), 1, 0, 0);
+
+            var res = cut.Last();
+
+            res?.Production.Should().Be(1);
+        }
+
+        [Fact]
         public void ChargeEmptyFlowShouldThrow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
+            var cut = CreateTestObject();
 
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
-
-            var act = () => cut.ChargeBattery(DateTime.Parse("2022-02-13T09:00:00"), 1);
+            var act = () => cut.Charge(DateTime.Parse("2022-02-13T09:00:00"), 1);
 
             act.Should().Throw<Exception>();
         }
@@ -257,12 +503,11 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void ChargeWhereHourNotFoundFlowShouldThrow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData);
 
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
-
-            var act = () => cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 1);
+            var act = () => cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 1);
 
             act.Should().Throw<Exception>();
         }
@@ -270,17 +515,15 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void ChargeShouldChargeBatteryLevelAfterHour()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 10);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 10);
-
-            cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 30);
+            cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 30);
 
             var res = cut.All();
-
             res.Skip(0).First().BatteryLevel.Should().Be(10);
             res.Skip(1).First().BatteryLevel.Should().Be(40);
             res.Skip(2).First().BatteryLevel.Should().Be(40);
@@ -289,17 +532,15 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void ChargeBeyondSizeShouldChargeBatteryLevelAfterHour()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 40, inverterLimit: 1000, batteryLevel: 10);
 
-            var cut = CreateTestObject(testPowerFlow, 40, 1000, 10);
-
-            cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 50);
+            cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 50);
 
             var res = cut.All();
-
             res.Skip(0).First().BatteryLevel.Should().Be(10);
             res.Skip(1).First().BatteryLevel.Should().Be(40);
             res.Skip(2).First().BatteryLevel.Should().Be(40);
@@ -308,18 +549,16 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void ChargeTwiceBeyondInverterLimitShouldChargeBatteryLevelAfterHour()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 30, batteryLevel: 10);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 30, 10);
-
-            cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
-            cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
+            cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 20);
+            cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 20);
 
             var res = cut.All();
-
             res.Skip(0).First().BatteryLevel.Should().Be(10);
             res.Skip(1).First().BatteryLevel.Should().Be(40);
             res.Skip(2).First().BatteryLevel.Should().Be(40);
@@ -328,14 +567,13 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void ChargeShouldReturnActualChargeValue()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 10);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 10);
-
-            var res = cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 30);
+            var res = cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 30);
 
             res.Should().Be(30);
         }
@@ -343,14 +581,13 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void ChargeBeyondSizeShouldReturnActualChargeValue()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 40, inverterLimit: 1000, batteryLevel: 10);
 
-            var cut = CreateTestObject(testPowerFlow, 40, 1000, 10);
-
-            var res = cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 50);
+            var res = cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 50);
 
             res.Should().Be(30);
         }
@@ -358,15 +595,14 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void ChargeTwiceBeyondInverterLimitShouldReturnActualChargeValue()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 30, batteryLevel: 10);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 30, 10);
-
-            cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
-            var res = cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
+            cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 20);
+            var res = cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 20);
 
             res.Should().Be(10);
         }
@@ -374,19 +610,17 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void ChargeShouldConsiderFutureBatteryLevel()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 50, inverterLimit: 1000, batteryLevel: 0);
 
-            var cut = CreateTestObject(testPowerFlow, 50, 1000, 0);
-
-            cut.ChargeBattery(DateTime.Parse("2022-02-13T11:00:00"), 20).Should().Be(20);
-            cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20).Should().Be(20);
-            cut.ChargeBattery(DateTime.Parse("2022-02-13T09:00:00"), 20).Should().Be(10);
+            cut.Charge(DateTime.Parse("2022-02-13T11:00:00"), 20).Should().Be(20);
+            cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 20).Should().Be(20);
+            cut.Charge(DateTime.Parse("2022-02-13T09:00:00"), 20).Should().Be(10);
 
             var res = cut.All();
-
             res.Skip(0).First().BatteryLevel.Should().Be(10);
             res.Skip(1).First().BatteryLevel.Should().Be(30);
             res.Skip(2).First().BatteryLevel.Should().Be(50);
@@ -395,30 +629,64 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void ChargeShouldChangeCharge()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 0);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 0);
-
-            cut.ChargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
+            cut.Charge(DateTime.Parse("2022-02-13T10:00:00"), 20);
 
             var res = cut.All();
-
             res.Skip(0).First().Charge.Should().Be(0);
             res.Skip(1).First().Charge.Should().Be(20);
             res.Skip(2).First().Charge.Should().Be(0);
         }
 
         [Fact]
+        public void ChargeWithItemShouldChangeCharge()
+        {
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 0);
+            var item = cut.Get(DateTime.Parse("2022-02-13T09:00:00")) ?? throw new Exception();
+
+            cut.Charge(item, 20);
+
+            cut.First()?.Charge.Should().Be(20);
+        }
+
+        [Fact]
+        public void ChargeWithItemWithoutValueShouldChangeCharge()
+        {
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(20, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 0);
+            var item = cut.Get(DateTime.Parse("2022-02-13T09:00:00")) ?? throw new Exception();
+
+            cut.Charge(item);
+
+            cut.First()?.Charge.Should().Be(20);
+        }
+
+        [Fact]
+        public void ChargeWithNegativeShouldThrow()
+        {
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 0);
+
+            var act = new Action(() => cut.Charge(DateTime.Parse("2022-02-13T09:00:00"), -20));
+
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
+
+        [Fact]
         public void DischargeEmptyFlowShouldThrow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
+            var cut = CreateTestObject();
 
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
-
-            var act = () => cut.DischargeBattery(DateTime.Parse("2022-02-13T09:00:00"), 1);
+            var act = () => cut.Discharge(DateTime.Parse("2022-02-13T09:00:00"), 1);
 
             act.Should().Throw<Exception>();
         }
@@ -426,12 +694,11 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void DischargeWhereHourNotFoundFlowShouldThrow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData);
 
-            var cut = CreateTestObject(testPowerFlow, 0, 0, 0);
-
-            var act = () => cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 1);
+            var act = () => cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 1);
 
             act.Should().Throw<Exception>();
         }
@@ -439,36 +706,32 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void DischargeShouldChargeBatteryLevelAfterHour()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 1000);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 1000);
-
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 30);
+            cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 30);
 
             var res = cut.All();
-
             res.Skip(0).First().BatteryLevel.Should().Be(1000);
             res.Skip(1).First().BatteryLevel.Should().Be(970);
             res.Skip(2).First().BatteryLevel.Should().Be(970);
         }
 
         [Fact]
-        public void DischargeBeyondZeroShouldChargeBatteryLevelAfterHour()
+        public void DischargeBeyondZeroShouldChangeBatteryLevelAfterHour()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 40, inverterLimit: 1000, batteryLevel: 30);
 
-            var cut = CreateTestObject(testPowerFlow, 40, 1000, 30);
-
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 50);
+            cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 50);
 
             var res = cut.All();
-
             res.Skip(0).First().BatteryLevel.Should().Be(30);
             res.Skip(1).First().BatteryLevel.Should().Be(0);
             res.Skip(2).First().BatteryLevel.Should().Be(0);
@@ -477,18 +740,16 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void DischargeTwiceBeyondInverterLimitShouldChargeBatteryLevelAfterHour()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 30, batteryLevel: 1000);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 30, 1000);
-
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
+            cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 20).Should().Be(20);
+            cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 20).Should().Be(10);
 
             var res = cut.All();
-
             res.Skip(0).First().BatteryLevel.Should().Be(1000);
             res.Skip(1).First().BatteryLevel.Should().Be(970);
             res.Skip(2).First().BatteryLevel.Should().Be(970);
@@ -497,14 +758,13 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void DischargeShouldReturnActualChargeValue()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 1000);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 1000);
-
-            var res = cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 30);
+            var res = cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 30);
 
             res.Should().Be(30);
         }
@@ -512,14 +772,13 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void DischargeBeyondZeroShouldReturnActualDishargeValue()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 30);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 30);
-
-            var res = cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 50);
+            var res = cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 50);
 
             res.Should().Be(30);
         }
@@ -527,15 +786,14 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void DischargeTwiceBeyondInverterLimitShouldReturnActualDischargeValue()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 30, batteryLevel: 1000);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 30, 1000);
-
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
-            var res = cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
+            cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 20);
+            var res = cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 20);
 
             res.Should().Be(10);
         }
@@ -543,19 +801,17 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void DischargeShouldConsiderFutureBatteryLevel()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 100, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 100, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 100, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 50, inverterLimit: 1000, batteryLevel: 50);
 
-            var cut = CreateTestObject(testPowerFlow, 50, 1000, 50);
-
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T11:00:00"), 20).Should().Be(20);
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20).Should().Be(20);
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T09:00:00"), 20).Should().Be(10);
+            cut.Discharge(DateTime.Parse("2022-02-13T11:00:00"), 20).Should().Be(20);
+            cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 20).Should().Be(20);
+            cut.Discharge(DateTime.Parse("2022-02-13T09:00:00"), 20).Should().Be(10);
 
             var res = cut.All();
-
             res.Skip(0).First().BatteryLevel.Should().Be(40);
             res.Skip(1).First().BatteryLevel.Should().Be(20);
             res.Skip(2).First().BatteryLevel.Should().Be(00);
@@ -564,17 +820,15 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void DischargeShouldChangeCharge()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 50);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 50);
-
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
+            cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 20);
 
             var res = cut.All();
-
             res.Skip(0).First().Charge.Should().Be(0);
             res.Skip(1).First().Charge.Should().Be(-20);
             res.Skip(2).First().Charge.Should().Be(0);
@@ -583,17 +837,15 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void DischargeBeyondZeroShouldChangeChargeWithLimitation()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 10);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 10);
-
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 20);
+            cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 20);
 
             var res = cut.All();
-
             res.Skip(0).First().Charge.Should().Be(0);
             res.Skip(1).First().Charge.Should().Be(-10);
             res.Skip(2).First().Charge.Should().Be(0);
@@ -602,34 +854,68 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void DischargeMoreThanNeedShouldDischargeNeed()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
-            testPowerFlow.Add(0, 0, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batteryLevel: 1000);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 1000);
-
-            var res = cut.DischargeBattery(DateTime.Parse("2022-02-13T10:00:00"), 150);
+            var res = cut.Discharge(DateTime.Parse("2022-02-13T10:00:00"), 150);
 
             res.Should().Be(100);
         }
 
         [Fact]
+        public void DischargeWithItemShouldChangeCharge()
+        {
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 1000, 0);
+            var cut = CreateTestObject(testData: testData, batteryLevel: 1000);
+            var item = cut.Get(DateTime.Parse("2022-02-13T09:00:00")) ?? throw new Exception();
+
+            cut.Discharge(item, 20);
+
+            cut.First()?.Charge.Should().Be(-20);
+        }
+
+        [Fact]
+        public void DischargeWithItemWithoutValueShouldChangeCharge()
+        {
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 20, 0);
+            var cut = CreateTestObject(testData: testData, batteryLevel: 1000);
+            var item = cut.Get(DateTime.Parse("2022-02-13T09:00:00")) ?? throw new Exception();
+
+            cut.Discharge(item);
+
+            cut.First()?.Charge.Should().Be(-20);
+        }
+
+        [Fact]
+        public void DischargeWithNegativeShouldThrow()
+        {
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData);
+
+            var act = new Action(() => cut.Discharge(DateTime.Parse("2022-02-13T09:00:00"), -20));
+
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
+
+        [Fact]
         public void MovePowerShouldReturnFlow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 50);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 50);
-
-            var res = cut.MovePower(DateTime.Parse("2022-02-13T10:00:00"), DateTime.Parse("2022-02-13T11:00:00"), 10);
+            var res = cut.Move(DateTime.Parse("2022-02-13T10:00:00"), DateTime.Parse("2022-02-13T11:00:00"), 10);
 
             res.Should().Be(10);
-
             var flow = cut.All();
-
             flow.Skip(0).First().BatteryLevel.Should().Be(50);
             flow.Skip(1).First().BatteryLevel.Should().Be(60);
             flow.Skip(2).First().BatteryLevel.Should().Be(50);
@@ -641,19 +927,16 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void MovePowerBeyondSizeShouldReturnFlow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 80, batteryLevel: 50);
 
-            var cut = CreateTestObject(testPowerFlow, 80, 1000, 50);
-
-            var res = cut.MovePower(DateTime.Parse("2022-02-13T10:00:00"), DateTime.Parse("2022-02-13T11:00:00"), 40);
+            var res = cut.Move(DateTime.Parse("2022-02-13T10:00:00"), DateTime.Parse("2022-02-13T11:00:00"), 40);
 
             res.Should().Be(30);
-
             var flow = cut.All();
-
             flow.Skip(0).First().BatteryLevel.Should().Be(50);
             flow.Skip(1).First().BatteryLevel.Should().Be(80);
             flow.Skip(2).First().BatteryLevel.Should().Be(50);
@@ -665,19 +948,16 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void MovePowerBeyondInverterLimitShouldReturnFlow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 100, inverterLimit: 20, batteryLevel: 50);
 
-            var cut = CreateTestObject(testPowerFlow, 100, 20, 50);
-
-            var res = cut.MovePower(DateTime.Parse("2022-02-13T10:00:00"), DateTime.Parse("2022-02-13T11:00:00"), 40);
+            var res = cut.Move(DateTime.Parse("2022-02-13T10:00:00"), DateTime.Parse("2022-02-13T11:00:00"), 40);
 
             res.Should().Be(20);
-
             var flow = cut.All();
-
             flow.Skip(0).First().BatteryLevel.Should().Be(50);
             flow.Skip(1).First().BatteryLevel.Should().Be(70);
             flow.Skip(2).First().BatteryLevel.Should().Be(50);
@@ -689,20 +969,17 @@ namespace Grumpy.SmartPower.Core.UnitTests
         [Fact]
         public void MovePowerBeyondInverterOnDischargeLimitShouldReturnFlow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 0, 0);
-            testPowerFlow.Add(0, 100, 0);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 100, inverterLimit: 40, batteryLevel: 50);
+            cut.Discharge(DateTime.Parse("2022-02-13T11:00:00"), 15);
 
-            var cut = CreateTestObject(testPowerFlow, 100, 40, 50);
-
-            cut.DischargeBattery(DateTime.Parse("2022-02-13T11:00:00"), 15);
-            var res = cut.MovePower(DateTime.Parse("2022-02-13T10:00:00"), DateTime.Parse("2022-02-13T11:00:00"), 30);
+            var res = cut.Move(DateTime.Parse("2022-02-13T10:00:00"), DateTime.Parse("2022-02-13T11:00:00"), 30);
 
             res.Should().Be(25);
-
             var flow = cut.All();
-
             flow.Skip(0).First().BatteryLevel.Should().Be(50);
             flow.Skip(1).First().BatteryLevel.Should().Be(75);
             flow.Skip(2).First().BatteryLevel.Should().Be(35);
@@ -712,219 +989,104 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void DistributeExtraPowerUnderBatterySizeShouldReturnFlow()
+        public void MoveItemShouldReturnFlow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 100, 3);
-            testPowerFlow.Add(0, 100, 2);
-            testPowerFlow.Add(200, 100, 1);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 50);
+            var source = cut.Get(DateTime.Parse("2022-02-13T10:00:00")) ?? throw new Exception();
+            var target = cut.Get(DateTime.Parse("2022-02-13T11:00:00")) ?? throw new Exception();
 
-            var cut = CreateTestObject(testPowerFlow, 2000, 1000, 1000);
+            var res = cut.Move(source, target, 10);
 
-            cut.ChargeExtraPower();
-
+            res.Should().Be(10);
             var flow = cut.All();
-
-            flow.Skip(0).First().BatteryLevel.Should().Be(1000);
+            flow.Skip(0).First().BatteryLevel.Should().Be(50);
+            flow.Skip(1).First().BatteryLevel.Should().Be(60);
+            flow.Skip(2).First().BatteryLevel.Should().Be(50);
             flow.Skip(0).First().Charge.Should().Be(0);
-            flow.Skip(0).First().Power.Should().Be(-100);
-            flow.Skip(1).First().BatteryLevel.Should().Be(1000);
-            flow.Skip(1).First().Charge.Should().Be(0);
-            flow.Skip(1).First().Power.Should().Be(-100);
-            flow.Skip(2).First().BatteryLevel.Should().Be(1100);
-            flow.Skip(2).First().Charge.Should().Be(100);
-            flow.Skip(2).First().Power.Should().Be(0);
+            flow.Skip(1).First().Charge.Should().Be(10);
+            flow.Skip(2).First().Charge.Should().Be(-10);
         }
 
         [Fact]
-        public void DistributeExtraPowerOverBatterySizeShouldReturnFlow()
+        public void MoveItemWithoutValueShouldReturnFlow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 100, 3);
-            testPowerFlow.Add(0, 100, 2);
-            testPowerFlow.Add(200, 100, 1);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            var cut = CreateTestObject(testData: testData, batteryLevel: 1000);
+            var source = cut.Get(DateTime.Parse("2022-02-13T10:00:00")) ?? throw new Exception();
+            var target = cut.Get(DateTime.Parse("2022-02-13T11:00:00")) ?? throw new Exception();
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 1000);
+            var res = cut.Move(source, target);
 
-            cut.ChargeExtraPower();
-
-            var flow = cut.All();
-
-            flow.Skip(0).First().BatteryLevel.Should().Be(900);
-            flow.Skip(0).First().Charge.Should().Be(-100);
-            flow.Skip(0).First().Power.Should().Be(0);
-            flow.Skip(1).First().BatteryLevel.Should().Be(900);
-            flow.Skip(1).First().Charge.Should().Be(0);
-            flow.Skip(1).First().Power.Should().Be(-100);
-            flow.Skip(2).First().BatteryLevel.Should().Be(1000);
-            flow.Skip(2).First().Charge.Should().Be(100);
-            flow.Skip(2).First().Power.Should().Be(0);
+            res.Should().Be(100);
         }
 
         [Fact]
-        public void DistributeExtraPowerOverBatterySizeToTwoHoursShouldReturnFlow()
+        public void MoveNegativNumberShouldThrow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 100, 3);
-            testPowerFlow.Add(0, 100, 2);
-            testPowerFlow.Add(250, 100, 1);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 50);
+            var source = cut.Get(DateTime.Parse("2022-02-13T10:00:00")) ?? throw new Exception();
+            var target = cut.Get(DateTime.Parse("2022-02-13T11:00:00")) ?? throw new Exception();
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 1000);
+            var act = new Action(() => cut.Move(source, target, -10));
 
-            cut.ChargeExtraPower();
-
-            var flow = cut.All();
-
-            flow.Skip(0).First().BatteryLevel.Should().Be(900);
-            flow.Skip(0).First().Charge.Should().Be(-100);
-            flow.Skip(0).First().Power.Should().Be(0);
-            flow.Skip(1).First().BatteryLevel.Should().Be(850);
-            flow.Skip(1).First().Charge.Should().Be(-50);
-            flow.Skip(1).First().Power.Should().Be(-50);
-            flow.Skip(2).First().BatteryLevel.Should().Be(1000);
-            flow.Skip(2).First().Charge.Should().Be(150);
-            flow.Skip(2).First().Power.Should().Be(0);
+            act.Should().Throw<ArgumentException>();
         }
 
         [Fact]
-        public void DistributeInitialBatteryPowerShouldReturnFlow()
+        public void MoveWithWrongOrderShouldThrow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 100, 2);
-            testPowerFlow.Add(0, 100, 1);
-            testPowerFlow.Add(0, 100, 3);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 50);
+            var source = cut.Get(DateTime.Parse("2022-02-13T11:00:00")) ?? throw new Exception();
+            var target = cut.Get(DateTime.Parse("2022-02-13T10:00:00")) ?? throw new Exception();
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 100);
+            var act = new Action(() => cut.Move(source, target, -10));
 
-            cut.DistributeInitialBatteryPower();
-
-            var flow = cut.All();
-
-            flow.Skip(0).First().BatteryLevel.Should().Be(0);
-            flow.Skip(0).First().Charge.Should().Be(-100);
-            flow.Skip(0).First().Power.Should().Be(0);
-            flow.Skip(1).First().BatteryLevel.Should().Be(0);
-            flow.Skip(1).First().Charge.Should().Be(0);
-            flow.Skip(1).First().Power.Should().Be(-100);
-            flow.Skip(2).First().BatteryLevel.Should().Be(0);
-            flow.Skip(2).First().Charge.Should().Be(0);
-            flow.Skip(2).First().Power.Should().Be(-100);
+            act.Should().Throw<ArgumentException>();
         }
 
         [Fact]
-        public void DistributeInitialBatteryTwoPeeksPowerShouldReturnFlow()
+        public void ForeachShouldListFlow()
         {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 100, 2);
-            testPowerFlow.Add(0, 100, 1);
-            testPowerFlow.Add(0, 100, 4);
-            testPowerFlow.Add(0, 100, 3);
-            testPowerFlow.Add(0, 100, 5);
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(1, 0, 0);
+            testData.Add(2, 0, 0);
+            testData.Add(3, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 50);
+            var i = 1;
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 200);
-
-            cut.DistributeInitialBatteryPower();
-
-            var flow = cut.All();
-
-            flow.Skip(0).First().Charge.Should().Be(-100);
-            flow.Skip(1).First().Charge.Should().Be(0);
-            flow.Skip(2).First().Charge.Should().Be(-100);
-            flow.Skip(3).First().Charge.Should().Be(0);
-            flow.Skip(4).First().Charge.Should().Be(0);
+            foreach(var item in cut)
+            {
+                item.Production.Should().Be(i++);
+            }
         }
 
-        [Fact]
-        public void ChargeFromGridMoveFromOneTotheNextShouldReturnFlow()
-        {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 100, 2);
-            testPowerFlow.Add(0, 100, 1);
-            testPowerFlow.Add(0, 100, 2);
-
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 0);
-
-            cut.ChargeFromGrid();
-
-            var flow = cut.All();
-
-            flow.Skip(0).First().Charge.Should().Be(0);
-            flow.Skip(1).First().Charge.Should().Be(100);
-            flow.Skip(2).First().Charge.Should().Be(-100);
-        }
-
-        [Fact]
-        public void ChargeFromGridMoveButLimitToInverterLimitShouldReturnFlow()
-        {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 100, 2);
-            testPowerFlow.Add(0, 100, 1);
-            testPowerFlow.Add(0, 100, 2);
-
-            var cut = CreateTestObject(testPowerFlow, 1000, 50, 0);
-
-            cut.ChargeFromGrid();
-
-            var flow = cut.All();
-
-            flow.Skip(0).First().Charge.Should().Be(0);
-            flow.Skip(1).First().Charge.Should().Be(50);
-            flow.Skip(2).First().Charge.Should().Be(-50);
-        }
-
-        [Fact]
-        public void ChargeFromGridMoveFromTwoToTwoShouldReturnFlow()
-        {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 100, 1);
-            testPowerFlow.Add(0, 100, 1);
-            testPowerFlow.Add(0, 100, 2);
-            testPowerFlow.Add(0, 50, 3);
-
-            var cut = CreateTestObject(testPowerFlow, 1000, 100, 0);
-
-            cut.ChargeFromGrid();
-
-            var flow = cut.All();
-
-            flow.Skip(0).First().Charge.Should().Be(50);
-            flow.Skip(1).First().Charge.Should().Be(100);
-            flow.Skip(2).First().Charge.Should().Be(-100);
-            flow.Skip(3).First().Charge.Should().Be(-50);
-        }
-
-        [Fact]
-        public void ChargeFromGridMoveFromOneToTwoShouldReturnFlow()
-        {
-            var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
-            testPowerFlow.Add(0, 100, 1);
-            testPowerFlow.Add(0, 100, 2);
-            testPowerFlow.Add(0, 100, 2);
-
-            var cut = CreateTestObject(testPowerFlow, 1000, 200, 0);
-
-            cut.ChargeFromGrid();
-
-            var flow = cut.All();
-
-            flow.Skip(0).First().Charge.Should().Be(200);
-            flow.Skip(1).First().Charge.Should().Be(-100);
-            flow.Skip(2).First().Charge.Should().Be(-100);
-        }
-
-
-        private IPowerFlow1 CreateTestObject(TestPowerFlow testPowerFlow, int batterySize, int inverterLimit, int batteryLevel)
-        {
-            return CreateTestObject(testPowerFlow.Productions, testPowerFlow.Consumptions, testPowerFlow.Prices, testPowerFlow.Start, testPowerFlow.End, batterySize, inverterLimit, batteryLevel);
-        }
-
-        private IPowerFlow1 CreateTestObject(IEnumerable<ProductionItem> productions, IEnumerable<ConsumptionItem> consumptions, IEnumerable<PriceItem> prices, DateTime from, DateTime to, int batterySize, int inverterLimit, int batteryLevel)
+        private IPowerFlow CreateTestObject(int batterySize = 10000, int inverterLimit = 3300, int batteryLevel = 0, TestPowerFlow? testData = null)
         {
             _houseBatteryService.GetBatterySize().Returns(batterySize);
             _houseBatteryService.InverterLimit().Returns(inverterLimit);
             _houseBatteryService.GetBatteryCurrent().Returns(batteryLevel);
 
-            return _powerFlowFactory.Instance(productions, consumptions, prices, from, to);
+            var res = _powerFlowFactory.Instance();
+
+            if (testData != null)
+                res.Add(testData.Hour, testData.Productions, testData.Consumptions, testData.Prices);
+
+            return res;
         }
     }
 }

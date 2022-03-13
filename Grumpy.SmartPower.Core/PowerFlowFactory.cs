@@ -14,9 +14,9 @@ namespace Grumpy.SmartPower.Core
             _houseBatteryService = houseBatteryService;
         }
 
-        public IPowerFlow1 Instance(IEnumerable<ProductionItem> productions, IEnumerable<ConsumptionItem> consumptions, IEnumerable<PriceItem> prices, DateTime from, DateTime to)
+        public IPowerFlow Instance()
         {
-            return new PowerFlow1(_houseBatteryService, productions, consumptions, prices, from, to);
+            return new PowerFlow(_houseBatteryService);
         }
     }
 }

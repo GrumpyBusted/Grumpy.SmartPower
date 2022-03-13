@@ -32,7 +32,7 @@ public class SmartPowerServiceScenariosTests
     private readonly IWeatherService _weatherService = Substitute.For<IWeatherService>();
     private readonly IPowerUsageRepository _powerUsageRepository = Substitute.For<IPowerUsageRepository>();
     private readonly IPowerMeterService _powerMeterService = Substitute.For<IPowerMeterService>();
-    private readonly IPowerFlowFactory _powerFlowFactory;
+    private readonly IPowerFlowFactory _powerFlowFactory = Substitute.For<IPowerFlowFactory>();
 
     public SmartPowerServiceScenariosTests()
     {
