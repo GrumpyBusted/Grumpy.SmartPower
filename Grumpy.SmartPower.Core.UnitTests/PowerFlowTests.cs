@@ -1,8 +1,12 @@
 ﻿using FluentAssertions;
+using Grumpy.SmartPower.Core.Consumption;
 using Grumpy.SmartPower.Core.Infrastructure;
+using Grumpy.SmartPower.Core.Model;
+using Grumpy.SmartPower.Core.Production;
 using Grumpy.TestTools.Extensions;
 using NSubstitute;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -1081,12 +1085,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
             _houseBatteryService.InverterLimit().Returns(inverterLimit);
             _houseBatteryService.GetBatteryCurrent().Returns(batteryLevel);
 
-            var res = _powerFlowFactory.Instance();
-
-            if (testData != null)
-                res.Add(testData.Hour, testData.Productions, testData.Consumptions, testData.Prices);
-
-            return res;
+            return _powerFlowFactory.Instance(testData?.Hour ?? DateTime.Parse("2022-02-13T10:00:00"), testData?.Productions ?? new List<ProductionItem>(), testData?.Consumptions ?? new List<ConsumptionItem>(), testData?.Prices ?? new List<PriceItem>());
         }
     }
 }

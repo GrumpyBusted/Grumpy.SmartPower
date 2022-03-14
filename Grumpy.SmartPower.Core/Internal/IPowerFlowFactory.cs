@@ -6,6 +6,7 @@ namespace Grumpy.SmartPower.Core
 {
     public interface IPowerFlowFactory
     {
-        public IPowerFlow Instance();
+        IPowerFlow Instance();
+        IPowerFlow Instance(DateTime from, IEnumerable<ProductionItem> productions, IEnumerable<ConsumptionItem> consumptions, IEnumerable<PriceItem> prices);
     }
 }

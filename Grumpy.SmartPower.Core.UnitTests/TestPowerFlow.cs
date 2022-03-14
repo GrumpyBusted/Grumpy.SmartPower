@@ -1,5 +1,6 @@
 ﻿using Grumpy.Common.Extensions;
 using Grumpy.SmartPower.Core.Consumption;
+using Grumpy.SmartPower.Core.Infrastructure;
 using Grumpy.SmartPower.Core.Model;
 using Grumpy.SmartPower.Core.Production;
 using System;
@@ -63,5 +64,12 @@ namespace Grumpy.SmartPower.Core.UnitTests
         public DateTime Start => _productions.Count == 0 ? _hour : _productions.Min(i => i.Hour);
 
         public DateTime End => _hour;
+
+        public IPowerFlow PowerFlow(IHouseBatteryService houseBatteryService)
+        {
+            var factory = new PowerFlowFactory(houseBatteryService);
+
+            return factory.Instance(Start, Productions, Consumptions, Prices); ;
+        }
     }
 }

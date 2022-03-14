@@ -23,36 +23,26 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
-        public void InvalidFromWhenCreatingShouldThrow()
-        {
-            var act = () => CreateTestObject(Enumerable.Empty<ProductionItem>(), Enumerable.Empty<ConsumptionItem>(), Enumerable.Empty<PriceItem>(), DateTime.Parse("2022-02-13T09:01:00"), DateTime.Parse("2022-02-13T09:01:00"), 0, 0, 0);
-
-            act.Should().Throw<Exception>();
-        }
-
-        [Fact]
         public void DistributeExtraPowerUnderBatterySizeShouldReturnFlow()
         {
             var testPowerFlow = new TestPowerFlow("2022-02-13T09:00:00");
             testPowerFlow.Add(0, 100, 3);
             testPowerFlow.Add(0, 100, 2);
             testPowerFlow.Add(200, 100, 1);
+            var cut = CreateTestObject(batteryLevel: 1000);
+            var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            var cut = CreateTestObject(testPowerFlow, 2000, 1000, 1000);
+            cut.ChargeExtraPower(flow);
 
-            cut.ChargeExtraPower();
-
-            //var flow = cut.All();
-
-            //flow.Skip(0).First().BatteryLevel.Should().Be(1000);
-            //flow.Skip(0).First().Charge.Should().Be(0);
-            //flow.Skip(0).First().Power.Should().Be(-100);
-            //flow.Skip(1).First().BatteryLevel.Should().Be(1000);
-            //flow.Skip(1).First().Charge.Should().Be(0);
-            //flow.Skip(1).First().Power.Should().Be(-100);
-            //flow.Skip(2).First().BatteryLevel.Should().Be(1100);
-            //flow.Skip(2).First().Charge.Should().Be(100);
-            //flow.Skip(2).First().Power.Should().Be(0);
+            flow.Skip(0).First().BatteryLevel.Should().Be(1000);
+            flow.Skip(0).First().Charge.Should().Be(0);
+            flow.Skip(0).First().Power.Should().Be(-100);
+            flow.Skip(1).First().BatteryLevel.Should().Be(1000);
+            flow.Skip(1).First().Charge.Should().Be(0);
+            flow.Skip(1).First().Power.Should().Be(-100);
+            flow.Skip(2).First().BatteryLevel.Should().Be(1100);
+            flow.Skip(2).First().Charge.Should().Be(100);
+            flow.Skip(2).First().Power.Should().Be(0);
         }
 
         [Fact]
@@ -62,22 +52,20 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 3);
             testPowerFlow.Add(0, 100, 2);
             testPowerFlow.Add(200, 100, 1);
+            var cut = CreateTestObject(batterySize: 1000, batteryLevel: 1000) ;
+            var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 1000);
+            cut.ChargeExtraPower(flow);
 
-            cut.ChargeExtraPower();
-
-            //var flow = cut.All();
-
-            //flow.Skip(0).First().BatteryLevel.Should().Be(900);
-            //flow.Skip(0).First().Charge.Should().Be(-100);
-            //flow.Skip(0).First().Power.Should().Be(0);
-            //flow.Skip(1).First().BatteryLevel.Should().Be(900);
-            //flow.Skip(1).First().Charge.Should().Be(0);
-            //flow.Skip(1).First().Power.Should().Be(-100);
-            //flow.Skip(2).First().BatteryLevel.Should().Be(1000);
-            //flow.Skip(2).First().Charge.Should().Be(100);
-            //flow.Skip(2).First().Power.Should().Be(0);
+            flow.Skip(0).First().BatteryLevel.Should().Be(900);
+            flow.Skip(0).First().Charge.Should().Be(-100);
+            flow.Skip(0).First().Power.Should().Be(0);
+            flow.Skip(1).First().BatteryLevel.Should().Be(900);
+            flow.Skip(1).First().Charge.Should().Be(0);
+            flow.Skip(1).First().Power.Should().Be(-100);
+            flow.Skip(2).First().BatteryLevel.Should().Be(1000);
+            flow.Skip(2).First().Charge.Should().Be(100);
+            flow.Skip(2).First().Power.Should().Be(0);
         }
 
         [Fact]
@@ -87,22 +75,20 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 3);
             testPowerFlow.Add(0, 100, 2);
             testPowerFlow.Add(250, 100, 1);
+            var cut = CreateTestObject(batterySize: 1000, batteryLevel: 1000);
+            var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 1000);
+            cut.ChargeExtraPower(flow);
 
-            cut.ChargeExtraPower();
-
-            //var flow = cut.All();
-
-            //flow.Skip(0).First().BatteryLevel.Should().Be(900);
-            //flow.Skip(0).First().Charge.Should().Be(-100);
-            //flow.Skip(0).First().Power.Should().Be(0);
-            //flow.Skip(1).First().BatteryLevel.Should().Be(850);
-            //flow.Skip(1).First().Charge.Should().Be(-50);
-            //flow.Skip(1).First().Power.Should().Be(-50);
-            //flow.Skip(2).First().BatteryLevel.Should().Be(1000);
-            //flow.Skip(2).First().Charge.Should().Be(150);
-            //flow.Skip(2).First().Power.Should().Be(0);
+            flow.Skip(0).First().BatteryLevel.Should().Be(900);
+            flow.Skip(0).First().Charge.Should().Be(-100);
+            flow.Skip(0).First().Power.Should().Be(0);
+            flow.Skip(1).First().BatteryLevel.Should().Be(850);
+            flow.Skip(1).First().Charge.Should().Be(-50);
+            flow.Skip(1).First().Power.Should().Be(-50);
+            flow.Skip(2).First().BatteryLevel.Should().Be(1000);
+            flow.Skip(2).First().Charge.Should().Be(150);
+            flow.Skip(2).First().Power.Should().Be(0);
         }
 
         [Fact]
@@ -112,22 +98,20 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 2);
             testPowerFlow.Add(0, 100, 1);
             testPowerFlow.Add(0, 100, 3);
+            var cut = CreateTestObject(batteryLevel: 100);
+            var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 100);
+            cut.DistributeInitialBatteryPower(flow);
 
-            //cut.DistributeInitialBatteryPower();
-
-            //var flow = cut.All();
-
-            //flow.Skip(0).First().BatteryLevel.Should().Be(0);
-            //flow.Skip(0).First().Charge.Should().Be(-100);
-            //flow.Skip(0).First().Power.Should().Be(0);
-            //flow.Skip(1).First().BatteryLevel.Should().Be(0);
-            //flow.Skip(1).First().Charge.Should().Be(0);
-            //flow.Skip(1).First().Power.Should().Be(-100);
-            //flow.Skip(2).First().BatteryLevel.Should().Be(0);
-            //flow.Skip(2).First().Charge.Should().Be(0);
-            //flow.Skip(2).First().Power.Should().Be(-100);
+            flow.Skip(0).First().BatteryLevel.Should().Be(0);
+            flow.Skip(0).First().Charge.Should().Be(-100);
+            flow.Skip(0).First().Power.Should().Be(0);
+            flow.Skip(1).First().BatteryLevel.Should().Be(0);
+            flow.Skip(1).First().Charge.Should().Be(0);
+            flow.Skip(1).First().Power.Should().Be(-100);
+            flow.Skip(2).First().BatteryLevel.Should().Be(0);
+            flow.Skip(2).First().Charge.Should().Be(0);
+            flow.Skip(2).First().Power.Should().Be(-100);
         }
 
         [Fact]
@@ -139,18 +123,16 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 4);
             testPowerFlow.Add(0, 100, 3);
             testPowerFlow.Add(0, 100, 5);
+            var cut = CreateTestObject(/*testPowerFlow, 1000, 1000, 200*/);
+            var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 200);
+            cut.DistributeInitialBatteryPower(flow);
 
-            //cut.DistributeInitialBatteryPower();
-
-            //var flow = cut.All();
-
-            //flow.Skip(0).First().Charge.Should().Be(-100);
-            //flow.Skip(1).First().Charge.Should().Be(0);
-            //flow.Skip(2).First().Charge.Should().Be(-100);
-            //flow.Skip(3).First().Charge.Should().Be(0);
-            //flow.Skip(4).First().Charge.Should().Be(0);
+            flow.Skip(0).First().Charge.Should().Be(-100);
+            flow.Skip(1).First().Charge.Should().Be(0);
+            flow.Skip(2).First().Charge.Should().Be(-100);
+            flow.Skip(3).First().Charge.Should().Be(0);
+            flow.Skip(4).First().Charge.Should().Be(0);
         }
 
         [Fact]
@@ -160,16 +142,14 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 2);
             testPowerFlow.Add(0, 100, 1);
             testPowerFlow.Add(0, 100, 2);
+            var cut = CreateTestObject();
+            var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 1000, 0);
+            cut.ChargeFromGrid(flow);
 
-            //cut.ChargeFromGrid();
-
-            //var flow = cut.All();
-
-            //flow.Skip(0).First().Charge.Should().Be(0);
-            //flow.Skip(1).First().Charge.Should().Be(100);
-            //flow.Skip(2).First().Charge.Should().Be(-100);
+            flow.Skip(0).First().Charge.Should().Be(0);
+            flow.Skip(1).First().Charge.Should().Be(100);
+            flow.Skip(2).First().Charge.Should().Be(-100);
         }
 
         [Fact]
@@ -179,16 +159,14 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 2);
             testPowerFlow.Add(0, 100, 1);
             testPowerFlow.Add(0, 100, 2);
+            var cut = CreateTestObject(inverterLimit: 50);
+            var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 50, 0);
+            cut.ChargeFromGrid(flow);
 
-            //cut.ChargeFromGrid();
-
-            //var flow = cut.All();
-
-            //flow.Skip(0).First().Charge.Should().Be(0);
-            //flow.Skip(1).First().Charge.Should().Be(50);
-            //flow.Skip(2).First().Charge.Should().Be(-50);
+            flow.Skip(0).First().Charge.Should().Be(0);
+            flow.Skip(1).First().Charge.Should().Be(50);
+            flow.Skip(2).First().Charge.Should().Be(-50);
         }
 
         [Fact]
@@ -199,17 +177,15 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 1);
             testPowerFlow.Add(0, 100, 2);
             testPowerFlow.Add(0, 50, 3);
+            var cut = CreateTestObject(/*testPowerFlow, 1000, 100, 0*/);
+            var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 100, 0);
+            cut.ChargeFromGrid(flow);
 
-            //cut.ChargeFromGrid();
-
-            //var flow = cut.All();
-
-            //flow.Skip(0).First().Charge.Should().Be(50);
-            //flow.Skip(1).First().Charge.Should().Be(100);
-            //flow.Skip(2).First().Charge.Should().Be(-100);
-            //flow.Skip(3).First().Charge.Should().Be(-50);
+            flow.Skip(0).First().Charge.Should().Be(50);
+            flow.Skip(1).First().Charge.Should().Be(100);
+            flow.Skip(2).First().Charge.Should().Be(-100);
+            flow.Skip(3).First().Charge.Should().Be(-50);
         }
 
         [Fact]
@@ -219,18 +195,24 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 1);
             testPowerFlow.Add(0, 100, 2);
             testPowerFlow.Add(0, 100, 2);
+            var cut = CreateTestObject(/*testPowerFlow, 1000, 200, 0*/);
+            var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            var cut = CreateTestObject(testPowerFlow, 1000, 200, 0);
+            cut.ChargeFromGrid(flow);
 
-            //cut.ChargeFromGrid();
-
-            //var flow = cut.All();
-
-            //flow.Skip(0).First().Charge.Should().Be(200);
-            //flow.Skip(1).First().Charge.Should().Be(-100);
-            //flow.Skip(2).First().Charge.Should().Be(-100);
+            flow.Skip(0).First().Charge.Should().Be(200);
+            flow.Skip(1).First().Charge.Should().Be(-100);
+            flow.Skip(2).First().Charge.Should().Be(-100);
         }
 
+        private IPowerFlowService CreateTestObject(int batterySize = 10000, int inverterLimit = 3300, int batteryLevel = 0)
+        {
+            _houseBatteryService.GetBatterySize().Returns(batterySize);
+            _houseBatteryService.InverterLimit().Returns(inverterLimit);
+            _houseBatteryService.GetBatteryCurrent().Returns(batteryLevel);
+
+            return new PowerFlowService(_houseBatteryService, _powerFlowFactory);
+        }
 
         private IPowerFlowService CreateTestObject(TestPowerFlow testPowerFlow, int batterySize, int inverterLimit, int batteryLevel)
         {
