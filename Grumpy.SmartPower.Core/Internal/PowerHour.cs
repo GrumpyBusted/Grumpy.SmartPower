@@ -1,5 +1,6 @@
 ﻿using Grumpy.Common.Extensions;
 using Grumpy.SmartPower.Core.Infrastructure;
+using Grumpy.SmartPower.Core.Model;
 
 namespace Grumpy.SmartPower.Core
 {
@@ -39,31 +40,39 @@ namespace Grumpy.SmartPower.Core
             Power = production - consumption;
         }
 
-        public int MaxCharge()
+        public int MaxCharge(int potentialDischargeBefore = 0)
         {
+            if (potentialDischargeBefore < 0 || potentialDischargeBefore > BatteryLevel)
+                throw new ArgumentOutOfRangeException(nameof(potentialDischargeBefore), "Must be between zero and battery level");
+
             var previousBatteryLevel = GetPreviousBatteryLevel();
-            var currentRemainingCapacity = _batterySize.Value - BatteryLevel - Charge;
-            var previousRemainingCapacity = _batterySize.Value - previousBatteryLevel - Charge;
+            var currentRemaining = _batterySize.Value - (BatteryLevel - potentialDischargeBefore);
+            var previousRemaining = Math.Max(_batterySize.Value - (previousBatteryLevel - potentialDischargeBefore), 0);
             var chargingCapacity = _inverterLimit.Value - Charge;
 
-            return Math.Min(chargingCapacity, Math.Min(currentRemainingCapacity, previousRemainingCapacity));
+            return Math.Min(chargingCapacity, Math.Min(currentRemaining, previousRemaining));
         }
 
-        public int MaxDischarge()
+        public int MaxDischarge(int potentialChargeBefore = 0)
         {
-            var dischargingCapacity = _inverterLimit.Value + Charge;
+            if (potentialChargeBefore < 0 || potentialChargeBefore > _batterySize.Value - BatteryLevel)
+                throw new ArgumentOutOfRangeException(nameof(potentialChargeBefore), "Must be a positive number");
+
             var previousBatteryLevel = GetPreviousBatteryLevel();
+            var currentRemaining = BatteryLevel + potentialChargeBefore;
+            var previousRemaining = Math.Min(_batterySize.Value, previousBatteryLevel + potentialChargeBefore);
+            var dischargingCapacity = _inverterLimit.Value + Charge;
             var possibleDischarge = Math.Max(Power * -1, 0);
 
-            return Math.Min(dischargingCapacity, Math.Min(possibleDischarge, previousBatteryLevel));
+            return Math.Min(dischargingCapacity, Math.Min(possibleDischarge, Math.Min(currentRemaining, previousRemaining)));
         }
 
-        public int ChargeBattery(int value)
+        public int ChargeBattery(int value, int potentialDischargeBefore = 0)
         {
             if (value < 0)
                 throw new ArgumentOutOfRangeException(nameof(value), "Must be a positive number");
 
-            var charge = Math.Min(value, MaxCharge());
+            var charge = Math.Min(value, MaxCharge(potentialDischargeBefore));
 
             if (Power > value)
                 Power -= value;
@@ -80,12 +89,12 @@ namespace Grumpy.SmartPower.Core
             return charge;
         }
 
-        public int DischargeBattery(int value)
+        public int DischargeBattery(int value, int potentialChargeBefore = 0)
         {
             if (value < 0)
                 throw new ArgumentOutOfRangeException(nameof(value), "Must be a positive number");
 
-            var discharge = Math.Min(value, MaxDischarge());
+            var discharge = Math.Min(value, MaxDischarge(potentialChargeBefore));
 
             Power += discharge;
             Charge -= discharge;
@@ -105,6 +114,11 @@ namespace Grumpy.SmartPower.Core
                 throw new ArgumentOutOfRangeException(nameof(value), "Cannot adjust BatteryLevel lower than zero or hight than BatterySize");
 
             BatteryLevel += value;
+        }
+
+        public BatteryMode BatteryMode()
+        {
+            return Model.BatteryMode.Default;
         }
 
         private int GetPreviousBatteryLevel()

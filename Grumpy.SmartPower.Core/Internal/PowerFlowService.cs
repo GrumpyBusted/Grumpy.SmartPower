@@ -42,10 +42,7 @@ namespace Grumpy.SmartPower.Core
             {
                 foreach (var target in powerFlow.Where(i => i.Hour < source.Hour && i.MaxDischarge() > 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour))
                 {
-                    // TODO Move
-                    var move = powerFlow.Discharge(target);
-
-                    powerFlow.Charge(source, move);
+                    powerFlow.Move(source, target);
 
                     if (source.Power <= 0)
                         break;
@@ -88,6 +85,20 @@ namespace Grumpy.SmartPower.Core
             }
         }
 
+        public void ChargeFromGrid(IPowerFlow powerFlow)
+        {
+            foreach (var target in powerFlow.Where(i => i.Power < 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour))
+            {
+                foreach (var source in powerFlow.Where(i => i.Hour < target.Hour && i.Price < target.Price * _chargeEfficiency).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
+                {
+                    powerFlow.Move(source, target);
+
+                    if (target.Power >= 0)
+                        break;
+                }
+            }
+        }
+
         public double Price(IPowerFlow powerFlow)
         {
             var firstPrice = powerFlow.First()?.Price ?? 0;
@@ -104,20 +115,6 @@ namespace Grumpy.SmartPower.Core
             res += lastPrice * endBatteryLevel * -1;
 
             return res;
-        }
-
-        public void ChargeFromGrid(IPowerFlow powerFlow)
-        {
-            foreach (var target in powerFlow.Where(i => i.Power < 0).OrderByDescending(i => i.Price).ThenBy(i => i.Hour))
-            {
-                foreach (var source in powerFlow.Where(i => i.Hour < target.Hour && i.Price < target.Price * _chargeEfficiency).OrderBy(i => i.Price).ThenByDescending(i => i.Hour))
-                {
-                    powerFlow.Move(source, target);
-
-                    if (target.Power >= 0)
-                        break;
-                }
-            }
         }
     }
 }

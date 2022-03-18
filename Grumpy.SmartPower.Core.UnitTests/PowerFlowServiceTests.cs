@@ -55,7 +55,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
             var cut = CreateTestObject(batterySize: 1000, batteryLevel: 1000) ;
             var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            cut.ChargeExtraPower(flow);
+            cut.DistributeExtraPower(flow);
 
             flow.Skip(0).First().BatteryLevel.Should().Be(900);
             flow.Skip(0).First().Charge.Should().Be(-100);
@@ -78,7 +78,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
             var cut = CreateTestObject(batterySize: 1000, batteryLevel: 1000);
             var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
-            cut.ChargeExtraPower(flow);
+            cut.DistributeExtraPower(flow);
 
             flow.Skip(0).First().BatteryLevel.Should().Be(900);
             flow.Skip(0).First().Charge.Should().Be(-100);
@@ -123,7 +123,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 4);
             testPowerFlow.Add(0, 100, 3);
             testPowerFlow.Add(0, 100, 5);
-            var cut = CreateTestObject(/*testPowerFlow, 1000, 1000, 200*/);
+            var cut = CreateTestObject(batteryLevel: 200);
             var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
             cut.DistributeInitialBatteryPower(flow);
@@ -177,7 +177,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 1);
             testPowerFlow.Add(0, 100, 2);
             testPowerFlow.Add(0, 50, 3);
-            var cut = CreateTestObject(/*testPowerFlow, 1000, 100, 0*/);
+            var cut = CreateTestObject(inverterLimit: 100);
             var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
             cut.ChargeFromGrid(flow);
@@ -195,7 +195,7 @@ namespace Grumpy.SmartPower.Core.UnitTests
             testPowerFlow.Add(0, 100, 1);
             testPowerFlow.Add(0, 100, 2);
             testPowerFlow.Add(0, 100, 2);
-            var cut = CreateTestObject(/*testPowerFlow, 1000, 200, 0*/);
+            var cut = CreateTestObject(inverterLimit: 200);
             var flow = testPowerFlow.PowerFlow(_houseBatteryService);
 
             cut.ChargeFromGrid(flow);

@@ -929,6 +929,27 @@ namespace Grumpy.SmartPower.Core.UnitTests
         }
 
         [Fact]
+        public void MovePowerBackwardShouldReturnFlow()
+        {
+            var testData = new TestPowerFlow("2022-02-13T09:00:00");
+            testData.Add(0, 0, 0);
+            testData.Add(0, 100, 0);
+            testData.Add(0, 0, 0);
+            var cut = CreateTestObject(testData: testData, batterySize: 1000, inverterLimit: 1000, batteryLevel: 50);
+
+            var res = cut.Move(DateTime.Parse("2022-02-13T11:00:00"), DateTime.Parse("2022-02-13T10:00:00"), 10);
+
+            res.Should().Be(10);
+            var flow = cut.All();
+            flow.Skip(0).First().BatteryLevel.Should().Be(50);
+            flow.Skip(1).First().BatteryLevel.Should().Be(40);
+            flow.Skip(2).First().BatteryLevel.Should().Be(50);
+            flow.Skip(0).First().Charge.Should().Be(0);
+            flow.Skip(1).First().Charge.Should().Be(-10);
+            flow.Skip(2).First().Charge.Should().Be(10);
+        }
+
+        [Fact]
         public void MovePowerBeyondSizeShouldReturnFlow()
         {
             var testData = new TestPowerFlow("2022-02-13T09:00:00");

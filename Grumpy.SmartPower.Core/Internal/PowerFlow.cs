@@ -80,19 +80,14 @@ namespace Grumpy.SmartPower.Core
             return _flow.OrderByDescending(h => h.Hour).FirstOrDefault();
         }
 
-        public int Charge(DateTime hour, int value)
+        public int Charge(DateTime hour, int? value = null)
         {
             var item = GetItem(hour);
 
             return Charge(item, value);
         }
 
-        public int Charge(PowerHour item)
-        {
-            return Charge(item, item.Power);
-        }
-
-        public int Charge(PowerHour item, int value)
+        public int Charge(PowerHour item, int? value = null)
         {
             if (value < 0)
                 throw new ArgumentOutOfRangeException(nameof(value), "Must be a positive number");
@@ -100,7 +95,7 @@ namespace Grumpy.SmartPower.Core
             var batterySize = _batterySize.Value;
             var batteryLevel = _flow.Where(h => h.Hour > item.Hour).Max(h => h.BatteryLevel as int?) ?? 0;
             int max = Math.Min(item.MaxCharge(), batterySize - batteryLevel);
-            var charge = Math.Min(max, value);
+            var charge = Math.Min(max, value ?? item.Power);
 
             item.ChargeBattery(charge);
             AdjustBatteryLevel(charge, i => i.Hour >= item.Hour);
@@ -108,26 +103,21 @@ namespace Grumpy.SmartPower.Core
             return charge;
         }
 
-        public int Discharge(DateTime hour, int value)
+        public int Discharge(DateTime hour, int? value = null)
         {
             var item = GetItem(hour);
 
             return Discharge(item, value);
         }
 
-        public int Discharge(PowerHour item)
-        {
-            return Discharge(item, item.Power * -1);
-        }
-
-        public int Discharge(PowerHour item, int value)
+        public int Discharge(PowerHour item, int? value = null)
         {
             if (value < 0)
                 throw new ArgumentOutOfRangeException(nameof(value), "Must be a positive number");
 
             var batteryLevel = _flow.Where(i => i.Hour > item.Hour).Min(h => h.BatteryLevel as int?) ?? _batterySize.Value;
             int max = Math.Min(item.MaxDischarge(), batteryLevel);
-            var discharge = Math.Min(max, value);
+            var discharge = Math.Min(max, value ?? item.Power);
 
             item.DischargeBattery(discharge);
             AdjustBatteryLevel(-discharge, i => i.Hour >= item.Hour);
@@ -135,7 +125,7 @@ namespace Grumpy.SmartPower.Core
             return discharge;
         }
 
-        public int Move(DateTime from, DateTime to, int value)
+        public int Move(DateTime from, DateTime to, int? value = null)
         {
             var source = GetItem(from);
             var target = GetItem(to);
@@ -143,29 +133,46 @@ namespace Grumpy.SmartPower.Core
             return Move(source, target, value);
         }
 
-        public int Move(PowerHour source, PowerHour target)
+        public int Move(PowerHour source, PowerHour target, int? value = null)
         {
-            return Move(source, target, target.Power * -1);
-        }
-
-        public int Move(PowerHour source, PowerHour target, int value)
-        {
-            if (value < 0)
+            if (value <= 0)
                 throw new ArgumentException("Invalid value to move", nameof(value));
 
-            if (source.Hour >= target.Hour)
-                throw new ArgumentException("Source must be before target", nameof(source));
+            if (source.Hour == target.Hour)
+                throw new ArgumentException("Source must be different than target", nameof(source));
+
+            if (source.Hour > target.Hour)
+                return MoveBackward(source, target, value);
+            else
+                return MoveForward(source, target, value);
+        }
+
+        private int MoveBackward(PowerHour source, PowerHour target, int? value)
+        {
+
+            // TODO test - Check for batterylevel
+            var move = Discharge(target, value ?? source.Power);
+
+            Charge(source, move);
+
+            return move;
+        }
+
+        private int MoveForward(PowerHour source, PowerHour target, int? value)
+        {
+            // TODO test - Check for batterylevel
 
             var batterySize = _batterySize.Value;
             var batteryLevel = _flow.Where(i => i.Hour >= source.Hour && i.Hour < target.Hour).Max(i => i.BatteryLevel);
             int maxCharge = Math.Min(source.MaxCharge(), batterySize - batteryLevel);
             int maxDischage = target.MaxDischarge();
             int max = Math.Min(maxCharge, maxDischage);
-            var move = Math.Min(max, value);
+            var move = Math.Min(max, value ?? source.Power);
 
             source.ChargeBattery(move);
+            AdjustBatteryLevel(move, i => i.Hour >= source.Hour && i.Hour <= target.Hour);
             target.DischargeBattery(move);
-            AdjustBatteryLevel(move, i => i.Hour >= source.Hour && i.Hour < target.Hour);
+            AdjustBatteryLevel(-move, i => i.Hour == target.Hour);
 
             return move;
         }

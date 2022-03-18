@@ -8,9 +8,10 @@ namespace Grumpy.SmartPower.Core
     {
         public BatteryMode Optimize(IEnumerable<ProductionItem> productions, IEnumerable<ConsumptionItem> consumptions, IEnumerable<PriceItem> prices, DateTime from);
         void ChargeExtraPower(IPowerFlow powerFlow);
+        void DistributeExtraPower(IPowerFlow powerFlow);
+        void DistributeBatteryPower(IPowerFlow powerFlow);
         void DistributeInitialBatteryPower(IPowerFlow powerFlow);
         void ChargeFromGrid(IPowerFlow powerFlow);
-        void DistributeBatteryPower(IPowerFlow powerFlow);
         double Price(IPowerFlow powerFlow);
     }
 }

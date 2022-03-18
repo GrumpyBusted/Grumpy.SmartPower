@@ -13,14 +13,11 @@ namespace Grumpy.SmartPower.Core
         PowerHour? Get(DateTime hour);
         PowerHour? First();
         PowerHour? Last();
-        int Charge(DateTime hour, int value);
-        int Charge(PowerHour item);
-        int Charge(PowerHour item, int value);
-        int Discharge(DateTime hour, int value);
-        int Discharge(PowerHour item);
-        int Discharge(PowerHour item, int value);
-        int Move(DateTime from, DateTime to, int value);
-        int Move(PowerHour source, PowerHour target);
-        int Move(PowerHour source, PowerHour target, int value);
+        int Charge(DateTime hour, int? value = null);
+        int Charge(PowerHour item, int? value = null);
+        int Discharge(DateTime hour, int? value = null);
+        int Discharge(PowerHour item, int? value = null);
+        int Move(DateTime from, DateTime to, int? value = null);
+        int Move(PowerHour source, PowerHour target, int? value = null);
     }
 }

@@ -172,6 +172,46 @@ public class PowerHourTests
     }
 
     [Fact]
+    public void MaxChargeWithStartingBatteryLevelAndPreviousDischargeShouldReturnUpToBatterySize()
+    {
+        var cut = CreateTestObject(batterySize: 1000, batteryLevel: 200);
+
+        var res = cut.MaxCharge(200);
+
+        res.Should().Be(1000);
+    }
+
+    [Fact]
+    public void MaxChargeWithHightBatteryLevelAndPreviousDischargeShouldReturnUpToBatterySize()
+    {
+        var cut = CreateTestObject(batterySize: 1000, batteryLevel: 900);
+
+        var res = cut.MaxCharge(200);
+
+        res.Should().Be(300);
+    }
+
+    [Fact]
+    public void MaxChargeWithPreviousDischargeHigherThanBatteryLevelShouldThrow()
+    {
+        var cut = CreateTestObject(batterySize: 1000, batteryLevel: 200);
+
+        var act = new Action(() => cut.MaxCharge(300));
+
+        act.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
+    public void MaxChargeWithPreviousDischargeSubzeroShouldThrow()
+    {
+        var cut = CreateTestObject(batterySize: 1000, batteryLevel: 200);
+
+        var act = new Action(() => cut.MaxCharge(-1));
+
+        act.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
     public void MaxDischargeWithInverterLimitShouldReturnInverterLimit()
     {
         var cut = CreateTestObject(inverterLimit: 3300, batteryLevel: 5000, consumption: 5000);
@@ -199,6 +239,26 @@ public class PowerHourTests
         var res = cut.MaxDischarge();
 
         res.Should().Be(100);
+    }
+
+    [Fact]
+    public void MaxDischargeWithLowBatteryLevelWithPreviousChargeShouldReturnUptoBatteryLevelWithPreviousCharge()
+    {
+        var cut = CreateTestObject(batteryLevel: 100, consumption: 1000);
+
+        var res = cut.MaxDischarge(700);
+
+        res.Should().Be(800);
+    }
+
+    [Fact]
+    public void MaxDischargeWithPreviousChargeShouldReturnUptoBatterySize()
+    {
+        var cut = CreateTestObject(batterySize: 1000, batteryLevel: 100, consumption: 1000);
+
+        var res = cut.MaxDischarge(1000);
+
+        res.Should().Be(800);
     }
 
     [Fact]
@@ -252,6 +312,26 @@ public class PowerHourTests
         var res = cut.MaxDischarge();
 
         res.Should().Be(100);
+    }
+
+    [Fact]
+    public void MaxDischargeWithPreviousChargedBelowZeroShouldThrow()
+    {
+        var cut = CreateTestObject(batteryLevel: 5000, consumption: 100);
+
+        var act = new Action(() => cut.MaxDischarge(-1));
+
+        act.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
+    public void MaxDischargeWithPreviousChargedHigherThanBatteriSizeShouldThrow()
+    {
+        var cut = CreateTestObject(batterySize: 1000);
+
+        var act = new Action(() => cut.MaxDischarge(1001));
+
+        act.Should().Throw<ArgumentOutOfRangeException>();
     }
 
     [Fact]
@@ -416,6 +496,26 @@ public class PowerHourTests
         cut.DischargeBattery(90);
 
         cut.Charge.Should().Be(-90);
+    }
+
+    [Fact]
+    public void DischargeBatteryWithLowBatteryLevelShouldReturnMaxBatteryLevel()
+    {
+        var cut = CreateTestObject(batteryLevel: 50, consumption: 100);
+
+        var res = cut.DischargeBattery(90);
+
+        res.Should().Be(50);
+    }
+
+    [Fact]
+    public void DischargeBatteryWithLowBatteryLevelAndSkipLevelCheckShouldReturnMaxBatteryLevel()
+    {
+        var cut = CreateTestObject(batteryLevel: 50, consumption: 100);
+
+        var res = cut.DischargeBattery(90, 100);
+
+        res.Should().Be(90);
     }
 
     [Fact]
