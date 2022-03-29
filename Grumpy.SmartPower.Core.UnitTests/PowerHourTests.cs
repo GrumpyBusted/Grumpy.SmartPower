@@ -119,9 +119,20 @@ public class PowerHourTests
     }
 
     [Fact]
+    public void MaxChargeWithPreviouslyDischargedShouldReturnUpToBatterySize()
+    {
+        var cut = CreateTestObject(inverterLimit: 3300, batteryLevel: 6000, consumption: 5000);
+        cut.DischargeBattery(1000);
+
+        var res = cut.MaxCharge();
+
+        res.Should().Be(4000);
+    }
+
+    [Fact]
     public void MaxChargeWithPreviouslyDischargedShouldReturnUpToInverterLimit()
     {
-        var cut = CreateTestObject(inverterLimit: 3300, batteryLevel: 5000, consumption: 5000);
+        var cut = CreateTestObject(inverterLimit: 3300, batteryLevel: 5000, consumption: 5000, batterySize: 20000);
         cut.DischargeBattery(1000);
 
         var res = cut.MaxCharge();
@@ -256,9 +267,9 @@ public class PowerHourTests
     {
         var cut = CreateTestObject(batterySize: 1000, batteryLevel: 100, consumption: 1000);
 
-        var res = cut.MaxDischarge(1000);
+        var res = cut.MaxDischarge(900);
 
-        res.Should().Be(800);
+        res.Should().Be(1000);
     }
 
     [Fact]
@@ -286,7 +297,7 @@ public class PowerHourTests
     [Fact]
     public void MaxDischargeWhenAlreadyChargedShouldReturnUpToPreviousBatteryLevel()
     {
-        var cut = CreateTestObject(batteryLevel: 1000, consumption: 5000);
+        var cut = CreateTestObject(batteryLevel: 100, consumption: 5000);
         cut.ChargeBattery(900);
 
         var res = cut.MaxDischarge();

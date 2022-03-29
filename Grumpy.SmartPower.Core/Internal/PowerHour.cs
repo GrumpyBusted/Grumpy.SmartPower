@@ -56,7 +56,7 @@ namespace Grumpy.SmartPower.Core
         public int MaxDischarge(int potentialChargeBefore = 0)
         {
             if (potentialChargeBefore < 0 || potentialChargeBefore > _batterySize.Value - BatteryLevel)
-                throw new ArgumentOutOfRangeException(nameof(potentialChargeBefore), "Must be a positive number");
+                throw new ArgumentOutOfRangeException(nameof(potentialChargeBefore), "Must be between zero and remaining battery");
 
             var previousBatteryLevel = GetPreviousBatteryLevel();
             var currentRemaining = BatteryLevel + potentialChargeBefore;
@@ -85,6 +85,7 @@ namespace Grumpy.SmartPower.Core
             }
 
             Charge += value;
+            BatteryLevel += value;
 
             return charge;
         }
@@ -98,6 +99,7 @@ namespace Grumpy.SmartPower.Core
 
             Power += discharge;
             Charge -= discharge;
+            BatteryLevel -= discharge;
 
             return discharge;
         }
